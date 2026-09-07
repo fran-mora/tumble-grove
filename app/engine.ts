@@ -1,4 +1,6 @@
-import { fruitHull, hullContact, confineToCircle, circleTravel } from './collision.ts';
+import { FRUIT_COLLECTION, chooseFruitLineup } from './fruit-collection.ts';
+import { basketWalls, bowlWalls, collideWithWalls, outsideBasket, outsideBowl, MOUTH_HALF_ANGLE } from './arena.ts';
+import { fruitHull, hullContact, circleTravel } from './collision.ts';
 export const WIDTH = 440;
 export const HEIGHT = 570;
 export const DANGER_Y = 100;
@@ -41,17 +43,19 @@ export class MergeGame {
   gravity = {x:0,y:1};
   private gravityTarget = {x:0,y:1};
   private gravityDirection = {x:0,y:1};
-  private dangerDirection = {x:0,y:1};
-  private tiltGrace = 0;
   private serial = 0;
   random: () => number;
-  constructor(random: () => number = Math.random) { this.random = random; }
+  lineup: number[];
+  private appearanceRandom:()=>number;
+  constructor(random: () => number = Math.random, appearanceRandom:()=>number=random) { this.random = random; this.appearanceRandom=appearanceRandom; this.lineup=chooseFruitLineup(appearanceRandom); }
+  getFruit(kind:number){return FRUIT_COLLECTION[this.lineup[kind]];}
+  getShape(kind:number,angle=0){return fruitHull(kind,FRUITS[kind].radius,angle,this.getFruit(kind).geometry);}
   get height() { return this.mode === 'gravity' ? WIDTH : HEIGHT; }
   get down() { return this.mode === 'gravity' ? this.gravityDirection : {x:0,y:1}; }
   setMode(mode: GameMode) {
     if (mode !== 'classic' && mode !== 'gravity') throw new Error('Invalid game mode');
     if (mode === this.mode) return;
-    this.mode = mode; this.gravity = {x:0,y:1}; this.gravityTarget = {x:0,y:1}; this.gravityDirection = {x:0,y:1}; this.dangerDirection = {x:0,y:1};
+    this.mode = mode; this.gravity = {x:0,y:1}; this.gravityTarget = {x:0,y:1}; this.gravityDirection = {x:0,y:1};
     this.reset();
   }
   setGravity(x:number,y:number) {
@@ -68,22 +72,20 @@ export class MergeGame {
     if(this.mode==='classic')return {x:this.aim,y:43};
     const d=this.down,offset=this.aim-WIDTH/2;
     const base={x:CIRCLE.x+d.y*offset,y:CIRCLE.y-d.x*offset};
-    const shape=fruitHull(this.current,FRUITS[this.current].radius);
+    const shape=this.getShape(this.current);
     const travel=Math.max(0,circleTravel(base,shape,{x:-d.x,y:-d.y},CIRCLE,CIRCLE.radius)-18);
     return {x:base.x-d.x*travel,y:base.y-d.y*travel};
   }
   get canDrop() { return !this.over && !this.paused && this.cooldown <= 0; }
   setAim(x: number) {
     if (!Number.isFinite(x)) return;
-    if(this.mode==='gravity'){const limit=Math.max(0,CIRCLE.radius-FRUITS[this.current].radius*2-24);this.aim=Math.max(WIDTH/2-limit,Math.min(WIDTH/2+limit,x));return;}
-    const shape = fruitHull(this.current, FRUITS[this.current].radius);
+    if(this.mode==='gravity'){const limit=Math.max(0,CIRCLE.radius*Math.sin(MOUTH_HALF_ANGLE)-FRUITS[this.current].radius-12);this.aim=Math.max(WIDTH/2-limit,Math.min(WIDTH/2+limit,x));return;}
+    const shape = this.getShape(this.current);
     this.aim = Math.max(-shape.minX + 1, Math.min(WIDTH - shape.maxX - 1, x));
   }
   addFruit(kind: number, x: number, y: number): FruitBody {
     if (!Number.isInteger(kind) || kind < 0 || kind >= FRUITS.length || !Number.isFinite(x) || !Number.isFinite(y)) throw new Error('Invalid fruit');
-    const shape = fruitHull(kind, FRUITS[kind].radius);
-    const body = { id: ++this.serial, kind, x: Math.max(-shape.minX + .5, Math.min(WIDTH - shape.maxX - .5, x)), y: Math.min(y, HEIGHT - shape.maxY - .5), vx: 0, vy: 0, angle: 0, age: 0 };
-    if(this.mode==='gravity'){body.x=x;body.y=y;confineToCircle(body,shape,CIRCLE,CIRCLE.radius);}
+    const body = { id: ++this.serial, kind, x, y, vx: 0, vy: 0, angle: 0, age: 0 };
     this.bodies.push(body);
     return body;
   }
@@ -102,13 +104,14 @@ export class MergeGame {
     return true;
   }
   reset() {
+    this.lineup=chooseFruitLineup(this.appearanceRandom,this.lineup);
     this.bodies = []; this.events = []; this.score = 0; this.drops = 0; this.merges = 0;
     this.highest = 0; this.current = 0; this.next = 0; this.aim = WIDTH / 2;
     this.time = 0; this.cooldown = 0; this.danger = 0; this.over = false; this.paused = false;
-    this.watermelons = 0; this.serial = 0; this.tiltGrace = .8;
+    this.watermelons = 0; this.serial = 0;
   }
   snapshot() {
-    return { mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
   }
   step(dt = STEP) {
     if (this.paused || this.over || dt <= 0 || !Number.isFinite(dt)) return;
@@ -121,11 +124,8 @@ export class MergeGame {
       this.gravity.x+=(this.gravityTarget.x-this.gravity.x)*mix;this.gravity.y+=(this.gravityTarget.y-this.gravity.y)*mix;
       const length=Math.hypot(this.gravity.x,this.gravity.y);
       if(length>.045)this.gravityDirection={x:this.gravity.x/length,y:this.gravity.y/length};
-      if(this.down.x*this.dangerDirection.x+this.down.y*this.dangerDirection.y<Math.cos(Math.PI/15)){
-        this.dangerDirection={...this.down};this.tiltGrace=.85;this.danger=0;
-      }
     }
-    this.tiltGrace=Math.max(0,this.tiltGrace-dt);
+    const walls=this.mode==='gravity'?bowlWalls(CIRCLE,CIRCLE.radius,this.down):basketWalls(WIDTH,HEIGHT);
     for (const b of this.bodies) {
       b.age += dt; b.vx += (this.mode==='gravity'?this.gravity.x:0)*1050*dt; b.vy += (this.mode==='gravity'?this.gravity.y:1)*1050*dt;
       b.vx *= Math.exp(-.8 * dt);
@@ -133,7 +133,7 @@ export class MergeGame {
       b.angle += b.vx * dt / FRUITS[b.kind].radius * .38;
     }
     // Rotation stays fixed during position solving; only world translations change.
-    const shapes = new Map(this.bodies.map(b => [b.id, fruitHull(b.kind, FRUITS[b.kind].radius, b.angle)]));
+    const shapes = new Map(this.bodies.map(b => [b.id, this.getShape(b.kind,b.angle)]));
     const removed = new Set<number>();
     const pairs: [FruitBody, FruitBody][] = [];
     for (let iteration = 0; iteration < 8; iteration++) {
@@ -169,10 +169,7 @@ export class MergeGame {
       for (const b of this.bodies) {
         if (removed.has(b.id)) continue;
         const shape = shapes.get(b.id)!;
-        if(this.mode==='gravity'){confineToCircle(b,shape,CIRCLE,CIRCLE.radius);continue;}
-        if (b.x + shape.minX < .5) { b.x = .5 - shape.minX; if (b.vx < 0) b.vx *= -.2; }
-        if (b.x + shape.maxX > WIDTH - .5) { b.x = WIDTH - shape.maxX - .5; if (b.vx > 0) b.vx *= -.2; }
-        if (b.y + shape.maxY > HEIGHT - .5) { b.y = HEIGHT - shape.maxY - .5; if (b.vy > 0) b.vy = b.vy > 65 ? -b.vy * .13 : 0; b.vx *= .985; }
+        collideWithWalls(b,shape,walls);
       }
     }
     if (pairs.length) {
@@ -192,15 +189,11 @@ export class MergeGame {
         this.events.push({ x, y, kind: Math.min(kind, 10), points, time: this.time, cleared });
       }
     }
-    const overflowing = this.bodies.some(b => {
-      if(b.age<=1.15)return false;
-      const shape=shapes.get(b.id)??fruitHull(b.kind,FRUITS[b.kind].radius,b.angle);
-      if(this.mode==='classic')return b.y+shape.minY<DANGER_Y;
-      if(this.tiltGrace>0)return false;
-      const d=this.down;
-      return shape.points.some(p=>(b.x+p.x-CIRCLE.x)*d.x+(b.y+p.y-CIRCLE.y)*d.y<CIRCLE_DANGER);
+    // The dashed guide never ends a round. A whole fruit must spill outside.
+    this.over = this.bodies.some(b => {
+      const shape=shapes.get(b.id)??this.getShape(b.kind,b.angle);
+      return this.mode==='classic'?outsideBasket(b,shape,WIDTH,HEIGHT):outsideBowl(b,shape,CIRCLE,CIRCLE.radius);
     });
-    this.danger = overflowing ? this.danger + dt : Math.max(0, this.danger - dt * 3);
-    if (this.danger >= 2.5) this.over = true;
+    this.danger = 0;
   }
 }

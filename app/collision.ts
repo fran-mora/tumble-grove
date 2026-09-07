@@ -4,9 +4,9 @@ export type Hull = { points: Point[]; axes: Point[]; minX: number; maxX: number;
 export type Contact = { nx: number; ny: number; depth: number };
 
 /** Offsets from the fruit body's center, shared by contact, walls and aim guide. */
-export function fruitHull(kind: number, radius: number, angle = 0): Hull {
+export function fruitHull(kind: number, radius: number, angle = 0, geometry: {hull:readonly (readonly number[])[]} = FRUIT_SHAPES[kind]): Hull {
   const cos = Math.cos(angle), sin = Math.sin(angle);
-  const points = FRUIT_SHAPES[kind].hull.map(([x,y]) => ({ x: (x*cos-y*sin)*radius, y: (x*sin+y*cos)*radius }));
+  const points = geometry.hull.map(([x,y]) => ({ x: (x*cos-y*sin)*radius, y: (x*sin+y*cos)*radius }));
   const axes = points.map((p,i) => {
     const q=points[(i+1)%points.length], dx=q.x-p.x, dy=q.y-p.y, length=Math.hypot(dx,dy);
     return {x:-dy/length,y:dx/length};

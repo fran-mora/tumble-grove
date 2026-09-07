@@ -5,9 +5,9 @@ import {fruitHull,confineToCircle,circleTravel,directionalLanding,hullContact} f
 const advance=(g,seconds)=>{for(let n=0;n<Math.ceil(seconds/STEP);n++)g.step();};
 const shapeOf=b=>fruitHull(b.kind,FRUITS[b.kind].radius,b.angle);
 function inside(b){for(const p of shapeOf(b).points)assert.ok(Math.hypot(b.x+p.x-CIRCLE.x,b.y+p.y-CIRCLE.y)<=CIRCLE.radius+.08,`escaped: ${b.kind}`);}
-function gameWithDirection(x,y){const g=new MergeGame(()=>.4);g.setMode('gravity');g.setGravity(x,y);advance(g,1.5);return g;}
+function gameWithDirection(x,y){const g=new MergeGame(()=>.4,()=>0);g.setMode('gravity');g.lineup=FRUITS.map((_,i)=>i*10);g.setGravity(x,y);advance(g,1.5);return g;}
 test('mode changes start a fresh round, and normal restarts keep gravity mode',()=>{
-  const g=new MergeGame();g.drop();g.score=55;g.setMode('gravity');
+  const g=new MergeGame(()=>0);g.drop();g.score=55;g.setMode('gravity');
   assert.equal(g.height,WIDTH);assert.equal(g.drops,0);assert.equal(g.score,0);assert.equal(g.bodies.length,0);
   g.setGravity(1,0);advance(g,1);g.reset();assert.equal(g.mode,'gravity');assert.ok(g.down.x>.99);
   g.setMode('classic');assert.equal(g.height,HEIGHT);assert.deepEqual(g.down,{x:0,y:1});
@@ -53,16 +53,22 @@ test('matching fruit merge while falling sideways and upward',()=>{
     assert.equal(g.merges,1);assert.equal(g.score,1);assert.equal(g.bodies[0].kind,1);inside(g.bodies[0]);
   }
 });
-test('the danger threshold rotates and grants settling time after a tilt',()=>{
+test('the rotated dotted line permits a higher stack without a countdown',()=>{
   const g=gameWithDirection(1,0),b=g.addFruit(6,CIRCLE.x,CIRCLE.y);
-  const holdUpstream=()=>{b.x=CIRCLE.x+CIRCLE_DANGER-15;b.y=CIRCLE.y;b.age=3;b.vx=0;b.vy=0;};
-  for(let n=0;n<240;n++){holdUpstream();g.step();}assert.equal(g.over,false);assert.ok(g.danger>1);
-  g.setGravity(0,1);advance(g,.5);assert.equal(g.over,false);assert.equal(g.danger,0);
+  for(let n=0;n<600;n++){b.x=CIRCLE.x+CIRCLE_DANGER-15;b.y=CIRCLE.y;b.age=3;b.vx=0;b.vy=0;g.step();}
+  assert.equal(g.over,false);assert.equal(g.danger,0);
 });
-test('the rotated danger line still ends an overflowing round',()=>{
-  const g=gameWithDirection(-1,0),b=g.addFruit(2,CIRCLE.x,CIRCLE.y);
-  for(let n=0;n<330;n++){b.x=CIRCLE.x-CIRCLE_DANGER+10;b.y=CIRCLE.y;b.age=3;b.vx=0;b.vy=0;g.step();}
-  assert.equal(g.over,true);assert.equal(g.drop(),false);
+test('a fruit may protrude through the mouth and loses only when fully outside',()=>{
+  for(const [x,y] of [[0,1],[1,0],[0,-1],[-1,0]]){
+    const g=gameWithDirection(x,y),b=g.addFruit(0,CIRCLE.x-x*(CIRCLE.radius-5),CIRCLE.y-y*(CIRCLE.radius-5));
+    g.step();assert.equal(g.over,false);
+    b.x=CIRCLE.x-x*(CIRCLE.radius+60);b.y=CIRCLE.y-y*(CIRCLE.radius+60);g.step();
+    assert.equal(g.over,true);assert.equal(g.drop(),false);
+  }
+});
+test('overflow moves outward through the circular opening without an invisible wall',()=>{
+  const g=gameWithDirection(0,1),b=g.addFruit(0,CIRCLE.x,25);b.vy=-650;
+  advance(g,.3);assert.equal(g.over,true);assert.ok(b.y<0);
 });
 test('obstacle landing is exact along oblique gravity',()=>{
   const g=gameWithDirection(.6,.8),shape=fruitHull(0,18),obstacle={x:CIRCLE.x,y:CIRCLE.y,shape:fruitHull(6,57)};
@@ -72,11 +78,11 @@ test('obstacle landing is exact along oblique gravity',()=>{
   assert.equal(hullContact({x:target.x-g.down.x*.02,y:target.y-g.down.y*.02},shape,obstacle,obstacle.shape),null);
   assert.ok(circleTravel(spawn,shape,g.down,CIRCLE,CIRCLE.radius)>0);
 });
-test('a mixed bowl remains bounded through repeated full gravity rotations',()=>{
+test('a mixed bowl stays finite through full rotations and can spill',()=>{
   const g=gameWithDirection(0,1);
   for(let drop=0;drop<45&&!g.over;drop++){
     const angle=drop*.29;g.setGravity(Math.sin(angle),Math.cos(angle));g.drop(80+(drop*73)%280);advance(g,.75);
-    for(const b of g.bodies){inside(b);assert.ok(Number.isFinite(b.vx)&&Number.isFinite(b.vy));}
+    for(const b of g.bodies){assert.ok(Number.isFinite(b.x)&&Number.isFinite(b.y)&&Number.isFinite(b.vx)&&Number.isFinite(b.vy));}
   }
   assert.ok(g.merges>0);
 });

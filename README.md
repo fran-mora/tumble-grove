@@ -6,9 +6,9 @@ A complete fruit dropping and merging web game, built as a separate project alon
 
 Move the pointer and click to drop. On a phone, drag to aim and release. The focused play area also supports Left/Right arrows to aim, Space or Enter to drop, and P to pause.
 
-Touching identical fruit merge through 11 tiers, from cherry to watermelon. Merges score triangular points (1, 3, 6, …, 55). Two watermelons clear for 100 points. Fruit remaining above the dashed line beyond a grace period ends the round. A fresh drop is exempt while entering the basket.
+Touching identical fruit merge through 11 growth levels. Each new round picks one character at each level from 110 fruit and variety characters (10 choices per level). That family remains fixed for the whole round, and the next round changes every level’s character. Merges score triangular points (1, 3, 6, …, 55). Two final-level fruit clear for 100 points. The dashed line is only a guide: fruit can stack above it indefinitely. A round ends only when a whole fruit spills outside. The basket has finite side walls and an open rim; the circular bowl has a visible opening that rotates with gravity. Fruit may protrude through the opening without immediately ending the round.
 
-Includes a next-fruit preview, aim guide, optional synthesized sound, pause, restart confirmation, watermelon celebration, reduced-motion support, and local personal-best storage. Browser storage may be unavailable or cleared; this never prevents play. The active round is not saved on refresh.
+Includes a next-fruit preview, aim guide, optional synthesized sound, pause, restart confirmation, final-level celebration, reduced-motion support, and local personal-best storage. Browser storage may be unavailable or cleared; this never prevents play. The active round is not saved on refresh.
 
 ## Develop
 
@@ -26,25 +26,25 @@ React/Vinext with a client-side Canvas renderer. The physics engine has no netwo
 
 ## Validation
 
-Thirty-two automated tests cover initial drops, all merge tiers, double-consumption prevention, chain reactions, collision separation, fresh-fruit grace, overflow, pause/reset, invalid input, and eight deterministic complete games. Contact tests additionally cover all 121 fruit pairings at three rotations, measured artwork alignment, floor contact, and containment. TypeScript and the production build pass. The local route returns HTTP 200. Interactive browser UI and physical-device testing were not requested or performed.
+Automated tests cover drops, all merge tiers, double-consumption prevention, chain reactions, collision separation, finite walls, high stacks above the former limit, actual spills through the basket rim and rotated circular mouth, pause/reset, invalid input, and extended deterministic games. Collection tests cover all 110 candidates, per-round selection, stable families during merges, sprite/collider alignment, floor contact, and guide contact. The offline check simulates cached navigation and every asset with networking disabled. Interactive browser UI and physical-device testing were not requested or performed.
 
-Gravity-mode tests cover every direction, the circular wall, rotated drop guides and danger boundaries, sideways/upward merges, full rotation, flat-phone dead zones, screen orientation, sensor permissions, missing data, and cleanup. Sensor events are simulated; no physical phone sensor test was available.
+Gravity and sensor tests cover every direction, the circular walls, rotated guides, sideways/upward merges, full rotation, flat-phone dead zones, screen orientation, sensor permissions, missing data, and cleanup. Sensor events are simulated.
 
 Optional WebMCP read-game and drop-fruit tools use the same engine as the controls, validate input, and are registered only when document.modelContext is supported. No supported WebMCP validation context was available, so these optional tools have not been verified in a browser implementing that API.
 
 ## Artwork
 
-Original fruit character sprite sheet generated for this project. The exact prompt is in public/artwork-prompt.txt. The runtime extracts each character from public/fruits.png; native fruit emoji provide a fallback if the image cannot load. Interface icons use Lucide. The game reimplements the drop-and-merge mechanic with original artwork and interface; it is not affiliated with an existing Fruit Merge publisher.
+Original fruit character sprite sheet generated for this project. The original prompt is in public/artwork-prompt.txt; collection prompts are saved alongside their atlases. The runtime extracts the original 11 characters from public/fruits.png and 99 new choices from public/fruit-collection-a.png and public/fruit-collection-b.png; native fruit emoji provide a fallback if the image cannot load. Interface icons use Lucide. The game reimplements the drop-and-merge mechanic with original artwork and interface; it is not affiliated with an existing Fruit Merge publisher.
 
 ## Fruit bounds
 
-Rendering and collision detection share body-centered geometry measured from the existing sprite sheet. Convex hulls follow fruit flesh; stems and leaves remain decorative so they do not create invisible spacing between fruit bodies. Each crop retains its native aspect ratio without square padding. The same rotated bounds handle walls, floor, overflow and the drop guide. Merge particles remain, but fruit sprites no longer shrink away from their colliders.
+Rendering and collision detection share body-centered geometry measured from the existing sprite sheet. Convex hulls follow fruit flesh; stems and leaves remain decorative so they do not create invisible spacing between fruit bodies. Each crop retains its native aspect ratio without square padding. The same rotated bounds handle walls, floor, spill detection and the drop guide. Merge particles remain, but fruit sprites no longer shrink away from their colliders.
 
-To regenerate geometry after replacing artwork, run `python3 scripts/trace-fruit-shapes.py` with Pillow installed. This reads PNG pixels and writes TypeScript coordinates; it does not modify the original image. Pillow is not required to build or run the game.
+To regenerate geometry after replacing artwork, run `python3 scripts/trace-fruit-shapes.py` for the original sheet and `python3 scripts/trace-collection.py` for the new atlases, with Pillow installed. This reads PNG pixels and writes TypeScript coordinates; it does not modify the original image. Pillow is not required to build or run the game.
 
 ## Phone gravity mode
 
-Turn on **Gravity mode** above the arena on a phone and allow motion/orientation access when prompted. This starts a circular round. Tilt in any direction to move fruit; the spawn edge, dotted drop guide and danger chord rotate with gravity. Flatter angles reduce gravity, and a small dead zone prevents drift when flat. Input is smoothed; large turns give the pile time to settle before the overflow timer counts again.
+Turn on **Gravity mode** above the arena on a phone and allow motion/orientation access when prompted. This starts a circular round. Tilt in any direction to move fruit; the opening, spawn edge and dotted guides rotate with gravity. Flatter angles reduce gravity, and a small dead zone prevents drift when flat. Input is smoothed. Crossing the dotted guide never starts a loss timer; keep fruit from spilling through the opening.
 
 Drag perpendicular to the dotted drop guide to move the entry point, then release to drop. Mode changes confirm before clearing an active round. Denied permission, missing sensors or no data preserve the existing game. Turning the mode off removes sensor listeners. Each mode stores its own local best score. Motion values are used only on the device and are not transmitted or saved.
 
