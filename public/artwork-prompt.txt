@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: one production sprite sheet for an original cute Fruit Merge web game.
+Primary request: Generate exactly one landscape 4:3 image, ideally 1536x1152 pixels. Twelve distinct individual fruit characters in a precise 4-column by 3-row equally sized square-cell grid. Every cell contains exactly one character centered in its cell, with generous pure white margins and separation, ready to crop into sprites. Grid structure is invisible: no lines or borders.
+Scene/backdrop: perfectly plain pure white #FFFFFF background.
+Subjects, strictly in this order left to right:
+Row 1: red cherry; strawberry; purple grape cluster; orange mandarin.
+Row 2: golden persimmon; red apple; green pear; pink peach.
+Row 3: pineapple; pale green cantaloupe; dark green striped whole round watermelon; watermelon slice.
+Style/medium: premium polished matte 3D clay cartoon game pieces, bold appealing saturated colors, tiny smiling faces, dark friendly eyes, soft rounded forms. Circular silhouettes as much as possible while keeping each fruit recognizable. The fruits are the only objects. Their small leaves and stems remain fully within their own cells. Consistent soft studio lighting and very gentle surface shading. Little to no cast shadow on the white background.
+Composition: four equally spaced columns and three equally spaced rows, same optical size for all characters. Each fruit fits inside central 70% of its square cell. No character touches or overlaps another; no character touches cell boundaries or edges of image. No floor, no scene, no supporting props.
+Constraints: exactly twelve characters, exact specified fruit order, one per cell, no labels, no letters, no numbers, no text, no watermark, no logo, no grid lines.
