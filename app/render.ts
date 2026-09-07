@@ -2,7 +2,7 @@ import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MergeGame } fro
 import { FRUIT_SHAPES } from './fruit-shapes.ts';
 import { fruitHull, landingY, directionalLanding } from './collision.ts';
 export async function loadSprites(): Promise<HTMLCanvasElement[]> {
-  const image = new Image(); image.src = '/fruits.png'; await image.decode();
+  const image = new Image(); image.src = new URL('fruits.png', document.baseURI).href; await image.decode();
   return FRUIT_SHAPES.map(({crop:[x,y,w,h]}) => {
     const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d')!;

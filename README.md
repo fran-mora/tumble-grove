@@ -51,3 +51,9 @@ Drag perpendicular to the dotted drop guide to move the entry point, then releas
 Sensor access needs a secure context and a browser exposing DeviceOrientationEvent. If an embedded browser has no motion support, open the published HTTPS game directly in your phone browser. The app uses feature detection and invokes the optional requestPermission method directly from the toggle/confirmation gesture.
 
 Implementation references: [MDN device coordinate frames](https://developer.mozilla.org/en-US/docs/Web/API/Device_orientation_events/Orientation_and_motion_data_explained), [MDN orientation permission](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/requestPermission_static), and [W3C screen orientation](https://www.w3.org/TR/screen-orientation/#dfn-current-orientation-angle).
+
+## Offline iPhone app and GitHub Pages
+
+Play at https://fran-mora.github.io/fruit-merge/ . In Safari, choose Share → Add to Home Screen, keep Open as Web App enabled if shown, and tap Add. Open the new icon while online and wait for **Ready for offline play** beneath the game. Then turn on airplane mode and reopen the app to check it before traveling. Classic and phone gravity modes both run locally. A round resets when the app reloads; best scores remain on that device.
+
+`npm run build:pages` creates a standalone static app in `dist-pages`, including a versioned service worker that saves every game asset before reporting offline readiness. `node scripts/check-offline.mjs` checks cached navigation, assets, and readiness with networking disabled. Publish the contents of `dist-pages` to the `gh-pages` branch; GitHub Pages serves that branch's root. The original Sites build remains available via `npm run build`.

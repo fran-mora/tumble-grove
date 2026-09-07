@@ -11,7 +11,8 @@
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
     "format": "oxfmt",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "build:pages": "vite build --config vite.pages.config.ts && node scripts/build-offline.mjs"
   },
   "dependencies": {
     "react": "19.2.6",
