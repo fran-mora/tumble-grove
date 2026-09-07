@@ -1,0 +1,22 @@
+Use case: stylized-concept.
+Asset type: production raster game sprite sheet, a strict regular atlas.
+Input image 1 is a STYLE REFERENCE ONLY. Match its detailed cute sculpted clay / soft 3D fruit rendering: saturated believable fruit textures, plump near-round bodies, glossy black bead eyes with tiny white catchlights, tiny curved black smile, rosy pink cheeks. Keep that rich shaded material style, not flat emoji.
+Create ONE tall image, ideally 1600 × 3520 pixels, exactly 5:11 aspect ratio. Pure white #FFFFFF backdrop.
+EXACT LAYOUT: 5 equal-width columns and 11 equal-height rows, exactly 55 fruit characters total. Every invisible cell is square. The cell centers are uniformly spaced across the entire full-bleed canvas. No header, footer, title, labels, lettering, borders or visible gridlines. Read the manifest left to right in each row, then top to bottom. Each cell contains exactly ONE complete fruit character (grapes / aggregate berries may be a coherent compact bunch), centered in its cell with about 12% pure white margin on all four sides. Every fruit fits fully inside its own cell and never touches its neighbors. Give all cells the same consistent visual fill ratio. Bodies are round or plump except necessary natural pear/pineapple/elongated fruit contours. Small compact leaves and stems only, held close to the body. Faces sit in the lower middle of the fruit body, front facing, and follow the reference's cheerful expression.
+Lighting: soft front studio illumination modeled on the reference, self-shading on the fruit surface only. NO cast shadows, ground shadows, ambient shadow patches, gray background, detached sparkles, props or decorations. Pure clean white pixels around each silhouette. No limbs or accessories.
+All manifest names below identify the fruit appearance; NEVER render their text. Keep every row and column exactly in the listed order. Fruit-specific rind colors and textures must clearly distinguish varieties. Whole fruits unless the manifest explicitly requests a tiny flesh cutout. Keep the artwork crisp and richly detailed.
+
+SHEET A. Exact manifest, each numbered line is ONE horizontal row of exactly five sprites:
+Row 1: Cherry | Blueberry | Cranberry | Redcurrant | Blackcurrant.
+Row 2: Strawberry | Raspberry | Blackberry | Cloudberry | Salmonberry.
+Row 3: Purple grapes | Lychee | Longan | Rambutan | Mangosteen.
+Row 4: Mandarin | Lime | Lemon | Clementine | Tangerine.
+Row 5: Persimmon | Apricot | Purple plum | Damson plum | Greengage plum.
+Row 6: Red apple | Green apple | Golden apple | Pomegranate | Quince.
+Row 7: Green pear | Asian pear | Avocado | Purple fig | Kiwifruit.
+Row 8: Peach | Nectarine | Mango | Dragonfruit | Papaya.
+Row 9: Pineapple | Coconut | Durian | Jackfruit | Breadfruit.
+Row 10: Cantaloupe | Honeydew | Galia melon | Canary melon | Piel de Sapo melon.
+Row 11: Whole dark striped watermelon | Whole yellow rind watermelon | Whole dark green Sugar Baby watermelon | Whole pale striped watermelon | Round orange watermelon with a tiny flesh cutout.
+
+Count before finishing: 11 rows, 5 columns, 55 distinct smiling characters, exactly one per square cell. Whole canvas is ONLY this evenly spaced 5 × 11 atlas.
