@@ -51,3 +51,46 @@ export function landingY(x:number,startY:number,shape:Hull,obstacles:{x:number;y
   }
   return Math.max(startY,landing);
 }
+
+/** Project the entire convex fruit into a circular arena, without a padded radius. */
+export function confineToCircle(body:Point & {vx:number;vy:number},shape:Hull,center:Point,radius:number):void {
+  for(let iteration=0;iteration<12;iteration++){
+    let distance=radius,nx=0,ny=0;
+    for(const p of shape.points){
+      const x=body.x+p.x-center.x,y=body.y+p.y-center.y,length=Math.hypot(x,y);
+      if(length>distance){distance=length;nx=x/length;ny=y/length;}
+    }
+    if(distance<=radius+1e-5)return;
+    body.x-=nx*(distance-radius+.001);body.y-=ny*(distance-radius+.001);
+    const outward=body.vx*nx+body.vy*ny;
+    if(outward>0){const impulse=outward*(outward>65?1.12:1);body.vx-=nx*impulse;body.vy-=ny*impulse;}
+  }
+}
+/** Distance a hull can travel along a unit direction before its edge hits a circle. */
+export function circleTravel(origin:Point,shape:Hull,direction:Point,center:Point,radius:number):number {
+  let distance=Infinity;
+  for(const p of shape.points){
+    const x=origin.x+p.x-center.x,y=origin.y+p.y-center.y,along=x*direction.x+y*direction.y;
+    const discriminant=along*along+radius*radius-x*x-y*y;
+    if(discriminant<0)return 0;
+    distance=Math.min(distance,-along+Math.sqrt(discriminant));
+  }
+  return Math.max(0,distance);
+}
+/** First contact in an arbitrary gravity direction, clipped to the circular wall. */
+export function directionalLanding(origin:Point,shape:Hull,direction:Point,obstacles:{x:number;y:number;shape:Hull}[],center:Point,radius:number):Point {
+  let distance=circleTravel(origin,shape,direction,center,radius);
+  for(const obstacle of obstacles){
+    let enter=-Infinity,exit=Infinity,possible=true;
+    const dx=obstacle.x-origin.x,dy=obstacle.y-origin.y;
+    for(const candidate of [shape,obstacle.shape])for(const axis of candidate.axes){
+      const [aMin,aMax]=project(shape,axis),[rawMin,rawMax]=project(obstacle.shape,axis);
+      const offset=dx*axis.x+dy*axis.y,bMin=rawMin+offset,bMax=rawMax+offset,speed=direction.x*axis.x+direction.y*axis.y;
+      if(Math.abs(speed)<1e-8){if(aMax<bMin||aMin>bMax)possible=false;continue;}
+      const t0=(bMin-aMax)/speed,t1=(bMax-aMin)/speed;
+      enter=Math.max(enter,Math.min(t0,t1));exit=Math.min(exit,Math.max(t0,t1));
+    }
+    if(possible&&enter<=exit&&exit>=0)distance=Math.min(distance,Math.max(0,enter));
+  }
+  return {x:origin.x+direction.x*distance,y:origin.y+direction.y*distance};
+}

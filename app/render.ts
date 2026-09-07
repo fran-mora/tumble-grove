@@ -1,6 +1,6 @@
-import { DANGER_Y, FRUITS, HEIGHT, WIDTH, MergeGame } from './engine.ts';
+import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MergeGame } from './engine.ts';
 import { FRUIT_SHAPES } from './fruit-shapes.ts';
-import { fruitHull, landingY } from './collision.ts';
+import { fruitHull, landingY, directionalLanding } from './collision.ts';
 export async function loadSprites(): Promise<HTMLCanvasElement[]> {
   const image = new Image(); image.src = '/fruits.png'; await image.decode();
   return FRUIT_SHAPES.map(({crop:[x,y,w,h]}) => {
@@ -28,18 +28,32 @@ export function drawFruit(ctx:CanvasRenderingContext2D,sprites:HTMLCanvasElement
 }
 export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:HTMLCanvasElement[],reducedMotion:boolean){
   const scale=ctx.canvas.width/WIDTH;
-  ctx.setTransform(scale,0,0,ctx.canvas.height/HEIGHT,0,0);ctx.clearRect(0,0,WIDTH,HEIGHT);
-  ctx.save();ctx.setLineDash([6,6]);ctx.lineWidth=game.danger>.15?2:1;
-  ctx.strokeStyle=game.danger>.15?'#d25b43':'#dcc2a1';ctx.beginPath();ctx.moveTo(14,DANGER_Y);ctx.lineTo(WIDTH-14,DANGER_Y);ctx.stroke();ctx.restore();
-  ctx.fillStyle=game.danger>.15?'#b44832':'#978367';ctx.font='9px Trebuchet MS, sans-serif';ctx.textAlign='right';
-  ctx.fillText(game.danger>.15?`MAKE SOME ROOM · ${Math.max(1,Math.ceil(2.5-game.danger))}`:'KEEP IT BELOW THE LINE',WIDTH-15,DANGER_Y-11);
+  ctx.setTransform(scale,0,0,ctx.canvas.height/game.height,0,0);ctx.clearRect(0,0,WIDTH,game.height);
+  const circular=game.mode==='gravity',direction=game.down;
+  ctx.save();
+  if(circular){ctx.translate(CIRCLE.x,CIRCLE.y);ctx.rotate(Math.atan2(-direction.x,direction.y));}
+  const limitY=circular?CIRCLE_DANGER:DANGER_Y;
+  const half=circular?Math.sqrt(CIRCLE.radius*CIRCLE.radius-limitY*limitY):0;
+  const left=circular?-half:14,right=circular?half:WIDTH-14;
+  ctx.setLineDash([6,6]);ctx.lineWidth=game.danger>.15?2:1;
+  ctx.strokeStyle=game.danger>.15?'#d25b43':'#dcc2a1';ctx.beginPath();ctx.moveTo(left,limitY);ctx.lineTo(right,limitY);ctx.stroke();
+  ctx.fillStyle=game.danger>.15?'#b44832':'#978367';ctx.font='9px Trebuchet MS, sans-serif';ctx.textAlign=circular?'center':'right';
+  ctx.fillText(game.danger>.15?`MAKE SOME ROOM · ${Math.max(1,Math.ceil(2.5-game.danger))}`:circular?'LEAVE ROOM TO DROP':'KEEP IT BELOW THE LINE',circular?0:WIDTH-15,limitY-11);
+  ctx.restore();
   if(!game.over){
-    const radius=FRUITS[game.current].radius;
-    const shape=fruitHull(game.current,radius);
-    const target=landingY(game.aim,43,shape,game.bodies.map(b=>({x:b.x,y:b.y,shape:fruitHull(b.kind,FRUITS[b.kind].radius,b.angle)})),HEIGHT-.5);
-    if(!game.paused){ctx.save();ctx.setLineDash([3,7]);ctx.strokeStyle='#c4d2ac';ctx.beginPath();ctx.moveTo(game.aim,43+shape.maxY);ctx.lineTo(game.aim,target);ctx.stroke();ctx.restore();
-      ctx.beginPath();ctx.ellipse(game.aim,target+shape.maxY,radius*.65,3,0,0,Math.PI*2);ctx.fillStyle='#bbc79c44';ctx.fill();}
-    drawFruit(ctx,sprites,game.current,game.aim,43,radius,0,game.canDrop?1:.38);
+    const radius=FRUITS[game.current].radius,shape=fruitHull(game.current,radius),spawn=game.getSpawn();
+    const obstacles=game.bodies.map(b=>({x:b.x,y:b.y,shape:fruitHull(b.kind,FRUITS[b.kind].radius,b.angle)}));
+    const target=circular?directionalLanding(spawn,shape,direction,obstacles,CIRCLE,CIRCLE.radius):{x:game.aim,y:landingY(game.aim,43,shape,obstacles,HEIGHT-.5)};
+    const support=Math.max(...shape.points.map(p=>p.x*direction.x+p.y*direction.y));
+    if(!game.paused){
+      ctx.save();ctx.setLineDash([3,7]);ctx.strokeStyle='#a8bf8f';ctx.beginPath();ctx.moveTo(spawn.x+direction.x*support,spawn.y+direction.y*support);ctx.lineTo(target.x,target.y);ctx.stroke();ctx.setLineDash([]);
+      if(circular){
+        const tip={x:spawn.x+direction.x*(support+27),y:spawn.y+direction.y*(support+27)};
+        ctx.beginPath();ctx.moveTo(tip.x-direction.x*7+direction.y*4,tip.y-direction.y*7-direction.x*4);ctx.lineTo(tip.x,tip.y);ctx.lineTo(tip.x-direction.x*7-direction.y*4,tip.y-direction.y*7+direction.x*4);ctx.stroke();
+      }else{ctx.beginPath();ctx.ellipse(target.x,target.y+shape.maxY,radius*.65,3,0,0,Math.PI*2);ctx.fillStyle='#bbc79c44';ctx.fill();}
+      ctx.restore();
+    }
+    drawFruit(ctx,sprites,game.current,spawn.x,spawn.y,radius,0,game.canDrop?1:.38);
   }
   for(const b of game.bodies){
     // Never shrink the artwork away from its collider, including during merges.
