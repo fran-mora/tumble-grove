@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { relative, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const dir = new URL('../dist-pages/', import.meta.url);
-const files = (await readdir(dir,{recursive:true,withFileTypes:true})).filter(e=>e.isFile()).map(e=>relative(fileURLToPath(dir),join(e.parentPath,e.name))).filter(f=>!['sw.js','.nojekyll'].includes(f)).sort();
+const files = (await readdir(dir,{recursive:true,withFileTypes:true})).filter(e=>e.isFile()).map(e=>relative(fileURLToPath(dir),join(e.parentPath,e.name))).filter(f=>!f.startsWith('.git/')&&!['sw.js','.nojekyll'].includes(f)).sort();
 const hash = createHash('sha256');
 for (const file of files) { hash.update(file); hash.update(await readFile(new URL(file,dir))); }
 const version = hash.digest('hex').slice(0,16);
