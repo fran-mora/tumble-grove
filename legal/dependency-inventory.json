@@ -1,0 +1,231 @@
+{
+  "scope": "Bundled JavaScript plus explicitly recorded styles, helpers and adapted component source. Not a legal clearance opinion.",
+  "packageLockSha256": "d3b6a0acbf9a9a2d751a0f4e94f08df2ace5aac574abf87b2c9dfac7d82b9486",
+  "packages": [
+    {
+      "name": "@base-ui/react",
+      "version": "1.7.0",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "git+https://github.com/mui/base-ui.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "07fc1b39d69d14bc7d40482a628f47226258eb01265db68ae684944b916beb2a"
+        }
+      ]
+    },
+    {
+      "name": "@base-ui/utils",
+      "version": "0.3.2",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "git+https://github.com/mui/base-ui.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "07fc1b39d69d14bc7d40482a628f47226258eb01265db68ae684944b916beb2a"
+        }
+      ]
+    },
+    {
+      "name": "@floating-ui/utils",
+      "version": "0.2.12",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/floating-ui/floating-ui.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "0e4c9a9b6c71019cbbea3bdc20b01223110a9035700f9c960c8fcbf78c2325ce"
+        }
+      ]
+    },
+    {
+      "name": "class-variance-authority",
+      "version": "0.7.1",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "Apache-2.0",
+      "repository": "https://github.com/joe-bell/cva.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "0ccbf956cffc8dcf515809433cb5242ee67c94513d46e48c261d68d0880de406"
+        }
+      ]
+    },
+    {
+      "name": "clsx",
+      "version": "2.1.1",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "lukeed/clsx",
+      "noticeFiles": [
+        {
+          "file": "license",
+          "sha256": "9a9edad7baae52622bddf3c15b2ef8a33d2c89f2d25408ad13e8a7481c6b0c97"
+        }
+      ]
+    },
+    {
+      "name": "lucide-react",
+      "version": "1.31.0",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "ISC",
+      "repository": "https://github.com/lucide-icons/lucide.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+        }
+      ]
+    },
+    {
+      "name": "react",
+      "version": "19.2.6",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/facebook/react.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+        }
+      ]
+    },
+    {
+      "name": "react-dom",
+      "version": "19.2.6",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/facebook/react.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+        }
+      ]
+    },
+    {
+      "name": "scheduler",
+      "version": "0.27.0",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/facebook/react.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+        }
+      ]
+    },
+    {
+      "name": "shadcn",
+      "version": "4.18.0",
+      "scopes": [
+        "Adapted component source under components/ui/, hooks/use-mobile.ts and lib/utils.ts; shadcn/tailwind.css imported by app/globals.css."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/shadcn-ui/ui.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE.md",
+          "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
+        }
+      ]
+    },
+    {
+      "name": "tailwind-merge",
+      "version": "3.6.0",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/dcastil/tailwind-merge.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE.md",
+          "sha256": "d4c70c7ce38cea8778f0aed3fc0bef0a9dbd27f13bd8b6773cbd6d37941971e5"
+        }
+      ]
+    },
+    {
+      "name": "tailwindcss",
+      "version": "4.2.1",
+      "scopes": [
+        "Styles imported and generated from app/globals.css, including the Tailwind stylesheet and preflight."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/tailwindlabs/tailwindcss.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "60e0b68c0f35c078eef3a5d29419d0b03ff84ec1df9c3f9d6e39a519a5ae7985"
+        }
+      ]
+    },
+    {
+      "name": "tw-animate-css",
+      "version": "1.4.0",
+      "scopes": [
+        "Animation styles imported by app/globals.css."
+      ],
+      "license": "MIT",
+      "repository": "Wombosvideo/tw-animate-css",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "039184dfa0a822397b3f45a435b5b1e538721587fbade96b9fa80f86cb354109"
+        }
+      ]
+    },
+    {
+      "name": "use-sync-external-store",
+      "version": "1.6.0",
+      "scopes": [
+        "Included in Vite’s production JavaScript inventory."
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/facebook/react.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE",
+          "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+        }
+      ]
+    },
+    {
+      "name": "vite",
+      "version": "8.0.13",
+      "scopes": [
+        "Module-preload helper injected into the browser build; the full distributed Vite licence file is retained, including its bundled third-party notices."
+      ],
+      "license": "MIT",
+      "repository": "git+https://github.com/vitejs/vite.git",
+      "noticeFiles": [
+        {
+          "file": "LICENSE.md",
+          "sha256": "40501d82eb20f60d031aaaa3291a103d72551ebd49e11e73ba94ea34589e7bdd"
+        }
+      ]
+    }
+  ]
+}
