@@ -2,13 +2,14 @@
   "name": "tumble-grove",
   "version": "0.1.0",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
     "data:fruits": "node --experimental-strip-types scripts/build-fruit-levels.mjs",
     "dev": "vite",
-    "build": "vite build && node scripts/build-offline.mjs",
+    "build": "vite build && node scripts/build-legal.mjs && node scripts/build-offline.mjs",
     "start": "vite preview",
     "lint": "oxlint",
     "format": "oxfmt",

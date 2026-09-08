@@ -1,0 +1,80 @@
+{
+  "note": "Fingerprints identify the recorded files. They do not establish authorship, copyrightability or non-infringement.",
+  "files": [
+    {
+      "path": "public/fruits.png",
+      "sha256": "7034fd8bbbcbfcb1a3326dc4b77ddf002779c7519a9f1772492a974f52ac1698",
+      "bytes": 1625324
+    },
+    {
+      "path": "public/artwork-prompt.txt",
+      "sha256": "450f47a4d7e490d38e777b912cfd04e8ae09556d853641d0ef685769aab79493",
+      "bytes": 1758
+    },
+    {
+      "path": "public/fruit-collection-a.png",
+      "sha256": "92fb550b4d0117dfc2b83b088b1e27b8c21307565c8dfa8d27935efd0b300737",
+      "bytes": 1944596
+    },
+    {
+      "path": "public/fruit-collection-a-prompt.txt",
+      "sha256": "d9f93fb13004dad87f5012edd79a1bb15645673c45ad367b15971827ad591851",
+      "bytes": 3196
+    },
+    {
+      "path": "public/fruit-collection-b.png",
+      "sha256": "8c3b079a98127ac8efd006e4a7b8bf4ce7afcefe6ce08c37f355828122201c0a",
+      "bytes": 2024283
+    },
+    {
+      "path": "public/fruit-collection-b-prompt.txt",
+      "sha256": "19a0d1f757532c5439a6006c32896cee73ad7128653e601a78e340a4fb3db3fb",
+      "bytes": 3127
+    },
+    {
+      "path": "public/favicon.svg",
+      "sha256": "98e5ab165d4e1789b719305caff52410525e00f41a0ccb55b8663a0c3d2d06f5",
+      "bytes": 187
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "sha256": "5a1bd3c7941702ed40edc6b5b33d59b94e54745b36aca8b0dbf89ef3486e4fad",
+      "bytes": 253
+    },
+    {
+      "path": "app/fruit-shapes.ts",
+      "sha256": "c7378b16715379503f55e66fb9ae05a79a39f98650c1000c23b3a382e6b5ef7a",
+      "bytes": 5669
+    },
+    {
+      "path": "app/collection-shapes.ts",
+      "sha256": "6d8c66a39cce42217f8a5eb17af20ef5a12278d4daa4b773a788605d0c8686b8",
+      "bytes": 49931
+    },
+    {
+      "path": "app/fruit-collection.ts",
+      "sha256": "bbf2d01efdc0196de370753888f81d193cda068904d6be0111c23ed6c1eb527a",
+      "bytes": 3785
+    },
+    {
+      "path": "scripts/trace-fruit-shapes.py",
+      "sha256": "65590c998993930b550eecc9b6df046540885355f978ebde4381c74c5ecb1490",
+      "bytes": 2963
+    },
+    {
+      "path": "scripts/trace-collection.py",
+      "sha256": "08c3b9b37c14a4595efc7d8068599250ff253409f5624866b1a0f8c37ebd2601",
+      "bytes": 3882
+    },
+    {
+      "path": "docs/fruit-size-research.json",
+      "sha256": "55dac46ea7730361d6f702e2b1fdb658e1f18997d325171e419d7e6cd6dafb08",
+      "bytes": 31021
+    },
+    {
+      "path": "public/fruit-sizes.csv",
+      "sha256": "6521d0c7af262d88bdebd34b0f954997612c9d9f4dcc44977ec73a619eec627c",
+      "bytes": 23643
+    }
+  ]
+}

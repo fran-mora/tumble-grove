@@ -1,0 +1,23 @@
+[
+  {
+    "name": "shadcn",
+    "scope": "Adapted component source under components/ui/, hooks/use-mobile.ts and lib/utils.ts; shadcn/tailwind.css imported by app/globals.css.",
+    "source": "https://github.com/shadcn-ui/ui",
+    "note": "components.json identifies the base-nova scaffold. Its exact upstream source revision was not recorded; the installed package supplies the upstream MIT notice."
+  },
+  {
+    "name": "tailwindcss",
+    "scope": "Styles imported and generated from app/globals.css, including the Tailwind stylesheet and preflight.",
+    "source": "https://github.com/tailwindlabs/tailwindcss"
+  },
+  {
+    "name": "tw-animate-css",
+    "scope": "Animation styles imported by app/globals.css.",
+    "source": "https://github.com/Wombosvideo/tw-animate-css"
+  },
+  {
+    "name": "vite",
+    "scope": "Module-preload helper injected into the browser build; the full distributed Vite licence file is retained, including its bundled third-party notices.",
+    "source": "https://github.com/vitejs/vite"
+  }
+]

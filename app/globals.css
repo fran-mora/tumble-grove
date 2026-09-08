@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+/* Legal records contain upstream examples, not game utility classes. */
+@source not '../docs/legal';
+@source not '../public/legal';
+@source not '../THIRD_PARTY_NOTICES.txt';
 @custom-variant dark (&:is(.dark *));
 @theme inline { --color-background:var(--background); --color-foreground:var(--foreground); --color-popover:var(--popover); --color-popover-foreground:var(--foreground); --color-primary:var(--primary); --color-primary-foreground:#fff; --color-muted:#f1efd9; --color-muted-foreground:#737767; --color-border:#dce2c8; --color-ring:#3c7c55; --font-sans:'Trebuchet MS',Arial,sans-serif; }
 :root,.dark{--background:#fff9df;--foreground:#274d39;--popover:#fffdf2;--primary:#2d6c48;--radius:1rem;--border:#dce2c8;--accent:#edf2d9;--secondary:#e7eedc;--muted-foreground:#737767;--destructive:#c84f3f;}

@@ -18,6 +18,10 @@ export default defineConfig({
       : undefined,
   },
   build: {
+    license: { fileName: 'legal/bundled-dependencies.json' },
+    rolldownOptions: {
+      output: { postBanner: '/*! Third-party licences: ../legal/third-party-notices.txt */' },
+    },
     outDir: fileURLToPath(new URL('./dist-pages', import.meta.url)),
     emptyOutDir: true,
   },

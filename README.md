@@ -2,6 +2,12 @@
 
 A complete fruit dropping and merging web game, built as a separate project alongside Little Orchard.
 
+## Licensing and credits
+
+Original contributions are **rights reserved**, with personal play and offline saving allowed by the [project rights notice](LICENSE). This is not an open-source release. Third-party components and adapted UI source retain their upstream licences; their full text is in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). The game's Help dialog links to [Credits & licences](https://fran-mora.github.io/tumble-grove/credits.html), which also works offline.
+
+[docs/legal/](docs/legal/README.md) contains the asset provenance, generated file fingerprints, dependency inventory, identified inspiration and review status for a UK-based maintainer intending worldwide availability. These records are not legal clearance; trademark and specialist IP review remain outstanding. `npm run build` regenerates dependency notices and public copies before preparing the offline cache.
+
 ## Play
 
 Move the pointer and click to drop. On a phone, drag to aim and release. The focused play area also supports Left/Right arrows to aim, Space or Enter to drop, and P to pause.
@@ -36,7 +42,7 @@ Optional WebMCP read-game and drop-fruit tools use the same engine as the contro
 
 ## Artwork
 
-Original fruit character sprite sheet generated for this project. The original prompt is in public/artwork-prompt.txt; collection prompts are saved alongside their atlases. The runtime extracts the original 11 characters from public/fruits.png and 99 new choices from public/fruit-collection-a.png and public/fruit-collection-b.png; native fruit emoji provide a fallback if the image cannot load. Interface icons use Lucide. The game reimplements the drop-and-merge mechanic with original artwork and interface; all game artwork and interface assets were created for this project.
+Fruit character sprite sheets were generated for this project. The original prompt is in public/artwork-prompt.txt; collection prompts are saved alongside their atlases. The runtime extracts 11 characters from public/fruits.png and 99 new choices from public/fruit-collection-a.png and public/fruit-collection-b.png; native fruit emoji provide a fallback if an image cannot load. Interface icons use Lucide, including Feather-derived icons; components and styling also include third-party work. See [asset provenance](docs/legal/asset-provenance.md) for origins, evidence and limitations. Generation and provenance records do not establish copyrightability or non-infringement.
 
 ## Fruit bounds
 

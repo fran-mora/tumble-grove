@@ -1,0 +1,26 @@
+Tumble Grove — rights notice
+
+Copyright and other rights in original project contributions, where those
+rights subsist, remain with their respective rights holders. All rights
+reserved except as stated below. This project has not been released under
+an open-source licence.
+
+You may access and play the published Tumble Grove game and save the files
+needed for personal offline play on your devices. This limited permission
+does not grant a general right to republish the game, distribute its original
+assets, or use its name or branding for another product.
+
+This notice does not restrict rights granted by applicable law, GitHub's
+terms for viewing and forking public repositories, or the licences of
+third-party material. Third-party software, adapted component source, and
+other identified material remain governed by their own licences, including
+the permissions and conditions reproduced in THIRD_PARTY_NOTICES.txt.
+
+No exclusive rights are asserted here over game ideas, rules, factual fruit
+measurements, public-domain material, or material in which copyright does
+not subsist. In particular, this notice does not establish copyright in
+purely AI-generated output. It does not grant rights belonging to another
+game's creator or represent that intellectual-property clearance is complete.
+
+See docs/legal/README.md for the scope of this notice, asset provenance,
+dependency notices, and the status of outstanding review work.

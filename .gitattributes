@@ -1,0 +1,7 @@
+# Generated licence copies preserve the upstream text, including whitespace.
+THIRD_PARTY_NOTICES.txt -whitespace linguist-generated=true
+public/legal/third-party-notices.txt -whitespace linguist-generated=true
+public/legal/project-license.txt linguist-generated=true
+public/legal/dependency-inventory.json linguist-generated=true
+docs/legal/dependency-inventory.json linguist-generated=true
+docs/legal/asset-hashes.json linguist-generated=true
