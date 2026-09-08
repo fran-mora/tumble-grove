@@ -83,12 +83,12 @@ function canvasRecorder(clientWidth,height){
   return {ctx,text,boxes};
 }
 
-test('Inspect renders every actual fruit name within a small phone canvas, including rotated edge fruit',()=>{
-  for(const fruit of FRUIT_COLLECTION)for(const mode of ['classic','gravity']){
+test('Inspect renders every fruit name within a small phone canvas in both appearances, including rotated edge fruit',()=>{
+  for(const darkMode of [false,true])for(const fruit of FRUIT_COLLECTION)for(const mode of ['classic','gravity']){
     const game=new MergeGame(()=>0);game.setMode(mode);game.lineup[fruit.level]=fruit.id;
     const body=game.addFruit(fruit.level,fruit.id%2?0:440,fruit.id%3?game.height:0);body.angle=1.2;
     game.setInspecting(true);game.inspectedId=body.id;
-    const {ctx,text,boxes}=canvasRecorder(220,game.height);renderGame(ctx,game,[],true);
+    const {ctx,text,boxes}=canvasRecorder(220,game.height);renderGame(ctx,game,[],true,darkMode);
     assert.ok(text.includes(fruit.name),fruit.name);assert.equal(boxes.length,1);
     const box=boxes[0];
     assert.ok(box.x>=-VIEW_PADDING&&box.x+box.width<=440+VIEW_PADDING);
@@ -97,13 +97,13 @@ test('Inspect renders every actual fruit name within a small phone canvas, inclu
 });
 
 test('large merge names remain visible with reduced motion and cleared pairs do not announce a new fruit',()=>{
-  for(const reducedMotion of [false,true]){
+  for(const darkMode of [false,true])for(const reducedMotion of [false,true]){
     const game=new MergeGame(()=>.7);const body=game.addFruit(9,220,400);
     game.events=[{x:220,y:400,kind:9,points:45,time:0,cleared:false,bodyId:body.id}];game.time=1.6;
-    const visible=canvasRecorder(374,game.height);renderGame(visible.ctx,game,[],reducedMotion);
+    const visible=canvasRecorder(374,game.height);renderGame(visible.ctx,game,[],reducedMotion,darkMode);
     assert.ok(visible.text.includes(game.getFruit(9).name));
     game.events[0].cleared=true;game.bodies=[];
-    const cleared=canvasRecorder(374,game.height);renderGame(cleared.ctx,game,[],reducedMotion);
+    const cleared=canvasRecorder(374,game.height);renderGame(cleared.ctx,game,[],reducedMotion,darkMode);
     assert.ok(!cleared.text.includes(game.getFruit(9).name));
   }
 });

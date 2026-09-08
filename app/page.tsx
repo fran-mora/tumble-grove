@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { CircleHelp, VolumeX, Volume2, RotateCcw, ArrowRight, Trophy, MousePointer2, Pause, Play, Sparkles, Smartphone, Search, Leaf } from 'lucide-react';
+import { CircleHelp, VolumeX, Volume2, RotateCcw, ArrowRight, Trophy, MousePointer2, Pause, Play, Sparkles, Smartphone, Search, Leaf, Moon, Sun } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
@@ -20,6 +20,8 @@ export default function Home() {
   const spritesRef=useRef<HTMLCanvasElement[]>([]);
   const audioRef=useRef<AudioContext|null>(null);
   const soundRef=useRef(false);
+  const [darkMode,setDarkMode]=useState(()=>document.documentElement.classList.contains('dark'));
+  const darkModeRef=useRef(darkMode);
   const bestRef=useRef(0);
   const bestScoresRef=useRef({classic:0,gravity:0});
   const tiltControllerRef=useRef<AbortController|null>(null);
@@ -62,6 +64,12 @@ export default function Home() {
   },[playTone,sync,unlockAudio]);
   const reset=useCallback(()=>{pointRef.current=null;gameRef.current?.reset();setPaused(false);setModal(null);modalRef.current=null;setNotice(`New round: ${gameRef.current?.theme.name}.`);sync();canvasRef.current?.focus();},[sync]);
   useEffect(()=>{
+    darkModeRef.current=darkMode;
+    document.documentElement.classList.toggle('dark',darkMode);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',darkMode?'#14221c':'#fff9df');
+    try{localStorage.setItem('tumblegrove.appearance',darkMode?'dark':'light');}catch{/* The switch also works when storage is unavailable. */}
+  },[darkMode]);
+  useEffect(()=>{
     let savedHistory:unknown;
     try{savedHistory=JSON.parse(localStorage.getItem(FRUIT_HISTORY_KEY)??'null');}catch{/* Discovery balancing also works without storage. */}
     const game=new MergeGame(Math.random,Math.random,savedHistory);gameRef.current=game;
@@ -87,7 +95,7 @@ export default function Home() {
       previousWatermelons=game.watermelons;
       if(game.over&&!wasOver)setNotice(`A fruit spilled. Final score: ${game.score}.`);
       wasOver=game.over;
-      renderGame(ctx,game,spritesRef.current,reducedMotion);
+      renderGame(ctx,game,spritesRef.current,reducedMotion,darkModeRef.current);
       if(now-lastUi>100){saveFruitHistory();setHud(old=>{const next=getHud(game);return JSON.stringify(old)===JSON.stringify(next)?old:next;});lastUi=now;}
       frame=requestAnimationFrame(animate);
     };
@@ -145,7 +153,7 @@ export default function Home() {
   const chooseMode=(enabled:boolean)=>{const mode=enabled?'gravity':'classic';if(mode===hud.mode||tiltBusy)return;if(hud.drops&&!hud.over){setPendingMode(mode);setModal('mode');}else void changeMode(mode);};
   const closeDialog=()=>setModal(null);
   return <main className="app-shell">
-    <header className="topbar"><a className="brand" href="./" aria-label="Tumble Grove home"><Fruit kind={0}/><span>tumble<span className="brand-light"> grove</span><span className="brand-dot">.</span></span></a><span className="mode-pill"><i/> {hud.mode==='gravity'?'GRAVITY MODE':'CLASSIC MODE'}</span><div className="toolbar"><button className="icon-button" onClick={toggleSound} aria-label={sound?'Mute sound':'Enable sound'} aria-pressed={sound} title={sound?'Mute sound':'Enable sound'}>{sound?<Volume2 size={21}/>:<VolumeX size={21}/>}</button><button className="icon-button" onClick={()=>setModal('help')} aria-label="How to play" title="How to play"><CircleHelp size={21}/></button></div></header>
+    <header className="topbar"><a className="brand" href="./" aria-label="Tumble Grove home"><Fruit kind={0}/><span>tumble<span className="brand-light"> grove</span><span className="brand-dot">.</span></span></a><span className="mode-pill"><i/> {hud.mode==='gravity'?'GRAVITY MODE':'CLASSIC MODE'}</span><div className="toolbar"><button className="icon-button appearance-toggle" onClick={()=>setDarkMode(value=>!value)} aria-label="Dark mode" aria-pressed={darkMode} title={darkMode?'Switch to light mode':'Switch to dark mode'}>{darkMode?<Sun size={21}/>:<Moon size={21}/>}</button><button className="icon-button" onClick={toggleSound} aria-label={sound?'Mute sound':'Enable sound'} aria-pressed={sound} title={sound?'Mute sound':'Enable sound'}>{sound?<Volume2 size={21}/>:<VolumeX size={21}/>}</button><button className="icon-button" onClick={()=>setModal('help')} aria-label="How to play" title="How to play"><CircleHelp size={21}/></button></div></header>
     <section className="game-layout" aria-label="Tumble Grove game">
       <aside className="score-column"><div className="score-card"><span className="eyebrow">YOUR SCORE</span><strong className="score-number" aria-label={`Score: ${hud.score}`}>{hud.score.toLocaleString()}</strong><div className="best-score"><Trophy size={17}/><span>Best</span><b>{best.toLocaleString()}</b></div></div><div className="next-card"><span className="eyebrow">UP NEXT</span><div className="next-fruit"><Fruit kind={hud.next}/></div><span title={fruits[hud.next].name}>{fruits[hud.next].name}</span></div><button className="new-game" disabled={tiltBusy} onClick={openRestart} aria-label="New game"><RotateCcw size={17}/><span>New game</span></button><p className="little-note">A little focus.<br/>A lot of fruit.</p></aside>
       <div className="play-column"><div className="play-controls"><div className={`gravity-control ${hud.mode==='gravity'?'is-on':''}`}>

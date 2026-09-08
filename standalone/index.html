@@ -1,2 +1,10 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#fffbe8"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-title" content="Tumble Grove"/><title>Tumble Grove</title><meta name="description" content="Drop, match, and grow a colourful fruit family. Play Tumble Grove with classic or phone tilt controls, online or offline."/><link rel="canonical" href="https://fran-mora.github.io/tumble-grove/"/><link rel="icon" href="%BASE_URL%favicon.svg"/><link rel="manifest" href="%BASE_URL%manifest.webmanifest"/></head><body><div id="root"></div><script type="module" src="/main.tsx"></script></body></html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#fff9df"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-title" content="Tumble Grove"/><title>Tumble Grove</title><meta name="description" content="Drop, match, and grow a colourful fruit family. Play Tumble Grove with classic or phone tilt controls, online or offline."/><link rel="canonical" href="https://fran-mora.github.io/tumble-grove/"/><link rel="icon" href="%BASE_URL%favicon.svg"/><link rel="manifest" href="%BASE_URL%manifest.webmanifest"/><script>
+// Apply the saved appearance before the first paint, including offline launches.
+try {
+  if (localStorage.getItem('tumblegrove.appearance') === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#14221c');
+  }
+} catch {}
+</script></head><body><div id="root"></div><script type="module" src="/main.tsx"></script></body></html>
