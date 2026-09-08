@@ -23,7 +23,11 @@ for (const url of [scope,scope+'?launch=1',...stored.keys()]) {
   assert.ok((await response)?.ok,url);
 }
 const html=await readFile(new URL('index.html',root),'utf8');
+// A direct navigation must open the cited size table, rather than the game shell.
+let sizeResponse;
+handlers.fetch({request:{url:scope+'fruit-sizes.html?from=help',method:'GET',mode:'navigate'},respondWith:p=>{sizeResponse=p;}});
+assert.equal(await (await sizeResponse).text(),await readFile(new URL('fruit-sizes.html',root),'utf8'));
 for (const [,path] of html.matchAll(/(?:src|href)="([^\"]+)"/g)) { if (path.startsWith('https://')) continue; assert.ok(await cache.match(new URL(path,scope).href),path); }
 stored.delete(scope+'fruits.png');
 handlers.message({data:{type:'CHECK_OFFLINE'},ports:[{postMessage:data=>{ready=data.ready;}}],waitUntil:p=>{pending=p;}}); await pending; assert.equal(ready,false);
-console.log('Offline checks passed: installation, subpath navigation, all assets, missing-cache detection.');
+console.log('Offline checks passed: installation, subpath navigation, fruit-size table navigation, all assets, missing-cache detection.');

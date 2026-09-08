@@ -28,7 +28,7 @@ export function drawFruit(ctx:CanvasRenderingContext2D,sprites:HTMLCanvasElement
     const shape=appearance?.geometry??FRUIT_SHAPES[kind],scale=r/shape.radius;
     ctx.drawImage(sprite,-shape.center[0]*scale,-shape.center[1]*scale,sprite.width*scale,sprite.height*scale);
   }
-  else{ctx.font=`${r*1.7}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(FRUITS[kind].emoji,0,0);}
+  else{ctx.font=`${r*1.7}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(appearance?.emoji??FRUITS[kind].emoji,0,0);}
   ctx.restore();
 }
 export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:HTMLCanvasElement[],reducedMotion:boolean){

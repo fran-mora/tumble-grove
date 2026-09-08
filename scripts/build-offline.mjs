@@ -22,8 +22,8 @@ self.addEventListener('fetch', event => {
   if (!url.href.startsWith(self.registration.scope)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const key = event.request.mode === 'navigate' ? new URL('index.html', self.registration.scope).href : event.request;
-    const cached = await cache.match(key, {ignoreSearch:true});
+    const exact = await cache.match(event.request, {ignoreSearch:true});
+    const cached = exact || (event.request.mode === 'navigate' ? await cache.match(new URL('index.html', self.registration.scope).href) : undefined);
     return cached || fetch(event.request);
   })());
 });

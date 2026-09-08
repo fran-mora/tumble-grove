@@ -41,7 +41,7 @@ test('rendered fruit bodies reach the contact surface without square padding',()
 test('fruit flesh rests flush with the floor at any orientation',()=>{
   for(let kind=0;kind<11;kind++)for(const angle of [0,.4,1.8,3.1]){
     const game=new MergeGame(()=>0);const body=game.addFruit(kind,220,HEIGHT);body.angle=angle;body.age=2;game.step();
-    const shape=fruitHull(kind,FRUITS[kind].radius,body.angle);
+    const shape=game.getShape(kind,body.angle);
     // Start already below the floor after rotation as well.
     body.y=HEIGHT;game.step();
     assert.ok(Math.abs(body.y+shape.maxY-(HEIGHT-.005))<.01);

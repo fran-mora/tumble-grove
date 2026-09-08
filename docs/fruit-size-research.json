@@ -1,0 +1,666 @@
+{
+  "method": "Representative whole-fruit mass in grams; one fruit including skin and seeds. Cultivar-specific measured averages, published typical values, market grades and range midpoint estimates are distinguished. This is a game ranking dataset, not global species means or a claim that weight equals geometric size.",
+  "checked": "2026-09-08",
+  "rows": {
+    "Cherry": {
+      "massG": 10,
+      "basis": "study-mean",
+      "source": "https://www.nationalfruitcollection.org.uk/full2.php?fruit=cherry&id=7914",
+      "note": "Stella sweet cherry accession, UK National Fruit Collection fruit-weight record; one cherry, despite paired artwork."
+    },
+    "Redcurrant": {
+      "massG": 0.62,
+      "basis": "study-mean",
+      "source": "https://agresearch.montana.edu/warc/research_current/berries/currants/variety-trials.html",
+      "note": "Rovada: mean of five annual berry means (0.8, 0.7, 0.7, 0.4, 0.6 g), WARC 2017–2021."
+    },
+    "Blackcurrant": {
+      "massG": 1.341,
+      "basis": "study-mean",
+      "source": "https://agronomy.emu.ee/wp-content/uploads/2009/09/p7sII24.pdf",
+      "note": "Lithuanian cultivar trial, 2005–2008 grand mean 134.1 g per 100 berries; divided by 100."
+    },
+    "Gooseberry": {
+      "massG": 2.48,
+      "basis": "study-mean",
+      "source": "https://dergipark.org.tr/en/pub/sduzfd/article/317432",
+      "note": "Ribes grossularia, Kestel/Bursa trial; reported mean fruit weight."
+    },
+    "Acerola": {
+      "massG": 4.6,
+      "basis": "study-mean",
+      "source": "https://www.mdpi.com/2077-0472/11/11/1078",
+      "note": "Mean across 103 Brazilian phenotypes; observed range 1.53–8.85 g."
+    },
+    "Raspberry": {
+      "massG": 3.14,
+      "basis": "study-mean",
+      "source": "https://extension.oregonstate.edu/es/catalog/pub/em-9422-primocane-fruiting-raspberry-production-central-oregon",
+      "note": "Unweighted mean of 15 reported cultivar × year × field/tunnel cell means (2019–2020); not a production-weighted species average."
+    },
+    "Persimmon": {
+      "massG": 204,
+      "basis": "study-mean",
+      "source": "https://edis.ifas.ufl.edu/publication/MG242/pdf",
+      "note": "Fuyu cultivar, reported fruit weight in Florida trial."
+    },
+    "Jackfruit": {
+      "massG": 9979,
+      "basis": "cultivar-typical",
+      "source": "https://edis.ifas.ufl.edu/publication/MG370/pdf",
+      "note": "Black Gold representative medium cultivar, 22 lb × 453.59237 g/lb. Cultivars vary greatly."
+    },
+    "Blueberry": {
+      "massG": 1.6,
+      "basis": "study-mean",
+      "source": "https://user-23310503727.cld.bz/APS-July2019/1",
+      "note": "Missouri cultivar trial, mean of 13 cultivated highbush blueberry cultivars (2011–2016)."
+    },
+    "Blackberry": {
+      "massG": 5.9,
+      "basis": "study-mean",
+      "source": "https://user-23310503727.cld.bz/APS-July2019/1",
+      "note": "Missouri cultivar trial, mean of 14 cultivated blackberry cultivars (2011–2016)."
+    },
+    "Bilberry": {
+      "massG": 0.3,
+      "basis": "range-midpoint",
+      "source": "https://journals.tubitak.gov.tr/agriculture/vol44/iss2/5/",
+      "note": "Midpoint of reported 0.28–0.32 g annual means for wild Vaccinium myrtillus in central Bosnia."
+    },
+    "Cranberry": {
+      "massG": 2.2,
+      "basis": "study-mean",
+      "source": "https://techfinder.rutgers.edu/tech?title=Rutgers_University_Mullica_Queen%C2%AE_Cranberries",
+      "note": "Mullica Queen representative cultivar, published average berry weight."
+    },
+    "Cloudberry": {
+      "massG": 1.69,
+      "basis": "study-mean",
+      "source": "https://www.tandfonline.com/doi/abs/10.1080/09064710.2011.599330",
+      "note": "Nine female clones in Bench 1; reported mean 1.69 g/berry."
+    },
+    "Salmonberry": {
+      "massG": 3.5,
+      "basis": "published-estimate",
+      "source": "https://ecoknow.ca/articles/CJA_Paper.pdf",
+      "note": "Martindale and Jurakic archaeological reconstruction estimate, not a measured population mean."
+    },
+    "Mulberry": {
+      "massG": 4.5,
+      "basis": "cultivar-typical",
+      "source": "https://patents.google.com/patent/CN103053372A/en",
+      "note": "Purple-fruited 46CO19 cultivar, inventor-reported mean; representative cultivated mulberry."
+    },
+    "Pineberry": {
+      "massG": 18,
+      "basis": "range-midpoint",
+      "source": "https://patents.google.com/patent/USPP33477P2/en",
+      "note": "Florida Pearl FL 16.78-109; midpoint of patent’s 16–20 g average fruit-weight range."
+    },
+    "Strawberry": {
+      "massG": 22.9,
+      "basis": "study-mean",
+      "source": "https://member.floridastrawberry.org/wp-content/uploads/2022/10/2_FSREF_report_2021-22_Agehara_2_nitrogen.pdf",
+      "note": "Medallion cultivar, 0.5 lb/acre/day early nitrogen treatment; reported whole-season mean."
+    },
+    "Coffee cherry": {
+      "massG": 1.9,
+      "basis": "range-midpoint",
+      "source": "https://www.harc-hspa.com/uploads/2/6/1/7/26170270/dc19.pdf",
+      "note": "Midpoint of 10.8–27.2 g per 10 fresh cherries, divided by 10; selected coffee trees, not beans."
+    },
+    "Chokeberry": {
+      "massG": 1.1,
+      "basis": "study-mean",
+      "source": "https://www.ujecology.com/articles/aronia-promising-new-forms-and-varieties-in-fruit-selection-and-ornamental-gardening-83209.html",
+      "note": "Viking control cultivar; reported mean of one fruit (not a cluster)."
+    },
+    "Grapes": {
+      "massG": 7,
+      "basis": "range-midpoint",
+      "source": "https://cetulare.ucanr.edu/files/82015.pdf",
+      "note": "Fantasy Seedless: midpoint of typical 6–8 g per berry. Artwork is a bunch; ranking uses ONE grape for consistency."
+    },
+    "Rambutan": {
+      "massG": 42.5,
+      "basis": "range-midpoint",
+      "source": "https://www.icar.org.in/en/underutilized-fruits-and-vegetables",
+      "note": "Arka Coorg Arun; midpoint of 40–45 g fruit range."
+    },
+    "Mangosteen": {
+      "massG": 113.4,
+      "basis": "study-mean",
+      "source": "https://mangosteen.com/botany-and-nutrition/",
+      "note": "Grower’s 2006 sample of 32 whole purple mangosteens; about 4 oz average, including rind."
+    },
+    "Boysenberry": {
+      "massG": 6.2,
+      "basis": "study-mean",
+      "source": "https://www.ars.usda.gov/ARSUserFiles/1718/pdf/1996to1999/percentdrupelet.pdf",
+      "note": "Boysen clone 43, early-season ripe fruit in 1994 trial, 50 fruit."
+    },
+    "Langsat": {
+      "massG": 13.42,
+      "basis": "study-mean",
+      "source": "https://jhs.iihr.res.in/index.php/jhs/article/download/711/503",
+      "note": "Nilgiris study, Table 2 whole-fruit mean. Component means in the paper do not sum to this total; use reported whole-fruit value, lower confidence."
+    },
+    "Salak": {
+      "massG": 37.41,
+      "basis": "study-mean",
+      "source": "https://agrivita.ub.ac.id/index.php/agrivita/article/download/186/584",
+      "note": "Unweighted mean of Mawar plants Mwr-1 through Mwr-7 (43.54, 41.03, 47.70, 42.32, 38.55, 24.74, 24.00 g); selected group, not all salak."
+    },
+    "Mandarin": {
+      "massG": 146.5,
+      "basis": "range-midpoint",
+      "source": "https://ask.ifas.ufl.edu/publication/CH116",
+      "note": "Satsuma representative: midpoint of reported 139–154 g mean fruit weights across scion/rootstock combinations."
+    },
+    "Blood orange": {
+      "massG": 196,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9299091/",
+      "note": "Moro representative cultivar, reported mean whole-fruit weight."
+    },
+    "Kumquat": {
+      "massG": 12.5,
+      "basis": "range-midpoint",
+      "source": "https://www.mdpi.com/2504-3900/70/1/105",
+      "note": "Midpoint of published 5–20 g range for Fortunella margarita; range estimate, not a population mean."
+    },
+    "Lychee": {
+      "massG": 24,
+      "basis": "range-midpoint",
+      "source": "https://nrclitchi.org.in/cultivars-of-litchi/",
+      "note": "Shahi representative cultivar, midpoint of 22–26 g fruit weights."
+    },
+    "Longan": {
+      "massG": 10.6,
+      "basis": "study-mean",
+      "source": "https://lawdata.com.tw/tw/detail.aspx?no=377572",
+      "note": "Taiwan cultivar-characterization research abstract; 5.2–18.2 g observed range, mean 10.6 g."
+    },
+    "Key lime": {
+      "massG": 40,
+      "basis": "cultivar-typical",
+      "source": "https://citrusproject.nvsu.edu.ph/view-details?code=Key+Lime&key=LEM-16-2017",
+      "note": "Nueva Vizcaya State University citrus accession; recorded fruit weight."
+    },
+    "Calamansi": {
+      "massG": 11.585,
+      "basis": "range-midpoint",
+      "source": "https://www.nature.com/articles/s41598-021-03775-x",
+      "note": "Midpoint of 6.15–17.02 g germplasm range; estimate, not the study mean."
+    },
+    "Apricot": {
+      "massG": 40.41,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11990447/",
+      "note": "Bergeron representative cultivar, reported mean fruit weight."
+    },
+    "Feijoa": {
+      "massG": 73,
+      "basis": "study-mean",
+      "source": "https://www.sciencedirect.com/science/article/pii/S0304423815002496",
+      "note": "Twelve cultivars in southern Italy; reported 73.0 ± 16.7 g average over three years."
+    },
+    "Apple": {
+      "massG": 168.2,
+      "basis": "study-mean",
+      "source": "https://cris.utm.md/bitstream/5014/2116/1/p-79-87_0.pdf",
+      "note": "Red Velox representative red apple, 2016–2020 reported average."
+    },
+    "Green apple": {
+      "massG": 165.2,
+      "basis": "study-mean",
+      "source": "https://cris.utm.md/bitstream/5014/2116/1/p-79-87_0.pdf",
+      "note": "Granny Smith representative green apple, 2016–2020 reported average."
+    },
+    "Golden apple": {
+      "massG": 160.4,
+      "basis": "study-mean",
+      "source": "https://cris.utm.md/bitstream/5014/2116/1/p-79-87_0.pdf",
+      "note": "Golden Delicious Reinders representative yellow apple (Malus domestica, not ambarella), 2016–2020 average."
+    },
+    "Wax apple": {
+      "massG": 125,
+      "basis": "range-midpoint",
+      "source": "https://www.doae.go.th/en/java-apple-2/",
+      "note": "Thai Department of Agricultural Extension Java apple/Syzygium samarangense: midpoint of 100–150 g whole-fruit range."
+    },
+    "Golden kiwi": {
+      "massG": 145.4,
+      "basis": "study-mean",
+      "source": "https://researchcommons.waikato.ac.nz/bitstreams/4fb77e6f-5b4a-40b1-9091-78ff8cee531a/download",
+      "note": "Waikato gold-kiwifruit sample, Table 3.1 reported mean mass; cultivar/sample-specific."
+    },
+    "Kiwifruit": {
+      "massG": 75,
+      "basis": "range-midpoint",
+      "source": "https://extension.oregonstate.edu/catalog/em-9322-growing-kiwifruit-your-home-garden",
+      "note": "Hayward representative green kiwifruit; midpoint of published 60–90 g fruit range."
+    },
+    "Quince": {
+      "massG": 190,
+      "basis": "range-midpoint",
+      "source": "https://www.sciencedirect.com/science/article/abs/pii/B9780128031384000472",
+      "note": "Midpoint of horticultural reference average-weight range 100–280 g; not a measured global mean."
+    },
+    "Jujube": {
+      "massG": 4.54,
+      "basis": "study-mean",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/35844916/",
+      "note": "Iranian Ziziphus jujuba accessions; fresh-fruit grand mean, not dry weight. Larger cultivated varieties exist."
+    },
+    "Loquat": {
+      "massG": 68.73,
+      "basis": "study-mean",
+      "source": "https://www.mdpi.com/2218-1989/14/11/592",
+      "note": "Mkarkeb representative cultivar, measured mature fruit mean."
+    },
+    "Mirabelle": {
+      "massG": 13.01,
+      "basis": "study-mean",
+      "source": "https://www.horticulturenepal.org/uploads/main_attachment/1704181387_49-59%20articles.pdf",
+      "note": "Mirabelle in THDC Mustang, 2022, Table 5 average whole-fruit weight."
+    },
+    "Cherimoya": {
+      "massG": 400,
+      "basis": "study-mean",
+      "source": "https://www.actahort.org/members/showpdf?booknrarnr=497_8",
+      "note": "448 fruits from 137 trees, Loja Ecuador characterization; reported average 400 g."
+    },
+    "Custard apple": {
+      "massG": 300,
+      "basis": "published-estimate",
+      "source": "https://ecocrop.apps.fao.org/ecocrop/srv/en/cropView?id=412",
+      "note": "Interpreted as Annona reticulata (bullock’s heart), distinct from cherimoya; FAO typical fruit about 300 g."
+    },
+    "Mango": {
+      "massG": 400,
+      "basis": "study-mean",
+      "source": "https://link.springer.com/article/10.1186/s12870-021-02858-1",
+      "note": "Tommy Atkins representative cultivar, average weight of the parent in the cited hybrid population."
+    },
+    "Dragonfruit": {
+      "massG": 400,
+      "basis": "range-midpoint",
+      "source": "https://www.jpacd.org/jpacd/article/view/309",
+      "note": "Midpoint of reported average-weight range 350–450 g for Hylocereus fruit in US production review."
+    },
+    "Papaya": {
+      "massG": 1800,
+      "basis": "cultivar-typical",
+      "source": "https://agriculture.gov.tt/wp-content/uploads/2017/11/Papaya-_Production_Manual.pdf",
+      "note": "Red Lady representative large commercial papaya; ministry production manual average 1.8 kg."
+    },
+    "Tamarillo": {
+      "massG": 80.667,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7353566/",
+      "note": "Unweighted mean of Amber 90 g, Laird’s Large 108 g and Mulligan 44 g raw whole-fruit means."
+    },
+    "Coconut": {
+      "massG": 1680,
+      "basis": "study-mean",
+      "source": "https://www.mdpi.com/1996-1073/13/9/2178",
+      "note": "Ghana hybrid coconut sample, whole fresh fruit including husk and shell: 1.68 kg. Artwork depicts a dehusked coconut; ranking still uses botanical whole fruit."
+    },
+    "Cacao": {
+      "massG": 477.54,
+      "basis": "study-mean",
+      "source": "https://www.sciencedirect.com/science/article/abs/pii/S0926669011001142",
+      "note": "Whole fresh pod reconstructed as mean husk 355.82 g + mean seeds/pulp 121.72 g; not a cocoa bean."
+    },
+    "Citron": {
+      "massG": 345,
+      "basis": "cultivar-typical",
+      "source": "https://citrusproject.nvsu.edu.ph/view-details?code=Citron&key=CIT-30-2018",
+      "note": "Nueva Vizcaya State University Citrus medica accession; recorded fruit weight (not French citron/lemon)."
+    },
+    "Pomelo": {
+      "massG": 1450,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13062551/",
+      "note": "2024 harvest of 410 whole fruits, reported average 1.45 kg."
+    },
+    "Durian": {
+      "massG": 2600,
+      "basis": "range-midpoint",
+      "source": "https://www.fao.org/4/ad523e/ad523e04.htm",
+      "note": "Sua Hat Lep representative cultivar, midpoint of 2.5–2.7 kg average-weight range."
+    },
+    "Pawpaw": {
+      "massG": 129,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12872236/",
+      "note": "North American Asimina triloba, not papaya; review mean of cultivar averages from 61 cultivars, not production-weighted."
+    },
+    "Melon": {
+      "massG": 2495,
+      "basis": "range-midpoint",
+      "source": "https://www.johnnyseeds.com/on/demandware.static/-/Library-Sites-JSSSharedLibrary/default/dwd7515c44/assets/information/melon-varieties-comparison-chart.pdf",
+      "note": "Seed supplier comparison chart; Athena cantaloupe, 5–6 lb. Pounds converted to grams."
+    },
+    "Galia melon": {
+      "massG": 1588,
+      "basis": "range-midpoint",
+      "source": "https://www.johnnyseeds.com/on/demandware.static/-/Library-Sites-JSSSharedLibrary/default/dwd7515c44/assets/information/melon-varieties-comparison-chart.pdf",
+      "note": "Seed supplier comparison chart; Arava, 3–4 lb. Pounds converted to grams."
+    },
+    "Canary melon": {
+      "massG": 1814,
+      "basis": "cultivar-typical",
+      "source": "https://www.johnnyseeds.com/on/demandware.static/-/Library-Sites-JSSSharedLibrary/default/dwd7515c44/assets/information/melon-varieties-comparison-chart.pdf",
+      "note": "Seed supplier comparison chart; Brilliant, 4 lb average. Pounds converted to grams."
+    },
+    "Piel de Sapo": {
+      "massG": 1361,
+      "basis": "cultivar-typical",
+      "source": "https://www.johnnyseeds.com/on/demandware.static/-/Library-Sites-JSSSharedLibrary/default/dwd7515c44/assets/information/melon-varieties-comparison-chart.pdf",
+      "note": "Seed supplier comparison chart; Lambkin, 3 lb average. Pounds converted to grams."
+    },
+    "Crenshaw melon": {
+      "massG": 3175,
+      "basis": "range-midpoint",
+      "source": "https://www.johnnyseeds.com/on/demandware.static/-/Library-Sites-JSSSharedLibrary/default/dwd7515c44/assets/information/melon-varieties-comparison-chart.pdf",
+      "note": "Seed supplier comparison chart; Lilly, 6–8 lb. Pounds converted to grams."
+    },
+    "Snow Leopard melon": {
+      "massG": 907,
+      "basis": "cultivar-typical",
+      "source": "https://www.johnnyseeds.com/on/demandware.static/-/Library-Sites-JSSSharedLibrary/default/dwd7515c44/assets/information/melon-varieties-comparison-chart.pdf",
+      "note": "Seed supplier comparison chart; Snow Leopard, 2 lb average. Pounds converted to grams."
+    },
+    "Hami melon": {
+      "massG": 2000,
+      "basis": "study-mean",
+      "source": "https://www.ahs.ac.cn/EN/10.16420/j.issn.0513-353x.2020-0930",
+      "note": "Dongfangmi 3 cultivar release; reported average single-fruit weight 2.0 kg."
+    },
+    "Korean melon": {
+      "massG": 383.56,
+      "basis": "study-mean",
+      "source": "https://www.researchgate.net/figure/Physical-analysis-of-Korean-melon-n-14_tbl3_370053452",
+      "note": "Authors’ physical analysis table, 14 Korean melons in harvesting-tool study; reported mean."
+    },
+    "Watermelon": {
+      "massG": 6010,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10181218/",
+      "note": "Crimson Sweet representative red watermelon, reported mean across early and full cropping seasons."
+    },
+    "Sugar Baby watermelon": {
+      "massG": 4000,
+      "basis": "cultivar-typical",
+      "source": "https://www.jica.go.jp/project/english/kenya/015/materials/c8h0vm0000f7o8cj-att/materials_27.pdf",
+      "note": "Sugar Baby, JICA cultivation guide reported average 4 kg."
+    },
+    "Winter melon": {
+      "massG": 7938,
+      "basis": "range-midpoint",
+      "source": "https://greatlakesstapleseeds.com/products/benincasa-hispida-winter-melon",
+      "note": "Benincasa hispida; grower-reported 15–20 lb average range, midpoint converted to grams."
+    },
+    "Butternut": {
+      "massG": 2041,
+      "basis": "range-midpoint",
+      "source": "https://www.johnnyseeds.com/vegetables/squash/winter-squash/waltham-butternut-organic-butternut-squash-seed-671G.32.html",
+      "note": "Waltham Butternut; midpoint of seed supplier 4–5 lb average range."
+    },
+    "Acorn squash": {
+      "massG": 737,
+      "basis": "range-midpoint",
+      "source": "https://www.joyfulseeds.com/store/pc/Table-Queen-Acorn-Squash-Seed-p12675.htm",
+      "note": "Table Queen; midpoint of grower/supplier 1.25–2 lb average range."
+    },
+    "Yuzu": {
+      "massG": 52,
+      "basis": "study-mean",
+      "source": "https://citrusvariety.ucr.edu/crc1216",
+      "note": "UC Riverside evaluation 2003–2007, Riverside and Lindcove: mean weight per fruit 52 g."
+    },
+    "Casaba melon": {
+      "massG": 2500,
+      "basis": "range-midpoint",
+      "source": "https://kokopelli-semences.fr/fr/p/P4329-casaba-golden-beauty",
+      "note": "Golden Beauty: seed conservation association’s 2000–3000 g fruit range, midpoint."
+    },
+    "Red pineapple": {
+      "massG": 687.84,
+      "basis": "proxy",
+      "source": "https://www.scielo.br/j/rbf/a/LmpV9b3TNqrLCDj5MYnbYNM/?lang=en",
+      "note": "Ananas bracteatus var. albus proxy for red/wild pineapple; measured 30-fruit sample with crowns. Not an exact measurement of the illustrated red cultivar."
+    },
+    "Yellow watermelon": {
+      "massG": 2722,
+      "basis": "range-midpoint",
+      "source": "https://www.vegetables.bayer.com/us/en-us/products/watermelon/details.html/watermelon_yellow_doll_usa_seminis_home_garden_home_garden_all.html",
+      "note": "Yellow Doll representative yellow-fleshed cultivar; midpoint of breeder’s 5–7 lb average range."
+    },
+    "Huckleberry": {
+      "massG": 0.6,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12686722/",
+      "note": "Vaccinium membranaceum; overall fresh-fruit mean across sampled locations and years."
+    },
+    "Damson": {
+      "massG": 5.7,
+      "basis": "study-mean",
+      "source": "https://www.nationalfruitcollection.org.uk/full2.php?fruit=plum&id=8090",
+      "note": "Shropshire Prune/Damson accession, UK National Fruit Collection fruit-weight record."
+    },
+    "Greengage": {
+      "massG": 28.2,
+      "basis": "study-mean",
+      "source": "https://www.nationalfruitcollection.org.uk/full2.php?fruit=plum&id=8278",
+      "note": "Reine Claude/Greengage accession, UK National Fruit Collection fruit-weight record."
+    },
+    "Plum": {
+      "massG": 27.97,
+      "basis": "study-mean",
+      "source": "https://www.sciencedirect.com/science/article/pii/S0260877405002979",
+      "note": "Stanley European plum representative, study mean fruit mass."
+    },
+    "Guava": {
+      "massG": 152.84,
+      "basis": "study-mean",
+      "source": "https://indianjournals.com/article/pa-21-1-010",
+      "note": "Allahabad Safeda, integrated-nutrient treatment T5 study mean; sample-specific."
+    },
+    "Bergamot": {
+      "massG": 258,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6680538/",
+      "note": "Fantastico representative cultivar at March harvest; mean across two harvest years."
+    },
+    "Crabapple": {
+      "massG": 14.92,
+      "basis": "study-mean",
+      "source": "https://www.agrifoodscience.com/index.php/TURJAF/article/download/4610/2276",
+      "note": "Mean of two measured whole-fruit genotype means, 46 EL 01 (17.31 g) and 46 EL 02 (12.53 g)."
+    },
+    "Starfruit": {
+      "massG": 190,
+      "basis": "range-midpoint",
+      "source": "https://www.itfnet.org/gfruit/Templates%20English/carambola.variety.htm",
+      "note": "B2/MAHA 66 representative cultivar, midpoint of 160–220 g medium-fruit range."
+    },
+    "Pineapple": {
+      "massG": 2500,
+      "basis": "range-midpoint",
+      "source": "https://nhb.gov.in/pdf/fruits/pineapple/pin013.pdf",
+      "note": "Kew/Smooth Cayenne representative cultivar; midpoint of 2–3 kg whole-fruit range."
+    },
+    "Pepino": {
+      "massG": 165,
+      "basis": "range-midpoint",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4813249/",
+      "note": "Solanum muricatum; midpoint of published typical 80–250 g whole-fruit range."
+    },
+    "Cactus pear": {
+      "massG": 162.5,
+      "basis": "range-midpoint",
+      "source": "https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/cactus-pears",
+      "note": "Cultivated Opuntia fruit; midpoint of published 75–250 g whole-fruit range."
+    },
+    "Nectarine": {
+      "massG": 170,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8228427/",
+      "note": "Nectaross representative cultivar, reported mean 170 ± 10 g."
+    },
+    "Avocado": {
+      "massG": 239,
+      "basis": "study-mean",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11011534/",
+      "note": "Hass, Tenerife study grand mean whole-fruit weight 239 ± 54 g."
+    },
+    "Clementine": {
+      "massG": 85.5,
+      "basis": "cultivar-typical",
+      "source": "https://citrusproject.nvsu.edu.ph/view-details?code=Clementine&key=CLE-13-2017",
+      "note": "Nueva Vizcaya State University clementine accession; recorded whole-fruit weight."
+    },
+    "Pale striped watermelon": {
+      "massG": 6010,
+      "basis": "proxy",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10181218/",
+      "note": "Artwork colour description, not a defined cultivar. Shares the Crimson Sweet striped-watermelon 6.01 kg measured mean; no invented size difference."
+    },
+    "Lemon": {
+      "massG": 197,
+      "basis": "study-mean",
+      "source": "https://www.dpi.nsw.gov.au/__data/assets/pdf_file/0015/1206150/Eureka-SL-lemon.pdf",
+      "note": "Eureka SL representative cultivar; NSW DPI fruit-quality evaluation average whole-fruit weight."
+    },
+    "Passionfruit": {
+      "massG": 40,
+      "basis": "range-midpoint",
+      "source": "https://www.fibkerala.gov.in/sites/default/files/inline-files/KKE%20%202023%20DECEMBER.pdf",
+      "note": "Ripe purple passionfruit: midpoint of Kerala Farm Information Bureau’s typical 35–45 g fruit range."
+    },
+    "Jabuticaba": {
+      "massG": 5.51,
+      "basis": "range-midpoint",
+      "source": "https://www.ars.usda.gov/research/publications/publication/?seqNo115=305399",
+      "note": "MC-05-06 representative clone; midpoint of reported average-fruit-weight range 4.02–7.0 g in USDA characterization abstract."
+    },
+    "Breadfruit": {
+      "massG": 1200,
+      "basis": "study-mean",
+      "source": "https://www.collectionscanada.gc.ca/obj/thesescanada/vol2/BVAU/TC-BVAU-57953.pdf",
+      "note": "Cultivar evaluation thesis: reported mean whole-fruit weight 1.2 kg across cultivars and study years."
+    },
+    "Pumpkin": {
+      "massG": 2495,
+      "basis": "range-midpoint",
+      "source": "https://ucanr.edu/node/124995/printable/print",
+      "note": "Small Sugar culinary pumpkin representative; midpoint of 5–6 lb range, excludes giant competition pumpkins."
+    },
+    "Loganberry": {
+      "massG": 4.94,
+      "basis": "study-mean",
+      "source": "https://www.researchgate.net/publication/289980729_Evaluation_of_blackberry_and_hybrid_berry_cultivars_new_to_Polish_climate_-_Short_communication",
+      "note": "Polish 2007–2008 trial: 494 g per 100 fruits, divided by 100."
+    },
+    "Pear": {
+      "massG": 177,
+      "basis": "study-mean",
+      "source": "https://dejong.ucdavis.edu/sites/g/files/dgvnsk8456/files/inline-files/107-Weinbaum-DeJong-Maki-2001-HortSci-Reassessment-Bartletts.pdf",
+      "note": "Bartlett representative, nonthinned treatment in 1993, eight trees; yield divided by fruit count."
+    },
+    "Asian pear": {
+      "massG": 250,
+      "basis": "study-mean",
+      "source": "https://www.bja.gov.bt/wp-content/uploads/2019/06/RNR-Journal-of-Bhutan-2013.pdf",
+      "note": "Hosui representative, reported 250 g cultivar mean from Carolina trial summarized in RNR Journal."
+    },
+    "Fig": {
+      "massG": 49.97,
+      "basis": "study-mean",
+      "source": "https://www.plantarchives.org/article/376-Phytochemical%20Constituents%20of%20Fig%20%28Ficus%20carica%20L.%29%20Cultivars%20Afghan%2C%20Deanna%20and%20Brown%20Turkey.pdf",
+      "note": "Brown Turkey representative, reported fresh individual-fruit weight."
+    },
+    "Sapodilla": {
+      "massG": 80,
+      "basis": "cultivar-typical",
+      "source": "https://nhb.gov.in/pdf/fruits/sapota/sap012.pdf",
+      "note": "PKM 1 representative cultivar; National Horticulture Board average fruit weight."
+    },
+    "Honeydew": {
+      "massG": 1950,
+      "basis": "range-midpoint",
+      "source": "https://mckenzieseeds.com/products/honeydew-green-flesh",
+      "note": "Green Flesh representative cultivar; midpoint of supplier 1.5–2.4 kg range. Use metric figures; parenthetical pound equivalents are approximate."
+    },
+    "Kabocha": {
+      "massG": 1300,
+      "basis": "cultivar-typical",
+      "source": "https://www.westcoastseeds.com/products/sweet-mama",
+      "note": "Sweet Mama green-skinned kabocha, supplier typical 1.3 kg fruit."
+    },
+    "Orange watermelon": {
+      "massG": 7938,
+      "basis": "range-midpoint",
+      "source": "https://ucanr.edu/site/uc-master-gardeners-santa-clara-county/watermelon-2006-trial",
+      "note": "Orangeglo representative cultivar; midpoint of observed trial yields 15–20 lb fruit, not packet’s larger 20–30 lb description."
+    },
+    "Lime": {
+      "massG": 72.17,
+      "basis": "study-mean",
+      "source": "https://www.scitechnol.com/peer-review/physiochemical-characterization-of-citrus-fruits-for-identification-of-potential-cultivars-in-pakistan-Mj6z.php?article_id=27462",
+      "note": "Persian lime representative cultivar; Pakistan citrus characterization average, whole fruit."
+    },
+    "Pomegranate": {
+      "massG": 320.94,
+      "basis": "range-midpoint",
+      "source": "https://www.mdpi.com/2311-7524/9/2/195",
+      "note": "Wonderful representative cultivar; midpoint of reported two-season average-weight range 304.5–337.38 g."
+    },
+    "Star apple": {
+      "massG": 143.59,
+      "basis": "study-mean",
+      "source": "https://www.researchgate.net/publication/289664481_Characterization_of_star_Apple_fruit_Chrysophyllum_cainito_L_green_and_purple_varieties",
+      "note": "Chrysophyllum cainito (not African star apple): equal mean of green 136.40 g and purple 150.78 g cultivar means, Table 1."
+    },
+    "Soursop": {
+      "massG": 988.4,
+      "basis": "study-mean",
+      "source": "https://revistas.chapingo.mx/horticultura/?articulo=2688&numero=287&section=articles&subsec=issues",
+      "note": "Soconusco, Chiapas accession study, Table 2 grand mean whole-fruit weight; large accession variation."
+    },
+    "Peach": {
+      "massG": 187,
+      "basis": "study-mean",
+      "source": "https://www.plant.uoguelph.ca/sites/default/files/Performance%20of%20New%20Peach%20Rootstocks%20-%20March%202024.pdf",
+      "note": "Redhaven on Rootpac-40, 2017–2023 average whole-fruit weight; representative orchard combination."
+    },
+    "Rose apple": {
+      "massG": 22.1,
+      "basis": "study-mean",
+      "source": "https://www.int-res.com/articles/esr_oa/n019p019.pdf",
+      "note": "Syzygium jambos, fruit-selection study: 27 whole fruits, mean 22.1 ± 5.88 g; distinct from wax apple."
+    },
+    "Medlar": {
+      "massG": 24,
+      "basis": "study-mean",
+      "source": "https://edepot.wur.nl/251304",
+      "note": "Nottingham representative cultivar, Dutch Research Station for Fruit Growing 1985 trial, 24 g fruit weight."
+    },
+    "Tangerine": {
+      "massG": 113.398,
+      "basis": "market-grade",
+      "source": "https://www.nj.gov/agriculture/divisions/fn/pdf/foodbuyingguidevegfruits.pdf",
+      "note": "USDA Food Buying Guide: 120-count whole fresh tangerines, four whole fruit per purchased pound; 453.59237/4. A commercial size grade, not peeled portion mass."
+    },
+    "Ugli fruit": {
+      "massG": 413.903,
+      "basis": "market-grade",
+      "source": "https://fns-prod.azureedge.us/sites/default/files/cn/SP37-2012ra.pdf",
+      "note": "USDA Food Buying Guide: one whole 32-count ugli fruit ≈14.6 oz; ×28.349523125 g/oz. Commercial grade, not a global cultivar average."
+    }
+  }
+}

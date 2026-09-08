@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MergeGame, FRUITS, WIDTH, HEIGHT, STEP } from '../app/engine.ts';
-import { fruitHull, hullContact } from '../app/collision.ts';
-const shapeOf=b=>fruitHull(b.kind,FRUITS[b.kind].radius,b.angle);
-const assertInside=b=>{const shape=shapeOf(b);assert.ok(b.x+shape.minX>=-.05);assert.ok(b.x+shape.maxX<=WIDTH+.05);assert.ok(b.y+shape.maxY<=HEIGHT+.05);};
+import { hullContact } from '../app/collision.ts';
+const shapeOf=(game,b)=>game.getShape(b.kind,b.angle);
+const assertInside=(game,b)=>{const shape=shapeOf(game,b);assert.ok(b.x+shape.minX>=-.05);assert.ok(b.x+shape.maxX<=WIDTH+.05);assert.ok(b.y+shape.maxY<=HEIGHT+.05);};
 const advance=(game,seconds)=>{for(let n=0;n<Math.ceil(seconds/STEP);n++)game.step();};
 const settled=(game,kind,x,y)=>{const b=game.addFruit(kind,x,y);b.age=2;return b;};
-test('first drops merge into a strawberry, score once, and settle inside the basket',()=>{
+test('first drops merge into the next growth level, score once, and settle inside the basket',()=>{
   const game=new MergeGame(()=>.4,()=>0);
   assert.equal(game.drop(220),true);
   assert.equal(game.drop(220),false);
@@ -14,10 +14,10 @@ test('first drops merge into a strawberry, score once, and settle inside the bas
   assert.equal(game.drop(220),true);
   advance(game,2.5);
   assert.equal(game.merges,1);assert.equal(game.score,1);assert.equal(game.bodies.length,1);assert.equal(game.bodies[0].kind,1);
-  assert.ok(Math.abs(game.bodies[0].y+shapeOf(game.bodies[0]).maxY-(HEIGHT-.005))<.05);
+  assert.ok(Math.abs(game.bodies[0].y+shapeOf(game,game.bodies[0]).maxY-(HEIGHT-.005))<.05);
   assert.equal(game.over,false);
 });
-test('every fruit tier merges once and two watermelons clear with a bonus',()=>{
+test('every fruit tier merges once and two final-level fruits clear with a bonus',()=>{
   for(let kind=0;kind<FRUITS.length;kind++){
     const game=new MergeGame(()=>0);const radius=FRUITS[kind].radius;
     settled(game,kind,220-radius*.7,400);settled(game,kind,220+radius*.7,400);
@@ -35,7 +35,7 @@ test('three touching fruit cannot consume a fruit twice in one step',()=>{
 });
 test('a merge can cause a further merge, preserving the correct score',()=>{
   const game=new MergeGame(()=>0);
-  settled(game,0,199,500);settled(game,0,233,500);settled(game,1,216,541);
+  settled(game,0,206,500);settled(game,0,224,500);settled(game,1,215,541);
   advance(game,2);
   assert.equal(game.merges,2);assert.equal(game.score,4);assert.equal(game.bodies.length,1);assert.equal(game.bodies[0].kind,2);
 });
@@ -43,8 +43,8 @@ test('unlike fruit separate and remain inside the basket',()=>{
   const game=new MergeGame(()=>0);settled(game,4,200,500);settled(game,6,245,500);advance(game,6);
   assert.equal(game.merges,0);
   const [a,b]=game.bodies;
-  const contact=hullContact(a,shapeOf(a),b,shapeOf(b));assert.ok(!contact||contact.depth<.15);
-  for(const body of game.bodies){assertInside(body);assert.ok(Number.isFinite(body.vx));}
+  const contact=hullContact(a,shapeOf(game,a),b,shapeOf(game,b));assert.ok(!contact||contact.depth<.15);
+  for(const body of game.bodies){assertInside(game,body);assert.ok(Number.isFinite(body.vx));}
 });
 test('a fruit can remain above the old dotted line indefinitely',()=>{
   const game=new MergeGame(()=>0),fruit=settled(game,6,220,70);
@@ -63,7 +63,7 @@ test('pause freezes physics and cooldown, and reset clears the whole round',()=>
   game.reset();assert.equal(game.bodies.length,0);assert.equal(game.score,0);assert.equal(game.drops,0);assert.equal(game.over,false);assert.equal(game.paused,false);assert.equal(game.canDrop,true);assert.equal(game.danger,0);
 });
 test('aim is clamped and invalid inputs never corrupt state',()=>{
-  const game=new MergeGame(()=>0),shape=fruitHull(0,18);game.setAim(-100);assert.equal(game.aim+shape.minX,1);game.setAim(10000);assert.equal(game.aim+shape.maxX,WIDTH-1);
+  const game=new MergeGame(()=>0),shape=game.getShape(0);game.setAim(-100);assert.equal(game.aim+shape.minX,1);game.setAim(10000);assert.equal(game.aim+shape.maxX,WIDTH-1);
   const previous=game.aim;game.setAim(NaN);assert.equal(game.aim,previous);assert.equal(game.drop(Infinity),false);assert.equal(game.bodies.length,0);
   assert.throws(()=>game.addFruit(-1,100,100));assert.throws(()=>game.addFruit(1,NaN,100));
 });
@@ -73,7 +73,7 @@ test('extended deterministic games stay finite without a line-based time limit',
     const game=new MergeGame(random,()=>0);
     for(let turn=0;turn<120&&!game.over;turn++){
       game.drop(25+random()*390);advance(game,.8);
-      for(const body of game.bodies){assert.ok(Number.isFinite(body.x)&&Number.isFinite(body.y));if(!game.over&&body.y+shapeOf(body).minY>55)assert.ok(body.y<HEIGHT+250);}
+      for(const body of game.bodies){assert.ok(Number.isFinite(body.x)&&Number.isFinite(body.y));if(!game.over&&body.y+shapeOf(game,body).minY>55)assert.ok(body.y<HEIGHT+250);}
     }
     assert.ok(game.merges>0);if(game.over)assert.equal(game.drop(),false);
   }

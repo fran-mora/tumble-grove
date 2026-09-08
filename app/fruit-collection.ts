@@ -1,7 +1,8 @@
 import { FRUIT_SHAPES } from './fruit-shapes.ts';
 import { COLLECTION_SHAPES } from './collection-shapes.ts';
+import { FRUIT_SIZE_GRAMS } from './fruit-sizes.ts';
 export type FruitGeometry = {crop:readonly number[];center:readonly number[];radius:number;hull:readonly (readonly number[])[]};
-export type FruitAppearance = {id:number;level:number;name:string;emoji:string;sheet:string;geometry:FruitGeometry};
+export type FruitAppearance = {id:number;level:number;name:string;emoji:string;sheet:string;geometry:FruitGeometry;typicalMassG:number};
 const names = [
   ['Cherry','Blueberry','Cranberry','Redcurrant','Blackcurrant','Gooseberry','Bilberry','Acerola','Chokeberry','Coffee cherry'],
   ['Strawberry','Raspberry','Blackberry','Cloudberry','Salmonberry','Mulberry','Huckleberry','Loganberry','Boysenberry','Pineberry'],
@@ -16,16 +17,34 @@ const names = [
   ['Watermelon','Yellow watermelon','Sugar Baby watermelon','Pale striped watermelon','Orange watermelon','Winter melon','Pumpkin','Kabocha','Butternut','Acorn squash'],
 ];
 const emoji=['🍒','🍓','🍇','🍊','🟠','🍎','🍐','🍑','🍍','🍈','🍉'];
-export const FRUIT_COLLECTION:FruitAppearance[]=names.flatMap((choices,level)=>choices.map((name,choice)=>{
-  const geometry=choice===0?FRUIT_SHAPES[level]:COLLECTION_SHAPES[level*9+choice-1];
-  return {id:level*10+choice,level,name,emoji:emoji[level],sheet:choice===0?'fruits.png':COLLECTION_SHAPES[level*9+choice-1].sheet,geometry};
+export const FRUITS_PER_LEVEL=10;
+export const FRUIT_BODY_AREA=2.6;
+/** Equal area per level; apply the same scale to artwork and collision silhouette. */
+function normalizeGeometry(source:FruitGeometry):FruitGeometry {
+  const area=Math.abs(source.hull.reduce((sum,[x,y],i)=>{
+    const [nx,ny]=source.hull[(i+1)%source.hull.length];return sum+x*ny-y*nx;
+  },0))/2;
+  const scale=Math.sqrt(FRUIT_BODY_AREA/area);
+  return {...source,radius:source.radius/scale,hull:source.hull.map(([x,y])=>[x*scale,y*scale])};
+}
+// IDs and sheet positions describe artwork identity, independently of growth level.
+export const FRUIT_COLLECTION:FruitAppearance[]=names.flatMap((choices,row)=>choices.map((name,choice)=>{
+  const geometry=normalizeGeometry(choice===0?FRUIT_SHAPES[row]:COLLECTION_SHAPES[row*9+choice-1]);
+  return {id:row*10+choice,level:-1,name,emoji:emoji[row],sheet:choice===0?'fruits.png':COLLECTION_SHAPES[row*9+choice-1].sheet,geometry,typicalMassG:FRUIT_SIZE_GRAMS[name]};
 }));
+const ordered=[...FRUIT_COLLECTION].sort((a,b)=>a.typicalMassG-b.typicalMassG||a.id-b.id);
+/** Equal-count size buckets: consecutive groups of ten, from lightest to heaviest. */
+export const FRUIT_LEVELS:number[][]=Array.from({length:names.length},(_,level)=>
+  ordered.slice(level*FRUITS_PER_LEVEL,(level+1)*FRUITS_PER_LEVEL).map(fruit=>{
+    fruit.level=level;return fruit.id;
+  })
+);
 /** Choose once per level; restarting changes each level's previous character. */
 export function chooseFruitLineup(random:()=>number,previous?:readonly number[]):number[]{
-  return names.map((_,level)=>{
+  return FRUIT_LEVELS.map((ids,level)=>{
     const value=random(),fraction=Number.isFinite(value)?Math.max(0,Math.min(1-Number.EPSILON,value)):0;
-    const old=previous?.[level];let choice=Math.floor(fraction*(old===undefined?10:9));
-    if(old!==undefined&&choice>=old%10)choice++;
-    return level*10+choice;
+    const old=ids.indexOf(previous?.[level]??-1);let choice=Math.floor(fraction*(ids.length-(old>=0?1:0)));
+    if(old>=0&&choice>=old)choice++;
+    return ids[choice];
   });
 }

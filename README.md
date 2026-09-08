@@ -38,9 +38,17 @@ Original fruit character sprite sheet generated for this project. The original p
 
 ## Fruit bounds
 
-Rendering and collision detection share body-centered geometry measured from the existing sprite sheet. Convex hulls follow fruit flesh; stems and leaves remain decorative so they do not create invisible spacing between fruit bodies. Each crop retains its native aspect ratio without square padding. The same rotated bounds handle walls, floor, spill detection and the drop guide. Merge particles remain, but fruit sprites no longer shrink away from their colliders.
+Rendering and collision detection share body-centered geometry measured from the existing sprite sheet. Convex hulls follow fruit flesh; stems and leaves remain decorative so they do not create invisible spacing between fruit bodies. Each crop retains its native aspect ratio without square padding. Every alternative at a level has the same body area; the next level has at least 26% more area. Shape and orientation can still change width or height independently. The same rotated bounds handle walls, floor, spill detection and the drop guide. Merge particles remain, but fruit sprites no longer shrink away from their colliders.
 
 To regenerate geometry after replacing artwork, run `python3 scripts/trace-fruit-shapes.py` for the original sheet and `python3 scripts/trace-collection.py` for the new atlases, with Pillow installed. This reads PNG pixels and writes TypeScript coordinates; it does not modify the original image. Pillow is not required to build or run the game.
+
+## Fruit sizes and growth levels
+
+[All 110 sizes and sources](https://fran-mora.github.io/tumble-grove/fruit-sizes.html) are also available from the game's help dialog and as a downloadable CSV. The research data is in `docs/fruit-size-research.json`. Each entry records a representative whole-fruit mass, source URL, evidence type, and cultivar or sampling caveat. Study averages are distinguished from published typical weights, range midpoints, commercial grades, and proxies. These are not universal species averages.
+
+Whole-fruit mass in grams is a consistent proxy for real-world size, including skin and seeds. We rank individual fruit (not grape bunches or paired cherries); coconut includes the husk. Values are rounded to three significant figures and sorted lightest to heaviest, then split into 11 consecutive buckets of exactly 10. Ties use stable artwork IDs and may straddle a boundary. Natural size ranges overlap. Game body areas increase by level but compress the real-world scale for playability.
+
+After editing the research, run `npm run data:fruits` to regenerate the runtime weights, public source table, and CSV, then `npm test`. Artwork identity and atlas coordinates stay independent of growth levels, so reclassification does not change the characters or require new artwork. Tests check complete evidence coverage, ordered buckets, all alternatives, and increasing body area.
 
 ## Phone gravity mode
 

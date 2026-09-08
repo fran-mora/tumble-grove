@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {FRUIT_COLLECTION,chooseFruitLineup} from '../app/fruit-collection.ts';
+import {readFileSync} from 'node:fs';
+import {FRUIT_COLLECTION,FRUIT_LEVELS,FRUIT_BODY_AREA,chooseFruitLineup} from '../app/fruit-collection.ts';
 import {MergeGame,FRUITS,STEP,CIRCLE} from '../app/engine.ts';
 import {fruitHull,hullContact,landingY} from '../app/collision.ts';
 import {drawFruit} from '../app/render.ts';
@@ -16,11 +17,45 @@ test('110 distinct named characters provide exactly 10 alternatives per growth l
 test('every alternative can be picked and each new round changes the previous family',()=>{
   for(let slot=0;slot<10;slot++){
     const lineup=chooseFruitLineup(()=>(slot+.5)/10);
-    assert.deepEqual(lineup,Array.from({length:11},(_,i)=>i*10+slot));
+    assert.deepEqual(lineup,FRUIT_LEVELS.map(ids=>ids[slot]));
     const next=chooseFruitLineup(()=>(slot+.5)/10,lineup);
-    assert.ok(next.every((id,level)=>Math.floor(id/10)===level&&id!==lineup[level]));
+    assert.ok(next.every((id,level)=>FRUIT_COLLECTION[id].level===level&&id!==lineup[level]));
   }
-  for(const value of [NaN,-1,1,Infinity])assert.ok(chooseFruitLineup(()=>value).every((id,level)=>id>=level*10&&id<level*10+10));
+  for(const value of [NaN,-1,1,Infinity])assert.ok(chooseFruitLineup(()=>value).every((id,level)=>FRUIT_LEVELS[level].includes(id)));
+  assert.deepEqual(chooseFruitLineup(()=>0,FRUIT_LEVELS.map((_,i)=>FRUIT_LEVELS[(i+1)%11][0])),chooseFruitLineup(()=>0));
+});
+test('all fruit have cited size evidence and the levels are ordered equal-count buckets',()=>{
+  const research=JSON.parse(readFileSync(new URL('../docs/fruit-size-research.json',import.meta.url),'utf8'));
+  assert.equal(Object.keys(research.rows).length,110);
+  const bases=new Set(['study-mean','cultivar-typical','range-midpoint','published-estimate','market-grade','proxy']);
+  for(const fruit of FRUIT_COLLECTION){
+    const row=research.rows[fruit.name];assert.ok(row,fruit.name);
+    assert.ok(Number.isFinite(row.massG)&&row.massG>0,fruit.name);
+    assert.equal(fruit.typicalMassG,Number(row.massG.toPrecision(3)),fruit.name);
+    assert.equal(new URL(row.source).protocol,'https:');assert.ok(bases.has(row.basis));assert.ok(row.note.length>20);
+  }
+  assert.equal(FRUIT_LEVELS.length,11);assert.equal(new Set(FRUIT_LEVELS.flat()).size,110);
+  let previous;
+  for(const ids of FRUIT_LEVELS){
+    assert.equal(ids.length,10);
+    for(const id of ids){
+      const fruit=FRUIT_COLLECTION[id];
+      if(previous){assert.ok(fruit.typicalMassG>=previous.typicalMassG);if(fruit.typicalMassG===previous.typicalMassG)assert.ok(fruit.id>previous.id);}
+      previous=fruit;
+    }
+  }
+  assert.equal(FRUIT_COLLECTION.find(f=>f.name==='Bilberry').level,0);
+  assert.equal(FRUIT_COLLECTION.find(f=>f.name==='Jackfruit').level,10);
+});
+test('every possible next-level fruit has a larger body area',()=>{
+  const area=shape=>Math.abs(shape.points.reduce((sum,p,i)=>{const q=shape.points[(i+1)%shape.points.length];return sum+p.x*q.y-p.y*q.x;},0))/2;
+  const levels=FRUIT_LEVELS.map(ids=>ids.map(id=>{
+    const fruit=FRUIT_COLLECTION[id],r=FRUITS[fruit.level].radius;
+    const a=area(fruitHull(fruit.level,r,.71,fruit.geometry));
+    assert.ok(Math.abs(a-FRUIT_BODY_AREA*r*r)<1e-7,fruit.name);
+    return a;
+  }));
+  for(let i=1;i<levels.length;i++)assert.ok(Math.min(...levels[i])>Math.max(...levels[i-1])*1.26,`level ${i+1}`);
 });
 test('a family remains fixed through drops and merges, and resets on a new game',()=>{
   let seed=981;const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
@@ -62,5 +97,18 @@ test('all fruit silhouettes meet exactly along the drop guide at varied rotation
     assert.equal(hullContact({x:220,y:y-.02},shape,{x:220,y:350},other),null);
     assert.ok(hullContact({x:220,y:y+.02},shape,{x:220,y:350},other));
     assert.equal(outsideBowl({x:CIRCLE.x,y:CIRCLE.y},shape,CIRCLE,CIRCLE.radius),false);
+  }
+});
+test('all 50 droppable alternatives spawn inside the circular bowl at every aim edge',()=>{
+  const game=new MergeGame(()=>0);game.setMode('gravity');
+  for(const fruit of FRUIT_COLLECTION.filter(f=>f.level<5)){
+    game.lineup[fruit.level]=fruit.id;game.current=fruit.level;
+    for(const [x,y] of [[0,1],[1,0],[0,-1],[-1,0]]){
+      game.setGravity(x,y);for(let n=0;n<180;n++)game.step();
+      for(const aim of [-100,220,1000]){
+        game.setAim(aim);const spawn=game.getSpawn(),shape=game.getShape(fruit.level);
+        for(const p of shape.points)assert.ok(Math.hypot(spawn.x+p.x-CIRCLE.x,spawn.y+p.y-CIRCLE.y)<CIRCLE.radius,fruit.name);
+      }
+    }
   }
 });
