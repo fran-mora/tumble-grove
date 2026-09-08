@@ -1,5 +1,5 @@
-const CACHE = 'fruit-merge-db3e6d2a284b1f03';
-const FILES = ["artwork-prompt.txt","assets/index-CU6DdLfU.css","assets/index-DahAccmt.js","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruits.png","index.html","manifest.webmanifest"];
+const CACHE = 'tumble-grove-e638d2e1031010cc';
+const FILES = ["artwork-prompt.txt","assets/index-DgQg6X0G.js","assets/index-Qv6EHege.css","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruits.png","index.html","manifest.webmanifest"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
