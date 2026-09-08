@@ -5,6 +5,7 @@ export const WIDTH = 440;
 export const HEIGHT = 570;
 export const DANGER_Y = 100;
 export const STEP = 1 / 120;
+export const MERGE_LABEL_SECONDS = 2.2;
 export const CIRCLE = {x:WIDTH/2,y:WIDTH/2,radius:WIDTH/2-.5};
 export const CIRCLE_DANGER = -CIRCLE.radius + 95;
 export type GameMode = 'classic' | 'gravity';
@@ -22,7 +23,7 @@ export const FRUITS = [
   { name: 'Watermelon', emoji: '🍉', radius: 96, color: '#4b9952' },
 ] as const;
 export type FruitBody = { id: number; kind: number; x: number; y: number; vx: number; vy: number; angle: number; age: number };
-export type MergeEvent = { x: number; y: number; kind: number; points: number; time: number; cleared: boolean };
+export type MergeEvent = { x: number; y: number; kind: number; points: number; time: number; cleared: boolean; bodyId: number | null };
 export class MergeGame {
   bodies: FruitBody[] = [];
   events: MergeEvent[] = [];
@@ -38,6 +39,8 @@ export class MergeGame {
   danger = 0;
   over = false;
   paused = false;
+  inspecting = false;
+  inspectedId: number | null = null;
   watermelons = 0;
   mode: GameMode = 'classic';
   gravity = {x:0,y:1};
@@ -76,7 +79,38 @@ export class MergeGame {
     const travel=Math.max(0,circleTravel(base,shape,{x:-d.x,y:-d.y},CIRCLE,CIRCLE.radius)-18);
     return {x:base.x-d.x*travel,y:base.y-d.y*travel};
   }
-  get canDrop() { return !this.over && !this.paused && this.cooldown <= 0; }
+  get canDrop() { return !this.over && !this.paused && !this.inspecting && this.cooldown <= 0; }
+  setInspecting(enabled: boolean) {
+    if (enabled && (this.over || !this.bodies.length)) return false;
+    this.inspecting = enabled;
+    this.inspectedId = null;
+    this.paused = enabled;
+    return true;
+  }
+  inspectFruit(x: number, y: number) {
+    if (!this.inspecting || !Number.isFinite(x) || !Number.isFinite(y)) return;
+    // Hit the rotated fruit body, front to back, rather than its padded image box.
+    const body = this.bodies.findLast(b => {
+      const { points } = this.getShape(b.kind, b.angle);
+      let positive = false, negative = false;
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i], q = points[(i + 1) % points.length];
+        const cross = (q.x - p.x) * (y - b.y - p.y) - (q.y - p.y) * (x - b.x - p.x);
+        if (cross > 1e-6) positive = true;
+        if (cross < -1e-6) negative = true;
+        if (positive && negative) return false;
+      }
+      return true;
+    });
+    this.inspectedId = body?.id ?? null;
+  }
+  cycleInspectedFruit(direction: -1 | 1) {
+    if (!this.inspecting || !this.bodies.length) return;
+    const index = this.bodies.findIndex(b => b.id === this.inspectedId);
+    const next = index < 0 ? (direction === 1 ? 0 : this.bodies.length - 1)
+      : (index + direction + this.bodies.length) % this.bodies.length;
+    this.inspectedId = this.bodies[next].id;
+  }
   setAim(x: number) {
     if (!Number.isFinite(x)) return;
     if(this.mode==='gravity'){const limit=Math.max(0,CIRCLE.radius*Math.sin(MOUTH_HALF_ANGLE)-FRUITS[this.current].radius-12);this.aim=Math.max(WIDTH/2-limit,Math.min(WIDTH/2+limit,x));return;}
@@ -108,17 +142,18 @@ export class MergeGame {
     this.bodies = []; this.events = []; this.score = 0; this.drops = 0; this.merges = 0;
     this.highest = 0; this.current = 0; this.next = 0; this.aim = WIDTH / 2;
     this.time = 0; this.cooldown = 0; this.danger = 0; this.over = false; this.paused = false;
+    this.inspecting = false; this.inspectedId = null;
     this.watermelons = 0; this.serial = 0;
   }
   snapshot() {
-    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
   }
   step(dt = STEP) {
-    if (this.paused || this.over || dt <= 0 || !Number.isFinite(dt)) return;
+    if (this.paused || this.inspecting || this.over || dt <= 0 || !Number.isFinite(dt)) return;
     dt = Math.min(dt, 1 / 60);
     this.time += dt;
     this.cooldown = Math.max(0, this.cooldown - dt);
-    this.events = this.events.filter(e => this.time - e.time < 1);
+    this.events = this.events.filter(e => this.time - e.time < MERGE_LABEL_SECONDS);
     if(this.mode==='gravity'){
       const mix=1-Math.exp(-10*dt);
       this.gravity.x+=(this.gravityTarget.x-this.gravity.x)*mix;this.gravity.y+=(this.gravityTarget.y-this.gravity.y)*mix;
@@ -178,15 +213,17 @@ export class MergeGame {
         const kind = a.kind + 1, x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
         const cleared = kind === FRUITS.length;
         const points = cleared ? 100 : kind * (kind + 1) / 2;
+        let bodyId: number | null = null;
         if (!cleared) {
           const fruit = this.addFruit(kind, x, y);
+          bodyId = fruit.id;
           if(this.mode==='gravity'){fruit.vx=(a.vx+b.vx)/2-this.down.x*35;fruit.vy=(a.vy+b.vy)/2-this.down.y*35;}
           else{fruit.vx = (a.vx + b.vx) / 2; fruit.vy = Math.min(0, (a.vy + b.vy) / 2) - 35;}
           this.highest = Math.max(this.highest, kind);
           if (kind === 10) this.watermelons++;
         }
         this.score += points; this.merges++;
-        this.events.push({ x, y, kind: Math.min(kind, 10), points, time: this.time, cleared });
+        this.events.push({ x, y, kind: Math.min(kind, 10), points, time: this.time, cleared, bodyId });
       }
     }
     // The dashed guide never ends a round. A whole fruit must spill outside.

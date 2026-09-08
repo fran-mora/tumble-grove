@@ -1,6 +1,6 @@
 import { FRUIT_COLLECTION, type FruitAppearance } from './fruit-collection.ts';
 import { RIM_Y, VIEW_PADDING, MOUTH_HALF_ANGLE } from './arena.ts';
-import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MergeGame } from './engine.ts';
+import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MERGE_LABEL_SECONDS, MergeGame } from './engine.ts';
 import { FRUIT_SHAPES } from './fruit-shapes.ts';
 import { landingY, directionalLanding } from './collision.ts';
 export async function loadSprites(): Promise<HTMLCanvasElement[]> {
@@ -56,6 +56,33 @@ function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame){
   ctx.fillText(fruit.name,x+width/2,y+height/2);
   ctx.restore();
 }
+type LabelBox = {x:number;y:number;width:number;height:number};
+function drawBodyName(ctx:CanvasRenderingContext2D,game:MergeGame,kind:number,x:number,y:number,angle=0,occupied:LabelBox[]=[]) {
+  const fruit=game.getFruit(kind),geometry=fruit.geometry,scale=FRUITS[kind].radius/geometry.radius;
+  const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+  const padding=8*unit,gap=8*unit,fontSize=Math.max(14,12*unit),height=fontSize+10*unit;
+  const minX=-VIEW_PADDING+padding,maxX=WIDTH+VIEW_PADDING-padding;
+  const minY=-VIEW_PADDING+padding,maxY=game.height+VIEW_PADDING-padding;
+  ctx.save();ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
+  const width=Math.min(ctx.measureText(fruit.name).width+padding*2,maxX-minX);
+  // Account for rotated leaves and stems while keeping the text itself upright.
+  const corners=[[0,0],[geometry.crop[2],0],[geometry.crop[2],geometry.crop[3]],[0,geometry.crop[3]]].map(([cx,cy])=>{
+    const dx=(cx-geometry.center[0])*scale,dy=(cy-geometry.center[1])*scale;
+    return {x:x+dx*Math.cos(angle)-dy*Math.sin(angle),y:y+dx*Math.sin(angle)+dy*Math.cos(angle)};
+  });
+  const left=Math.min(...corners.map(p=>p.x)),right=Math.max(...corners.map(p=>p.x));
+  const top=Math.min(...corners.map(p=>p.y)),bottom=Math.max(...corners.map(p=>p.y));
+  const candidates=[{x:x-width/2,y:top-gap-height},{x:right+gap,y:y-height/2},{x:left-gap-width,y:y-height/2},{x:x-width/2,y:bottom+gap}]
+    .map(p=>({x:Math.max(minX,Math.min(maxX-width,p.x)),y:Math.max(minY,Math.min(maxY-height,p.y)),width,height}));
+  const box=candidates.find(p=>occupied.every(o=>p.x+p.width+gap<=o.x||p.x>=o.x+o.width+gap||p.y+p.height+gap<=o.y||p.y>=o.y+o.height+gap));
+  if(!box){ctx.restore();return;}
+  occupied.push(box);
+  ctx.fillStyle='#fffdf1f5';ctx.strokeStyle='#85a576';ctx.lineWidth=unit;
+  ctx.beginPath();ctx.roundRect(box.x,box.y,width,height,height/2);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#28583b';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(fruit.name,box.x+width/2,box.y+height/2,width-padding*2);
+  ctx.restore();
+}
 export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:HTMLCanvasElement[],reducedMotion:boolean){
   const scale=ctx.canvas.width/(WIDTH+2*VIEW_PADDING),sy=ctx.canvas.height/(game.height+2*VIEW_PADDING);
   ctx.setTransform(scale,0,0,sy,VIEW_PADDING*scale,VIEW_PADDING*sy);ctx.clearRect(-VIEW_PADDING,-VIEW_PADDING,WIDTH+2*VIEW_PADDING,game.height+2*VIEW_PADDING);
@@ -96,11 +123,32 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
     // Never shrink the artwork away from its collider, including during merges.
     drawFruit(ctx,sprites,b.kind,b.x,b.y,FRUITS[b.kind].radius,b.angle,1,game.getFruit(b.kind));
   }
-  if(!reducedMotion)for(const e of game.events){
+  if(!reducedMotion&&!game.inspecting)for(const e of game.events){
     const age=game.time-e.time;
+    if(age>=1)continue;
     ctx.globalAlpha=Math.max(0,1-age);
     for(let i=0;i<10;i++){const angle=i*Math.PI*2/10;const distance=age*92;ctx.fillStyle=FRUITS[e.kind].color;ctx.beginPath();ctx.arc(e.x+Math.cos(angle)*distance,e.y+Math.sin(angle)*distance+age*age*35,Math.max(.1,3*(1-age)),0,Math.PI*2);ctx.fill();}
     ctx.fillStyle='#356645';ctx.font='bold 22px Trebuchet MS, sans-serif';ctx.textAlign='center';ctx.fillText(`+${e.points}`,e.x,e.y-age*65-15);ctx.globalAlpha=1;
+  }
+  if(game.inspecting){
+    const body=game.bodies.find(b=>b.id===game.inspectedId);
+    if(body){
+      const shape=game.getShape(body.kind,body.angle);
+      const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+      ctx.save();ctx.strokeStyle='#397447';ctx.lineWidth=2.5*unit;ctx.lineJoin='round';ctx.beginPath();
+      shape.points.forEach((p,i)=>{if(i===0)ctx.moveTo(body.x+p.x,body.y+p.y);else ctx.lineTo(body.x+p.x,body.y+p.y);});
+      ctx.closePath();ctx.stroke();ctx.restore();
+      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle);
+    }
+  }else if(!game.over){
+    const occupied:LabelBox[]=[];
+    // Keep a busy chain reaction readable; the most recent discoveries take priority.
+    for(const e of game.events.filter(e=>!e.cleared&&game.time-e.time<MERGE_LABEL_SECONDS).slice(-3).reverse()){
+      const body=game.bodies.find(b=>b.id===e.bodyId),age=game.time-e.time;
+      ctx.save();ctx.globalAlpha=reducedMotion?1:Math.min(1,(MERGE_LABEL_SECONDS-age)/.4);
+      drawBodyName(ctx,game,e.kind,body?.x??e.x,body?.y??e.y,body?.angle??0,occupied);
+      ctx.restore();
+    }
   }
   if(!game.over&&!game.paused)drawDropName(ctx,game);
 }
