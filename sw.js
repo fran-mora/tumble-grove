@@ -1,5 +1,5 @@
-const CACHE = 'tumble-grove-e638d2e1031010cc';
-const FILES = ["artwork-prompt.txt","assets/index-DgQg6X0G.js","assets/index-Qv6EHege.css","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruits.png","index.html","manifest.webmanifest"];
+const CACHE = 'tumble-grove-28dad95aa60f1712';
+const FILES = ["artwork-prompt.txt","assets/index-Qv6EHege.css","assets/index-eZN9IraF.js","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","manifest.webmanifest"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
@@ -13,8 +13,8 @@ self.addEventListener('fetch', event => {
   if (!url.href.startsWith(self.registration.scope)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const key = event.request.mode === 'navigate' ? new URL('index.html', self.registration.scope).href : event.request;
-    const cached = await cache.match(key, {ignoreSearch:true});
+    const exact = await cache.match(event.request, {ignoreSearch:true});
+    const cached = exact || (event.request.mode === 'navigate' ? await cache.match(new URL('index.html', self.registration.scope).href) : undefined);
     return cached || fetch(event.request);
   })());
 });
