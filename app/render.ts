@@ -31,6 +31,31 @@ export function drawFruit(ctx:CanvasRenderingContext2D,sprites:HTMLCanvasElement
   else{ctx.font=`${r*1.7}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(appearance?.emoji??FRUITS[kind].emoji,0,0);}
   ctx.restore();
 }
+function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame){
+  const fruit=game.getFruit(game.current),spawn=game.getSpawn();
+  const geometry=fruit.geometry,fruitScale=FRUITS[game.current].radius/geometry.radius;
+  // Keep the name readable when the arena shrinks to fit a phone's viewport.
+  const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+  const fontSize=Math.max(14,12*unit),padding=8*unit,gap=7*unit;
+  const minX=-VIEW_PADDING+padding,maxX=WIDTH+VIEW_PADDING-padding;
+  const minY=-VIEW_PADDING+padding,maxY=game.height+VIEW_PADDING-padding;
+  ctx.save();ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
+  const width=ctx.measureText(fruit.name).width+padding*2,height=fontSize+10*unit;
+  // Use the complete sprite bounds so the label also clears leaves and stems.
+  const left=spawn.x-geometry.center[0]*fruitScale,right=left+geometry.crop[2]*fruitScale;
+  const top=spawn.y-geometry.center[1]*fruitScale,bottom=top+geometry.crop[3]*fruitScale;
+  const horizontal=[{x:right+gap,y:spawn.y-height/2},{x:left-gap-width,y:spawn.y-height/2}];
+  const vertical=[{x:spawn.x-width/2,y:top-gap-height},{x:spawn.x-width/2,y:bottom+gap}];
+  // Prefer a position beside the drop guide; the text always stays upright.
+  const positions=Math.abs(game.down.y)>=Math.abs(game.down.x)?[...horizontal,...vertical]:[...vertical,...horizontal];
+  const position=positions.find(p=>p.x>=minX&&p.x+width<=maxX&&p.y>=minY&&p.y+height<=maxY)??positions[0];
+  const x=Math.max(minX,Math.min(maxX-width,position.x)),y=Math.max(minY,Math.min(maxY-height,position.y));
+  ctx.fillStyle='#fffdf1f5';ctx.strokeStyle='#d6dfc4';ctx.lineWidth=unit;
+  ctx.beginPath();ctx.roundRect(x,y,width,height,height/2);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#356645';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(fruit.name,x+width/2,y+height/2);
+  ctx.restore();
+}
 export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:HTMLCanvasElement[],reducedMotion:boolean){
   const scale=ctx.canvas.width/(WIDTH+2*VIEW_PADDING),sy=ctx.canvas.height/(game.height+2*VIEW_PADDING);
   ctx.setTransform(scale,0,0,sy,VIEW_PADDING*scale,VIEW_PADDING*sy);ctx.clearRect(-VIEW_PADDING,-VIEW_PADDING,WIDTH+2*VIEW_PADDING,game.height+2*VIEW_PADDING);
@@ -77,4 +102,5 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
     for(let i=0;i<10;i++){const angle=i*Math.PI*2/10;const distance=age*92;ctx.fillStyle=FRUITS[e.kind].color;ctx.beginPath();ctx.arc(e.x+Math.cos(angle)*distance,e.y+Math.sin(angle)*distance+age*age*35,Math.max(.1,3*(1-age)),0,Math.PI*2);ctx.fill();}
     ctx.fillStyle='#356645';ctx.font='bold 22px Trebuchet MS, sans-serif';ctx.textAlign='center';ctx.fillText(`+${e.points}`,e.x,e.y-age*65-15);ctx.globalAlpha=1;
   }
+  if(!game.over&&!game.paused)drawDropName(ctx,game);
 }

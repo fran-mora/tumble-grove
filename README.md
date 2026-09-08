@@ -8,7 +8,7 @@ Move the pointer and click to drop. On a phone, drag to aim and release. The foc
 
 Touching identical fruit merge through 11 growth levels. Each new round picks one character at each level from 110 fruit and variety characters (10 choices per level). That family remains fixed for the whole round, and the next round changes every level’s character. Merges score triangular points (1, 3, 6, …, 55). Two final-level fruit clear for 100 points. The dashed line is only a guide: fruit can stack above it indefinitely. A round ends only when a whole fruit spills outside. The basket has finite side walls and an open rim; the circular bowl has a visible opening that rotates with gravity. Fruit may protrude through the opening without immediately ending the round.
 
-Includes a next-fruit preview, aim guide, optional synthesized sound, pause, restart confirmation, final-level celebration, reduced-motion support, and local personal-best storage. Browser storage may be unavailable or cleared; this never prevents play. The active round is not saved on refresh.
+Includes a next-fruit preview, aim guide, optional synthesized sound, pause, restart confirmation, final-level celebration, reduced-motion support, and local personal-best storage. The fruit waiting to drop has a name label that follows the preview, stays upright with phone tilt, and moves around the sprite to fit within the arena. Browser storage may be unavailable or cleared; this never prevents play. The active round is not saved on refresh.
 
 On phones, the game fills the available dynamic viewport without page scrolling, respecting safe areas and Safari's browser bars. The arena preserves its aspect ratio and scales into the space remaining below the controls; landscape moves scores alongside it. Offline status stays within the same screen. Help dialogs can scroll independently when needed. The fruit-family strip is removed, and the desktop discovery panel shows only the highest fruit reached so far.
 
@@ -28,11 +28,11 @@ React/Vite with a client-side Canvas renderer. Development runs at http://127.0.
 
 ## Validation
 
-Automated tests cover drops, all merge tiers, double-consumption prevention, chain reactions, collision separation, finite walls, high stacks above the former limit, actual spills through the basket rim and rotated circular mouth, pause/reset, invalid input, and extended deterministic games. Collection tests cover all 110 candidates, per-round selection, stable families during merges, sprite/collider alignment, floor contact, and guide contact. The offline check simulates cached navigation and every asset with networking disabled. Interactive browser UI and physical-device testing were not requested or performed.
+Automated tests cover drops, all merge tiers, double-consumption prevention, chain reactions, collision separation, finite walls, high stacks above the former limit, actual spills through the basket rim and rotated circular mouth, pause/reset, invalid input, and extended deterministic games. Collection tests cover all 110 candidates, per-round selection, stable families during merges, sprite/collider alignment, floor contact, and guide contact. The offline check simulates cached navigation and every asset with networking disabled. Drop-preview names, edge placement, and name changes were checked in desktop and 390 × 844 browser viewports, including absence of mobile page scrolling. Physical-device testing has not been performed.
 
 Gravity and sensor tests cover every direction, the circular walls, rotated guides, sideways/upward merges, full rotation, flat-phone dead zones, screen orientation, sensor permissions, missing data, and cleanup. Sensor events are simulated.
 
-Optional WebMCP read-game and drop-fruit tools use the same engine as the controls, validate input, and are registered only when document.modelContext is supported. No supported WebMCP validation context was available, so these optional tools have not been verified in a browser implementing that API.
+Optional WebMCP read-game and drop-fruit tools use the same engine as the controls, validate input, and are registered only when document.modelContext is supported. The drop-fruit tool was exercised through the local browser integration during drop-preview verification.
 
 ## Artwork
 
