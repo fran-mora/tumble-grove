@@ -21,6 +21,6 @@ function OfflineStatus() {
       .catch(() => { if (alive) setStatus('Could not save offline. Connect and reload to retry.'); });
     return () => { alive = false; navigator.serviceWorker.removeEventListener('controllerchange', check); };
   }, []);
-  return <p role="status" style={{textAlign:'center',padding:'0 18px max(18px, env(safe-area-inset-bottom))',margin:0,fontSize:13,color:'#326c48'}}>{status}</p>;
+  return <p role="status" className="offline-status">{status}</p>;
 }
 createRoot(document.getElementById('root')!).render(<><Home/><OfflineStatus/></>);

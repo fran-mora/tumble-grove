@@ -10,6 +10,8 @@ Touching identical fruit merge through 11 growth levels. Each new round picks on
 
 Includes a next-fruit preview, aim guide, optional synthesized sound, pause, restart confirmation, final-level celebration, reduced-motion support, and local personal-best storage. Browser storage may be unavailable or cleared; this never prevents play. The active round is not saved on refresh.
 
+On phones, the game fills the available dynamic viewport without page scrolling, respecting safe areas and Safari's browser bars. The arena preserves its aspect ratio and scales into the space remaining below the controls; landscape moves scores alongside it. Offline status stays within the same screen. Help dialogs can scroll independently when needed. The fruit-family strip is removed, and the desktop discovery panel shows only the highest fruit reached so far.
+
 ## Develop
 
 Requires Node 22.13 or newer.

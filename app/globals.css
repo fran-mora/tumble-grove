@@ -21,3 +21,88 @@
 .game-board,.game-board.gravity-arena{border:0;border-radius:20px;box-shadow:none;max-height:none;background:transparent;overflow:hidden}.game-board:before{display:none}
 
 .brand{white-space:nowrap}.topbar{gap:12px}@media(max-width:640px){.brand{font-size:24px;letter-spacing:-1.2px}.brand>.fruit-image{width:32px;height:32px}.toolbar{flex-shrink:0}}
+
+.offline-status{text-align:center;padding:0 18px max(18px,env(safe-area-inset-bottom));margin:0;font-size:13px;color:#326c48}
+
+/* The arena fits the remaining viewport space, including Safari's changing bars. */
+@media (max-width:640px), (max-width:1024px) and (max-height:640px) and (pointer:coarse) {
+  html:has(.app-shell){height:100%;overflow:hidden;overscroll-behavior:none}
+  body:has(.app-shell){height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none}
+  #root{height:100%;min-height:0;display:flex;flex-direction:column}
+  .app-shell{width:100%;height:100%;min-height:0;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:max(4px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  #root>.app-shell{padding-bottom:0}
+  .topbar{height:48px;flex:none;gap:4px;border:0}
+  .brand{font-size:24px;letter-spacing:-1.2px;gap:6px}
+  .brand>.fruit-image{width:30px;height:30px}
+  .mode-pill,.little-note,.goal-column,.app-shell>footer{display:none}
+  .toolbar{gap:4px;flex-shrink:0}
+  .icon-button{width:44px;height:44px}
+  .game-layout{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;padding:4px 0;gap:6px}
+  .score-column{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;align-items:stretch;width:100%;padding:0;gap:6px;flex:none}
+  .score-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;min-width:0;text-align:left;padding:5px 8px;border-radius:12px}
+  .score-card .eyebrow,.next-card .eyebrow{font-size:12px;letter-spacing:.4px}
+  .score-number{font-size:26px;line-height:1.1;letter-spacing:-1px;overflow-wrap:normal}
+  .best-score{grid-column:1/-1;gap:4px;margin-top:3px;padding-top:3px;font-size:12px;line-height:14px}
+  .best-score svg{height:12px;width:12px}
+  .next-card{display:grid;grid-template-columns:minmax(0,1fr) 36px;align-content:center;align-items:center;gap:3px;min-width:0;margin:0;padding:5px 8px;border-radius:12px;font-size:12px}
+  .next-card>span:last-child{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .next-fruit{grid-row:1/3;grid-column:2;width:36px;height:36px}
+  .new-game{height:100%;min-height:44px;width:44px;padding:0;margin:0}
+  .new-game span{display:none}
+  .new-game svg{width:20px;height:20px}
+  .play-column{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;width:100%;max-width:none;margin:0;gap:4px}
+  .play-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 6px;flex:none;align-items:center}
+  .gravity-control{grid-column:1;grid-row:1;min-width:0;min-height:44px;margin:0;padding:0 10px;gap:8px;border-radius:12px}
+  .gravity-label{min-width:0}
+  .gravity-label label{display:flex;align-items:center;min-height:42px;font-size:14px}
+  .gravity-label span{display:none}
+  .gravity-switch{position:relative;flex-shrink:0}
+  .gravity-switch:after{content:'';position:absolute;inset:-9px 0}
+  .board-heading{grid-column:2;grid-row:1;margin:0}
+  .board-heading>span{display:none}
+  .pause-button{min-height:44px;min-width:44px;padding:0 10px;border:1px solid #d4dfc2;border-radius:12px;font-size:12px;letter-spacing:.3px}
+  .tilt-error,.cancel-tilt{grid-column:1/-1;margin:0;padding:6px 8px;font-size:12px;line-height:1.3}
+  .arena-stage{container-type:size;display:grid;place-items:center;flex:1;min-height:0;min-width:0;width:100%;overflow:hidden}
+  .game-board,.game-board.gravity-arena{width:min(100cqw,calc(100cqh * var(--arena-ratio)));height:auto;max-width:100%;flex:none}
+  .control-hint{flex:none;min-height:16px;margin:0;gap:6px;font-size:12px;line-height:16px}
+  .control-hint kbd,.control-hint .desktop-hint{display:none}
+  .control-hint .touch-hint{display:inline;font-size:12px}
+  .offline-status{flex:none;font-size:12px;line-height:16px;padding:0 max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  .empty-board,.gravity-arena .empty-board{padding-top:0}
+  .empty-icon,.gravity-arena .empty-icon{width:40px;height:40px;margin:0}
+  .empty-board h1,.gravity-arena .empty-board h1{font-size:18px;margin:6px 0}
+  .empty-board p,.gravity-arena .empty-board p{font-size:14px;line-height:1.5}
+  .empty-cta,.gravity-arena .empty-cta{margin-top:12px;font-size:12px}
+  .board-overlay,.gravity-arena .board-overlay{padding:12px;overflow:auto}
+  .overlay-symbol,.gravity-arena .overlay-symbol{width:36px;height:36px;margin:0 0 4px}
+  .board-overlay h2,.gravity-arena .board-overlay h2{font-size:22px;margin:4px 0;line-height:1.15}
+  .final-score,.gravity-arena .final-score{font-size:40px;line-height:1.1;margin-top:4px}
+  .board-overlay p,.gravity-arena .board-overlay p{font-size:13px;margin:6px 0 10px}
+  .board-overlay .primary-button{min-height:44px;padding:10px 14px}
+}
+
+/* In phone landscape, put scores beside the arena instead of above it. */
+@media (max-width:640px) and (orientation:landscape), (max-width:1024px) and (max-height:640px) and (orientation:landscape) and (pointer:coarse) {
+  .app-shell{display:grid;grid-template-columns:160px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);column-gap:10px}
+  .topbar{grid-column:1;grid-row:1;height:auto;flex-wrap:wrap;justify-content:center;gap:2px}
+  .brand{font-size:21px;gap:4px;letter-spacing:-1px}
+  .brand>.fruit-image{width:24px;height:24px}
+  .toolbar{justify-content:center}
+  .game-layout{display:contents}
+  .score-column{grid-column:1;grid-row:2;display:flex;flex-direction:column;justify-content:start;gap:5px;padding:4px 0;min-height:0}
+  .score-card,.next-card{flex:none}
+  .new-game{width:100%;height:44px;flex:none;gap:6px}
+  .new-game span{display:inline;font-size:13px}
+  .play-column{grid-column:2;grid-row:1/3;height:100%}
+  .control-hint{display:none}
+  .empty-icon,.empty-board p,.overlay-symbol,.gravity-arena .overlay-symbol,.board-overlay>.eyebrow{display:none}
+  .empty-board h1,.gravity-arena .empty-board h1{font-size:16px}
+  .empty-cta,.gravity-arena .empty-cta{margin-top:7px}
+  .board-overlay h2,.gravity-arena .board-overlay h2{font-size:18px}
+  .board-overlay p,.gravity-arena .board-overlay p{margin:4px 0 8px}
+}
+
+@media (max-width:640px) and (orientation:landscape) and (max-height:350px), (max-width:1024px) and (max-height:350px) and (orientation:landscape) and (pointer:coarse) {
+  .topbar .brand,.best-score{display:none}
+  .score-card,.next-card{padding:3px 8px}
+}
