@@ -15,6 +15,7 @@ itself, a finding that material does not infringe another work.
 | Emoji and favicon | `public/favicon.svg` contains a Unicode cherry character; fallback emoji appear in `app/fruit-collection.ts`. | Rendered by the player's platform fonts. No Apple, Google or other emoji font/artwork file is bundled. Platform glyph appearance is not claimed as original project artwork. |
 | Fonts | System font stack in `app/globals.css` and canvas text styles. | No font files are distributed. Naming an installed font does not transfer rights in that font. |
 | Fruit-size research | `docs/fruit-size-research.json`, generated `public/fruit-sizes.html`, `public/fruit-sizes.csv`, `app/fruit-sizes.ts`. | Source links and limitations are retained. Measurements are representative values, not universal averages. No third-party article, photograph or source dataset is relicensed by the project's rights notice. |
+| Round-theme associations | `app/fruit-themes.ts`, `docs/fruit-themes.md`. | Project-curated growing/market associations informed by linked horticultural sources. Overlapping themes are not native-origin claims. No source article text or images are bundled. |
 
 ## Image-generation metadata
 

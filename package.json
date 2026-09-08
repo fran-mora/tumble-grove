@@ -14,7 +14,9 @@
     "lint": "oxlint",
     "format": "oxfmt",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "build:pages": "npm run build"
+    "build:pages": "npm run build",
+    "test:themes": "node --experimental-strip-types --test tests/themes.test.mjs",
+    "simulate:themes": "node --experimental-strip-types scripts/simulate-themes.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

@@ -1,4 +1,5 @@
-import { FRUIT_COLLECTION, chooseFruitLineup } from './fruit-collection.ts';
+import { FRUIT_COLLECTION } from './fruit-collection.ts';
+import { chooseThemedRound, parseFruitHistory, type FruitHistory, type RoundTheme } from './fruit-themes.ts';
 import { basketWalls, bowlWalls, collideWithWalls, outsideBasket, outsideBowl, MOUTH_HALF_ANGLE } from './arena.ts';
 import { fruitHull, hullContact, circleTravel } from './collision.ts';
 export const WIDTH = 440;
@@ -49,8 +50,22 @@ export class MergeGame {
   private serial = 0;
   random: () => number;
   lineup: number[];
+  theme: RoundTheme;
+  historyRevision = 0;
+  private history: FruitHistory;
+  private encountered = new Set<number>();
   private appearanceRandom:()=>number;
-  constructor(random: () => number = Math.random, appearanceRandom:()=>number=random) { this.random = random; this.appearanceRandom=appearanceRandom; this.lineup=chooseFruitLineup(appearanceRandom); }
+  constructor(random: () => number = Math.random, appearanceRandom:()=>number=random, savedHistory?:unknown) {
+    this.random=random;this.appearanceRandom=appearanceRandom;this.history=parseFruitHistory(savedHistory);
+    const round=chooseThemedRound(appearanceRandom,this.history);
+    this.lineup=round.lineup;this.theme=round.theme;this.historyRevision++;
+    this.rememberFruit(0);
+  }
+  getFruitHistory(){return parseFruitHistory(this.history);}
+  private rememberFruit(kind:number){
+    const id=this.lineup[kind];if(this.encountered.has(id))return;
+    this.encountered.add(id);this.history.seen[id]=Math.min(1_000_000,this.history.seen[id]+1);this.historyRevision++;
+  }
   getFruit(kind:number){return FRUIT_COLLECTION[this.lineup[kind]];}
   getShape(kind:number,angle=0){return fruitHull(kind,FRUITS[kind].radius,angle,this.getFruit(kind).geometry);}
   get height() { return this.mode === 'gravity' ? WIDTH : HEIGHT; }
@@ -120,6 +135,7 @@ export class MergeGame {
   addFruit(kind: number, x: number, y: number): FruitBody {
     if (!Number.isInteger(kind) || kind < 0 || kind >= FRUITS.length || !Number.isFinite(x) || !Number.isFinite(y)) throw new Error('Invalid fruit');
     const body = { id: ++this.serial, kind, x, y, vx: 0, vy: 0, angle: 0, age: 0 };
+    this.rememberFruit(kind);
     this.bodies.push(body);
     return body;
   }
@@ -133,12 +149,14 @@ export class MergeGame {
     this.current = this.next;
     const value = this.random();
     this.next = value < .27 ? 0 : value < .53 ? 1 : value < .75 ? 2 : value < .92 ? 3 : 4;
+    this.rememberFruit(this.current);this.rememberFruit(this.next);
     this.cooldown = .48;
     this.setAim(this.aim);
     return true;
   }
   reset() {
-    this.lineup=chooseFruitLineup(this.appearanceRandom,this.lineup);
+    const round=chooseThemedRound(this.appearanceRandom,this.history,this.lineup);
+    this.lineup=round.lineup;this.theme=round.theme;this.historyRevision++;this.encountered.clear();this.rememberFruit(0);
     this.bodies = []; this.events = []; this.score = 0; this.drops = 0; this.merges = 0;
     this.highest = 0; this.current = 0; this.next = 0; this.aim = WIDTH / 2;
     this.time = 0; this.cooldown = 0; this.danger = 0; this.over = false; this.paused = false;
@@ -146,7 +164,7 @@ export class MergeGame {
     this.watermelons = 0; this.serial = 0;
   }
   snapshot() {
-    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+    return { theme:{id:this.theme.id,name:this.theme.name}, lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
   }
   step(dt = STEP) {
     if (this.paused || this.inspecting || this.over || dt <= 0 || !Number.isFinite(dt)) return;

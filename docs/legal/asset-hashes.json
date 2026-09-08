@@ -53,8 +53,18 @@
     },
     {
       "path": "app/fruit-collection.ts",
-      "sha256": "bbf2d01efdc0196de370753888f81d193cda068904d6be0111c23ed6c1eb527a",
-      "bytes": 3785
+      "sha256": "bfb59b5ad8c4a7b0fddcbe154eecaca5ad400d729ea2823ef851512b03fc6c1f",
+      "bytes": 4121
+    },
+    {
+      "path": "app/fruit-themes.ts",
+      "sha256": "18bd24b2ed47747f077d759929c125ee09a7316dade3c90561b8fe010a76367c",
+      "bytes": 5984
+    },
+    {
+      "path": "docs/fruit-themes.md",
+      "sha256": "c3197140d71b7a243714a898c7e764a697e6b6493215ec315bf0ace4408fd1d5",
+      "bytes": 6565
     },
     {
       "path": "scripts/trace-fruit-shapes.py",

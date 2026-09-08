@@ -39,12 +39,16 @@ export const FRUIT_LEVELS:number[][]=Array.from({length:names.length},(_,level)=
     fruit.level=level;return fruit.id;
   })
 );
+export function randomFraction(random:()=>number):number {
+  const value=random();return Number.isFinite(value)?Math.max(0,Math.min(1-Number.EPSILON,value)):0;
+}
 /** Choose once per level; restarting changes each level's previous character. */
-export function chooseFruitLineup(random:()=>number,previous?:readonly number[]):number[]{
+export function chooseFruitLineup(random:()=>number,previous?:readonly number[],weights?:readonly number[]):number[]{
   return FRUIT_LEVELS.map((ids,level)=>{
-    const value=random(),fraction=Number.isFinite(value)?Math.max(0,Math.min(1-Number.EPSILON,value)):0;
-    const old=ids.indexOf(previous?.[level]??-1);let choice=Math.floor(fraction*(ids.length-(old>=0?1:0)));
-    if(old>=0&&choice>=old)choice++;
-    return ids[choice];
+    const candidates=ids.filter(id=>id!==previous?.[level]);
+    const chances=candidates.map(id=>{const weight=weights?.[id];return weight!==undefined&&Number.isFinite(weight)&&weight>0?weight:1;});
+    let target=randomFraction(random)*chances.reduce((sum,weight)=>sum+weight,0);
+    for(let i=0;i<candidates.length;i++){target-=chances[i];if(target<0)return candidates[i];}
+    return candidates[candidates.length-1];
   });
 }

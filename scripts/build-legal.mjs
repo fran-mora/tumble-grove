@@ -94,6 +94,7 @@ const assets = [
   'public/fruit-collection-b.png', 'public/fruit-collection-b-prompt.txt',
   'public/favicon.svg', 'public/manifest.webmanifest',
   'app/fruit-shapes.ts', 'app/collection-shapes.ts', 'app/fruit-collection.ts',
+  'app/fruit-themes.ts', 'docs/fruit-themes.md',
   'scripts/trace-fruit-shapes.py', 'scripts/trace-collection.py',
   'docs/fruit-size-research.json', 'public/fruit-sizes.csv',
 ];
