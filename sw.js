@@ -1,5 +1,5 @@
-const CACHE = 'tumble-grove-dc02454afd92877a';
-const FILES = ["artwork-prompt.txt","assets/index-Bk2fmTik.js","assets/index-CX2LEpNM.css","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","manifest.webmanifest"];
+const CACHE = 'tumble-grove-2f894e5ff09735e7';
+const FILES = ["artwork-prompt.txt","assets/index-CX2LEpNM.css","assets/index-DRrDsF_X.js","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","manifest.webmanifest"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
