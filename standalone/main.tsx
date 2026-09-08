@@ -6,6 +6,7 @@ import '../app/globals.css';
 function OfflineStatus() {
   const [status, setStatus] = useState('Saving for offline play…');
   useEffect(() => {
+    if (import.meta.env.DEV) return;
     let alive = true;
     if (!('serviceWorker' in navigator)) { setStatus('Offline saving unavailable in this browser'); return; }
     const check = () => {
@@ -21,6 +22,6 @@ function OfflineStatus() {
       .catch(() => { if (alive) setStatus('Could not save offline. Connect and reload to retry.'); });
     return () => { alive = false; navigator.serviceWorker.removeEventListener('controllerchange', check); };
   }, []);
-  return <p role="status" className="offline-status">{status}</p>;
+  return import.meta.env.DEV ? null : <p role="status" className="offline-status">{status}</p>;
 }
 createRoot(document.getElementById('root')!).render(<><Home/><OfflineStatus/></>);

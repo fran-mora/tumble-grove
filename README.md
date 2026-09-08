@@ -24,7 +24,7 @@ npx tsc --noEmit
 npm run build
 ```
 
-React/Vinext with a client-side Canvas renderer. The physics engine has no network dependencies and uses a 120 Hz fixed step, convex fruit-silhouette collision constraints, mass-weighted impulses, friction, and collision-driven merges. Assets are bundled locally. The site does not need an external API, account database, or API key.
+React/Vite with a client-side Canvas renderer. Development runs at http://127.0.0.1:5174/. The physics engine has no network dependencies and uses a 120 Hz fixed step, convex fruit-silhouette collision constraints, mass-weighted impulses, friction, and collision-driven merges. Assets are bundled locally. The game is entirely static and needs no server runtime, external API, account database, or API key.
 
 ## Validation
 
@@ -66,6 +66,8 @@ Implementation references: [MDN device coordinate frames](https://developer.mozi
 
 Play at https://fran-mora.github.io/tumble-grove/ . In Safari, choose Share → Add to Home Screen, keep Open as Web App enabled if shown, and tap Add. Open the new icon while online and wait for **Ready for offline play** beneath the game. Then turn on airplane mode and reopen the app to check it before traveling. Classic and phone gravity modes both run locally. A round resets when the app reloads; best scores remain on that device.
 
-`npm run build:pages` creates a standalone static app in `dist-pages`, including a versioned service worker that saves every game asset before reporting offline readiness. `node scripts/check-offline.mjs` checks cached navigation, assets, and readiness with networking disabled. Publish the contents of `dist-pages` to the `gh-pages` branch; GitHub Pages serves that branch's root. The original Sites build remains available via `npm run build`.
+`npm run build` (also available as `npm run build:pages`) creates the static app in `dist-pages`, including a versioned service worker that saves every game asset before reporting offline readiness. `node scripts/check-offline.mjs` checks cached navigation, assets, and readiness with networking disabled. `npm start` previews the production build locally. Service worker registration is enabled only in production builds.
 
-The primary source repository is https://github.com/fran-mora/tumble-grove. The previous GitHub Pages address remains available as a compatibility copy for existing Home Screen installations. Best scores migrate in the current browser or Home Screen installation without clearing the old data. Legacy storage keys are read when migrating to the new name. Historical artwork prompts retain their original wording.
+GitHub Pages is the only deployment target. Publish the contents of `dist-pages` to the `gh-pages` branch of `fran-mora/tumble-grove`; GitHub Pages serves that branch's root. Keep source code on `main`.
+
+The source repository is https://github.com/fran-mora/tumble-grove. Install the Home Screen app from the Tumble Grove address above. Best scores migrate in the current browser or Home Screen installation without clearing the old data. Legacy storage keys are read when migrating to the new name. Historical artwork prompts retain their original wording.
