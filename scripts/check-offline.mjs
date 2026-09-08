@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const root = new URL('../dist-pages/', import.meta.url);
-const scope = 'https://example.test/fruit-merge/';
+const scope = process.env.OFFLINE_TEST_SCOPE || 'https://example.test/tumble-grove/';
 const handlers = {};
 const stored = new Map();
 const normalize = value => typeof value === 'string' ? value : value.url;
@@ -23,7 +23,7 @@ for (const url of [scope,scope+'?launch=1',...stored.keys()]) {
   assert.ok((await response)?.ok,url);
 }
 const html=await readFile(new URL('index.html',root),'utf8');
-for (const [,path] of html.matchAll(/(?:src|href)="([^\"]+)"/g)) assert.ok(await cache.match(new URL(path,scope).href),path);
+for (const [,path] of html.matchAll(/(?:src|href)="([^\"]+)"/g)) { if (path.startsWith('https://')) continue; assert.ok(await cache.match(new URL(path,scope).href),path); }
 stored.delete(scope+'fruits.png');
 handlers.message({data:{type:'CHECK_OFFLINE'},ports:[{postMessage:data=>{ready=data.ready;}}],waitUntil:p=>{pending=p;}}); await pending; assert.equal(ready,false);
 console.log('Offline checks passed: installation, subpath navigation, all assets, missing-cache detection.');

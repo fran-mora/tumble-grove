@@ -1,4 +1,4 @@
-# Fruit Merge
+# Tumble Grove
 
 A complete fruit dropping and merging web game, built as a separate project alongside Little Orchard.
 
@@ -34,7 +34,7 @@ Optional WebMCP read-game and drop-fruit tools use the same engine as the contro
 
 ## Artwork
 
-Original fruit character sprite sheet generated for this project. The original prompt is in public/artwork-prompt.txt; collection prompts are saved alongside their atlases. The runtime extracts the original 11 characters from public/fruits.png and 99 new choices from public/fruit-collection-a.png and public/fruit-collection-b.png; native fruit emoji provide a fallback if the image cannot load. Interface icons use Lucide. The game reimplements the drop-and-merge mechanic with original artwork and interface; it is not affiliated with an existing Fruit Merge publisher.
+Original fruit character sprite sheet generated for this project. The original prompt is in public/artwork-prompt.txt; collection prompts are saved alongside their atlases. The runtime extracts the original 11 characters from public/fruits.png and 99 new choices from public/fruit-collection-a.png and public/fruit-collection-b.png; native fruit emoji provide a fallback if the image cannot load. Interface icons use Lucide. The game reimplements the drop-and-merge mechanic with original artwork and interface; all game artwork and interface assets were created for this project.
 
 ## Fruit bounds
 
@@ -54,6 +54,8 @@ Implementation references: [MDN device coordinate frames](https://developer.mozi
 
 ## Offline iPhone app and GitHub Pages
 
-Play at https://fran-mora.github.io/fruit-merge/ . In Safari, choose Share → Add to Home Screen, keep Open as Web App enabled if shown, and tap Add. Open the new icon while online and wait for **Ready for offline play** beneath the game. Then turn on airplane mode and reopen the app to check it before traveling. Classic and phone gravity modes both run locally. A round resets when the app reloads; best scores remain on that device.
+Play at https://fran-mora.github.io/tumble-grove/ . In Safari, choose Share → Add to Home Screen, keep Open as Web App enabled if shown, and tap Add. Open the new icon while online and wait for **Ready for offline play** beneath the game. Then turn on airplane mode and reopen the app to check it before traveling. Classic and phone gravity modes both run locally. A round resets when the app reloads; best scores remain on that device.
 
 `npm run build:pages` creates a standalone static app in `dist-pages`, including a versioned service worker that saves every game asset before reporting offline readiness. `node scripts/check-offline.mjs` checks cached navigation, assets, and readiness with networking disabled. Publish the contents of `dist-pages` to the `gh-pages` branch; GitHub Pages serves that branch's root. The original Sites build remains available via `npm run build`.
+
+The primary source repository is https://github.com/fran-mora/tumble-grove. The previous GitHub Pages address remains available as a compatibility copy for existing Home Screen installations. Best scores migrate in the current browser or Home Screen installation without clearing the old data. Legacy storage keys are read when migrating to the new name. Historical artwork prompts retain their original wording.

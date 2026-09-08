@@ -7,7 +7,7 @@ const files = (await readdir(dir,{recursive:true,withFileTypes:true})).filter(e=
 const hash = createHash('sha256');
 for (const file of files) { hash.update(file); hash.update(await readFile(new URL(file,dir))); }
 const version = hash.digest('hex').slice(0,16);
-const sw = `const CACHE = 'fruit-merge-${version}';
+const sw = `const CACHE = 'tumble-grove-${version}';
 const FILES = ${JSON.stringify(files)};
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {

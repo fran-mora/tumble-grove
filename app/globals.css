@@ -19,3 +19,5 @@
 
 /* The physical rim is drawn on the canvas, leaving visible room for spills. */
 .game-board,.game-board.gravity-arena{border:0;border-radius:20px;box-shadow:none;max-height:none;background:transparent;overflow:hidden}.game-board:before{display:none}
+
+.brand{white-space:nowrap}.topbar{gap:12px}@media(max-width:640px){.brand{font-size:24px;letter-spacing:-1.2px}.brand>.fruit-image{width:32px;height:32px}.toolbar{flex-shrink:0}}
