@@ -8,11 +8,15 @@ import { requestPhoneTilt, type GravityVector } from './tilt';
 import { FRUIT_COLLECTION } from './fruit-collection';
 import { FRUIT_HISTORY_KEY } from './fruit-themes';
 import { VIEW_PADDING } from './arena';
-import { WIDTH, HEIGHT, STEP, MergeGame, type GameMode } from './engine';
+import { WIDTH, HEIGHT, STEP, MERGE_GATHER_SECONDS, MERGE_HOLD_SECONDS, MergeGame, type MergeEvent, type GameMode } from './engine';
 import { loadSprites, renderGame } from './render';
 
 type Modal = 'help' | 'restart' | 'win' | 'mode' | null;
-const getHud = (g: MergeGame) => ({lineup:g.lineup,theme:g.theme,mode:g.mode,score:g.score,drops:g.drops,merges:g.merges,highest:g.highest,next:g.next,current:g.current,over:g.over,danger:g.danger>.1,watermelons:g.watermelons,inspecting:g.inspecting,inspectedKind:g.bodies.find(b=>b.id===g.inspectedId)?.kind??null,hasFruit:g.bodies.length>0});
+const getHud = (g: MergeGame) => {
+  const event=g.events.findLast(e=>g.time-e.time>=MERGE_GATHER_SECONDS&&g.time-e.time<2.6);
+  const moment=event?{id:event.id,chain:event.chain,points:event.points,cleared:event.cleared,name:g.getFruit(event.kind).name}:null;
+  return {lineup:g.lineup,theme:g.theme,moment,mode:g.mode,score:g.score,drops:g.drops,merges:g.merges,highest:g.highest,next:g.next,current:g.current,over:g.over,danger:g.danger>.1,watermelons:g.watermelons,inspecting:g.inspecting,inspectedKind:g.bodies.find(b=>b.id===g.inspectedId)?.kind??null,hasFruit:g.bodies.length>0};
+};
 type ModelContext = { registerTool:(tool:{name:string;title:string;description:string;inputSchema:object;annotations:{readOnlyHint:boolean};execute:(input:unknown)=>unknown}, options:{signal:AbortSignal})=>void|Promise<void> };
 export default function Home() {
   const gameRef=useRef<MergeGame|null>(null);
@@ -41,16 +45,22 @@ export default function Home() {
   const [notice,setNotice]=useState('');
   const [ready,setReady]=useState(false);
   const pointRef=useRef<number|null>(null);
-  const playTone=useCallback((kind:number,drop=false)=>{
+  const playTone=useCallback((kind:number,drop=false,chain=1)=>{
     if(!soundRef.current)return;
     try{
       const audio=audioRef.current;
       if(!audio || audio.state!=='running')return;
-      const oscillator=audio.createOscillator(),gain=audio.createGain(),now=audio.currentTime;
-      oscillator.type='sine';oscillator.frequency.setValueAtTime(drop?320:370*Math.pow(2,kind/12),now);
-      oscillator.frequency.exponentialRampToValueAtTime(drop?155:550*Math.pow(2,kind/12),now+.09);
-      gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.11,now+.008);gain.gain.exponentialRampToValueAtTime(.001,now+(drop?.12:.3));
-      oscillator.connect(gain);gain.connect(audio.destination);oscillator.start();oscillator.stop(now+.35);
+      const now=audio.currentTime;
+      const notes=drop?[0]:chain>1?[0,4,7]:[0,7];
+      const base=drop?320:330*Math.pow(2,Math.min(18,kind+Math.max(0,chain-1)*2)/12);
+      for(const [index,note] of notes.entries()){
+        const oscillator=audio.createOscillator(),gain=audio.createGain(),start=now+index*.085,end=start+(drop?.14:.65);
+        oscillator.type='sine';oscillator.frequency.setValueAtTime(base*Math.pow(2,note/12),start);
+        if(drop)oscillator.frequency.exponentialRampToValueAtTime(155,start+.09);
+        gain.gain.setValueAtTime(0,start);gain.gain.linearRampToValueAtTime(drop?.09:.065/Math.sqrt(notes.length),start+.015);gain.gain.exponentialRampToValueAtTime(.001,end);
+        oscillator.connect(gain);gain.connect(audio.destination);oscillator.start(start);oscillator.stop(end+.02);
+        oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};
+      }
     }catch{/* Sound is optional; play remains available. */}
   },[]);
   const unlockAudio=useCallback(()=>{
@@ -79,7 +89,8 @@ export default function Home() {
     try{for(const mode of ['classic','gravity'] as const){const key=mode==='classic'?'tumblegrove.best':'tumblegrove.best.gravity';const legacyKey=mode==='classic'?'fruitmerge.best':'fruitmerge.best.gravity';const saved=Number(localStorage.getItem(key)??localStorage.getItem(legacyKey));if(Number.isFinite(saved)&&saved>0){bestScoresRef.current[mode]=Math.floor(saved);try{localStorage.setItem(key,String(Math.floor(saved)));}catch{}}}bestRef.current=bestScoresRef.current.classic;setBest(bestRef.current);}catch{}
     const canvas=canvasRef.current;if(!canvas)return;
     const ctx=canvas.getContext('2d');if(!ctx){setNotice('Canvas is unavailable in this browser. Please use a current browser to play.');return;}
-    let alive=true,last=0,accumulator=0,frame=0,lastUi=0,previousScore=0,previousMerges=0,previousWatermelons=0,wasOver=false;
+    let alive=true,last=0,accumulator=0,frame=0,lastUi=0,previousScore=0,previousWatermelons=0,wasOver=false;
+    const announcedEvents=new WeakSet<MergeEvent>();
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const resize=()=>{const rect=canvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);};
     const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
@@ -89,10 +100,17 @@ export default function Home() {
       const delta=last?Math.min((now-last)/1000,.05):0;last=now;
       if(!game.paused&&!game.over){accumulator+=delta;while(accumulator>=STEP){game.step();accumulator-=STEP;}}else accumulator=0;
       if(game.score!==previousScore){previousScore=game.score;if(game.score>bestRef.current){bestRef.current=game.score;bestScoresRef.current[game.mode]=game.score;setBest(game.score);try{localStorage.setItem(game.mode==='classic'?'tumblegrove.best':'tumblegrove.best.gravity',String(game.score));}catch{}}}
-      if(game.merges>previousMerges){const event=game.events.at(-1);if(event){playTone(event.kind);if(!event.cleared)setNotice(`You grew ${game.getFruit(event.kind).name}.`);}}
-      previousMerges=game.merges;
-      if(game.watermelons>previousWatermelons){setModal('win');modalRef.current='win';game.paused=true;}
-      previousWatermelons=game.watermelons;
+      const reveals=game.events.filter(event=>!announcedEvents.has(event)&&game.time-event.time>=MERGE_GATHER_SECONDS);
+      for(const event of reveals)announcedEvents.add(event);
+      // Handle simultaneous pairs without flooding audio, and sync chimes to the reveal.
+      for(const event of reveals.slice(-3))playTone(event.kind,false,event.chain);
+      const discovery=reveals.at(-1);
+      if(discovery)setNotice(discovery.cleared?`Final pair cleared. 100 points!`:`You grew ${game.getFruit(discovery.kind).name}.${discovery.chain>1?` ${discovery.chain}-step cascade!`:''}`);
+      if(game.watermelons<previousWatermelons)previousWatermelons=game.watermelons;
+      // Let the final fruit and any following cascade finish before a dialog pauses it.
+      if(game.watermelons>previousWatermelons&&game.events.every(event=>game.time-event.time>=MERGE_HOLD_SECONDS+.65)){
+        previousWatermelons=game.watermelons;setModal('win');modalRef.current='win';game.paused=true;
+      }
       if(game.over&&!wasOver)setNotice(`A fruit spilled. Final score: ${game.score}.`);
       wasOver=game.over;
       renderGame(ctx,game,spritesRef.current,reducedMotion,darkModeRef.current);
@@ -159,7 +177,7 @@ export default function Home() {
       <div className="play-column"><div className="play-controls"><div className={`gravity-control ${hud.mode==='gravity'?'is-on':''}`}>
           <Smartphone size={22} aria-hidden="true"/><div className="gravity-label"><label htmlFor="gravity-toggle">Gravity mode</label><span id="gravity-description">{tiltBusy?'Allow motion access, then gently tilt your phone…':hud.mode==='gravity'?'Tilt your phone. Gravity follows.':'A circular bowl you control with phone tilt.'}</span></div><Switch id="gravity-toggle" className="gravity-switch" checked={hud.mode==='gravity'} onCheckedChange={chooseMode} disabled={tiltBusy} aria-describedby="gravity-description" aria-label="Gravity mode"/>
         </div>{tiltBusy&&<button className="cancel-tilt" onClick={()=>tiltControllerRef.current?.abort()}>Cancel connection</button>}{tiltError&&<p className="tilt-error" role="alert">{tiltError}</p>}<div className="board-heading"><span>{hud.inspecting?'Take a closer look.':hud.mode==='gravity'?'Tilt, drop, and roll together.':'Make room for something bigger.'}</span><div className="board-actions"><button className="pause-button inspect-button" disabled={hud.over||tiltBusy||!hud.hasFruit} onClick={toggleInspect} aria-label="Inspect fruit" aria-pressed={hud.inspecting} title="Pause and tap fruit to see their names"><Search size={14}/> INSPECT</button><button className="pause-button" disabled={hud.over||tiltBusy} onClick={togglePause} aria-label={paused||hud.inspecting?'Resume game':'Pause game'}>{paused||hud.inspecting?<Play size={13}/>:<Pause size={13}/>} {paused||hud.inspecting?'RESUME':'PAUSE'}</button></div></div></div>
-        <p className="round-theme" data-theme={hud.theme.id} title={hud.theme.description}><Leaf size={14} aria-hidden="true"/><span className="round-theme-prefix">THIS ROUND</span><strong>{hud.theme.name}</strong></p>
+        <p className={`round-theme ${hud.moment&&!hud.inspecting?'merge-moment':''}`} data-theme={hud.theme.id} title={hud.moment&&!hud.inspecting?`${hud.moment.cleared?'Final pair cleared':hud.moment.name} · +${hud.moment.points} points`:hud.theme.description}>{hud.moment&&!hud.inspecting?<><Sparkles size={15} aria-hidden="true"/><strong key={hud.moment.id} className="merge-moment-copy">{hud.moment.cleared?'Final pair!':hud.moment.chain>1?`${hud.moment.chain}-step cascade!`:'Beautifully grown.'}</strong><span className="merge-points">+{hud.moment.points}</span></>:<><Leaf size={14} aria-hidden="true"/><span className="round-theme-prefix">THIS ROUND</span><strong>{hud.theme.name}</strong></>}</p>
         <div className="arena-stage"><div className={`game-board ${hud.inspecting?'is-inspecting':''} ${hud.danger?'in-danger':''} ${hud.mode==='gravity'?'gravity-arena':''}`} style={{'--arena-ratio':(WIDTH+2*VIEW_PADDING)/((hud.mode==='gravity'?WIDTH:HEIGHT)+2*VIEW_PADDING),aspectRatio:`${WIDTH+2*VIEW_PADDING}/${(hud.mode==='gravity'?WIDTH:HEIGHT)+2*VIEW_PADDING}`} as CSSProperties} >
           <canvas ref={canvasRef} className="game-canvas" width={WIDTH} height={hud.mode==='gravity'?WIDTH:HEIGHT} tabIndex={0} role="application" aria-describedby={hud.inspecting?'inspection-status':undefined} aria-label={hud.inspecting?'Tumble Grove inspection. Game paused. Tap a fruit to see its name, or use arrow keys to explore. Press Escape to resume.':`Tumble Grove play area. ${hud.mode==='gravity'?'Circular arena. Tilt your phone to change gravity. ':''}Current fruit: ${fruits[hud.current].name}. Use left and right arrows to aim, Space or Enter to drop, P to pause, I to inspect fruit.`}
             onPointerDown={event=>{if(event.button!==0)return;event.currentTarget.focus();const game=gameRef.current;if(game?.inspecting){const point=boardPoint(event.clientX,event.clientY);if(point){game.inspectFruit(point.x,point.y);sync();}return;}if(game?.paused)return;pointRef.current=event.pointerId;event.currentTarget.setPointerCapture(event.pointerId);aim(event.clientX,event.clientY);unlockAudio();}}
@@ -186,7 +204,7 @@ export default function Home() {
 
     <footer>Made for your happy little breaks.<span>DROP. MERGE. REPEAT.</span></footer><div className="sr-only" aria-live="polite" aria-atomic="true">{notice}</div>
     <Dialog open={modal==='help'||modal==='win'} onOpenChange={open=>{if(!open)closeDialog();}}><DialogContent className="game-dialog">
-      {modal==='win'?<><div className="dialog-art"><Fruit kind={10}/></div><DialogTitle className="dialog-title">Hello, {fruits[10].name.toLowerCase()}!</DialogTitle><DialogDescription className="dialog-copy">You grew the whole fruit family. Keep going for a bigger score—merge two final-level fruits to clear them and earn 100 bonus points.</DialogDescription><DialogClose className="primary-button"><Sparkles size={17}/> Keep growing</DialogClose></>:<><span className="eyebrow">A QUICK LITTLE GUIDE</span><DialogTitle className="dialog-title">Let’s grow something.</DialogTitle><DialogDescription className="dialog-copy">Aim, drop, and bring matching fruit together.</DialogDescription><ol className="rules"><li><b>Drop a fruit.</b><span>Move your mouse and click. On a phone, drag to aim and release to drop.</span></li><li><b>Make a match.</b><span>Two identical fruits touching become a bigger fruit and earn points.</span></li><li><b>Stack high. Don’t spill.</b><span>The dashed line is only a guide. Stack above it as high as you can; the round ends when a whole fruit falls outside the basket or through the bowl’s opening.</span></li><li><b>Learn their names.</b><span>New fruit names appear briefly after a merge. Choose Inspect to pause, then tap any fruit to see its name. Resume when you’re ready to keep playing.</span></li><li><b>A random theme each round.</b><span>The game randomly picks Tropical Grove, Temperate Orchard, Mediterranean Market or an occasional Wild Mix. It favours fruits that fit, with room for visiting fruits and fresh discoveries. Themes are loose growing and market associations, not claims of native origin. Each round still has 11 size levels and one fruit per level. Merge to discover the next one; two final-level fruits clear for 100 bonus points.</span></li></ol><p className="gravity-guide">Gravity mode: allow motion access on your phone, then tilt to roll fruit around the circular bowl. The opening and dotted guides follow gravity. Keep your fruit inside as you tilt. Switching modes starts a new round; each mode keeps its own best score.</p><p className="gravity-guide"><a href="./fruit-sizes.html" target="_blank" rel="noreferrer">See all 110 fruits, sizes and sources ↗</a></p><p className="gravity-guide"><a href="./credits.html" target="_blank" rel="noreferrer">Credits &amp; licences ↗</a></p><p className="keyboard-guide">Keyboard: <kbd>←</kbd> <kbd>→</kbd> aim · <kbd>Space</kbd> drop · <kbd>P</kbd> pause · <kbd>I</kbd> inspect. While inspecting: arrows select fruit, <kbd>Esc</kbd> resumes.</p><DialogClose className="primary-button">Got it. Let’s play <ArrowRight size={17}/></DialogClose></>}
+      {modal==='win'?<><div className="dialog-art"><Fruit kind={10}/></div><DialogTitle className="dialog-title">Hello, {fruits[10].name.toLowerCase()}!</DialogTitle><DialogDescription className="dialog-copy">You grew the whole fruit family. Keep going for a bigger score—merge two final-level fruits to clear them and earn 100 bonus points.</DialogDescription><DialogClose className="primary-button"><Sparkles size={17}/> Keep growing</DialogClose></>:<><span className="eyebrow">A QUICK LITTLE GUIDE</span><DialogTitle className="dialog-title">Let’s grow something.</DialogTitle><DialogDescription className="dialog-copy">Aim, drop, and bring matching fruit together.</DialogDescription><ol className="rules"><li><b>Drop a fruit.</b><span>Move your mouse and click. On a phone, drag to aim and release to drop.</span></li><li><b>Make a match.</b><span>Two identical fruits touching become a bigger fruit and earn points.</span></li><li><b>Stack high. Don’t spill.</b><span>The dashed line is only a guide. Stack above it as high as you can; the round ends when a whole fruit falls outside the basket or through the bowl’s opening.</span></li><li><b>Learn their names.</b><span>Merging fruit gather into a glowing new fruit, with a short beat before it can merge again. Cascades get brighter and their chimes rise with each step. Fruit names stay visible for three seconds; cascade counts celebrate the chain without multiplying your score. Choose Inspect to pause, then tap any fruit to see its name. Resume when you’re ready to keep playing.</span></li><li><b>A random theme each round.</b><span>The game randomly picks Tropical Grove, Temperate Orchard, Mediterranean Market or an occasional Wild Mix. It favours fruits that fit, with room for visiting fruits and fresh discoveries. Themes are loose growing and market associations, not claims of native origin. Each round still has 11 size levels and one fruit per level. Merge to discover the next one; two final-level fruits clear for 100 bonus points.</span></li></ol><p className="gravity-guide">Gravity mode: allow motion access on your phone, then tilt to roll fruit around the circular bowl. The opening and dotted guides follow gravity. Keep your fruit inside as you tilt. Switching modes starts a new round; each mode keeps its own best score.</p><p className="gravity-guide"><a href="./fruit-sizes.html" target="_blank" rel="noreferrer">See all 110 fruits, sizes and sources ↗</a></p><p className="gravity-guide"><a href="./credits.html" target="_blank" rel="noreferrer">Credits &amp; licences ↗</a></p><p className="keyboard-guide">Keyboard: <kbd>←</kbd> <kbd>→</kbd> aim · <kbd>Space</kbd> drop · <kbd>P</kbd> pause · <kbd>I</kbd> inspect. While inspecting: arrows select fruit, <kbd>Esc</kbd> resumes.</p><DialogClose className="primary-button">Got it. Let’s play <ArrowRight size={17}/></DialogClose></>}
     </DialogContent></Dialog>
     <AlertDialog open={modal==='restart'||modal==='mode'} onOpenChange={open=>{if(!open)closeDialog();}}><AlertDialogContent className="game-dialog"><AlertDialogTitle className="dialog-title">{modal==='mode'?`Switch to ${pendingMode==='gravity'?'gravity':'classic'} mode?`:'A fresh start?'}</AlertDialogTitle><AlertDialogDescription className="dialog-copy">{modal==='mode'?'Changing the arena starts a new round. Your personal bests will stay.':'This basket will be cleared. Your personal best will stay.'}</AlertDialogDescription><div className="dialog-actions"><AlertDialogCancel className="secondary-button">Keep playing</AlertDialogCancel><AlertDialogAction className="primary-button" onClick={()=>{if(modal==='mode')void changeMode(pendingMode);else reset();}}>{modal==='mode'?'Switch mode':'New game'}</AlertDialogAction></div></AlertDialogContent></AlertDialog>
   </main>;

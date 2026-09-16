@@ -6,7 +6,11 @@ export const WIDTH = 440;
 export const HEIGHT = 570;
 export const DANGER_Y = 100;
 export const STEP = 1 / 120;
-export const MERGE_LABEL_SECONDS = 2.2;
+export const MERGE_LABEL_SECONDS = 3;
+export const MERGE_GATHER_SECONDS = .24;
+export const MERGE_HOLD_SECONDS = 1.05;
+export const CASCADE_LINK_SECONDS = 3;
+export const mergeHoldSeconds = (chain:number) => MERGE_HOLD_SECONDS + Math.min(3,Math.max(0,chain-1))*.1;
 export const CIRCLE = {x:WIDTH/2,y:WIDTH/2,radius:WIDTH/2-.5};
 export const CIRCLE_DANGER = -CIRCLE.radius + 95;
 export type GameMode = 'classic' | 'gravity';
@@ -23,8 +27,9 @@ export const FRUITS = [
   { name: 'Melon', emoji: '🍈', radius: 84, color: '#b8ce77' },
   { name: 'Watermelon', emoji: '🍉', radius: 96, color: '#4b9952' },
 ] as const;
-export type FruitBody = { id: number; kind: number; x: number; y: number; vx: number; vy: number; angle: number; age: number };
-export type MergeEvent = { x: number; y: number; kind: number; points: number; time: number; cleared: boolean; bodyId: number | null };
+export type FruitBody = { id: number; kind: number; x: number; y: number; vx: number; vy: number; angle: number; age: number; birth?: { time:number; chain:number } };
+export type MergeSource = Pick<FruitBody, 'kind' | 'x' | 'y' | 'angle'>;
+export type MergeEvent = { id:number; chain:number; sources:MergeSource[]; x: number; y: number; kind: number; points: number; time: number; cleared: boolean; bodyId: number | null };
 export class MergeGame {
   bodies: FruitBody[] = [];
   events: MergeEvent[] = [];
@@ -164,7 +169,10 @@ export class MergeGame {
     this.watermelons = 0; this.serial = 0;
   }
   snapshot() {
-    return { theme:{id:this.theme.id,name:this.theme.name}, lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+    return { theme:{id:this.theme.id,name:this.theme.name}, lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, celebrations:this.events.map(e=>({id:e.id,chain:e.chain,kind:e.kind,name:this.getFruit(e.kind).name,age:Math.round((this.time-e.time)*100)/100,cleared:e.cleared,bodyId:e.bodyId})), bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+  }
+  private readyToMerge(body:FruitBody) {
+    return body.age>.08 && (!body.birth || this.time-body.birth.time>=mergeHoldSeconds(body.birth.chain));
   }
   step(dt = STEP) {
     if (this.paused || this.inspecting || this.over || dt <= 0 || !Number.isFinite(dt)) return;
@@ -198,7 +206,7 @@ export class MergeGame {
           const rb = FRUITS[b.kind].radius;
           const contact = hullContact(a, shapes.get(a.id)!, b, shapes.get(b.id)!);
           if (!contact) continue;
-          if (a.kind === b.kind && a.age > .08 && b.age > .08) {
+          if (a.kind === b.kind && this.readyToMerge(a) && this.readyToMerge(b)) {
             removed.add(a.id); removed.add(b.id); pairs.push([a, b]); continue;
           }
           const { nx, ny, depth } = contact;
@@ -229,19 +237,23 @@ export class MergeGame {
       this.bodies = this.bodies.filter(b => !removed.has(b.id));
       for (const [a, b] of pairs) {
         const kind = a.kind + 1, x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
+        // A cascade follows the result of a recent merge, not unrelated matches elsewhere.
+        const chain=1+Math.max(...[a,b].map(body=>body.birth&&this.time-body.birth.time<=CASCADE_LINK_SECONDS?body.birth.chain:0));
+        const sources=[a,b].map(({kind,x,y,angle})=>({kind,x,y,angle}));
         const cleared = kind === FRUITS.length;
         const points = cleared ? 100 : kind * (kind + 1) / 2;
         let bodyId: number | null = null;
         if (!cleared) {
           const fruit = this.addFruit(kind, x, y);
           bodyId = fruit.id;
+          fruit.birth={time:this.time,chain};
           if(this.mode==='gravity'){fruit.vx=(a.vx+b.vx)/2-this.down.x*35;fruit.vy=(a.vy+b.vy)/2-this.down.y*35;}
           else{fruit.vx = (a.vx + b.vx) / 2; fruit.vy = Math.min(0, (a.vy + b.vy) / 2) - 35;}
           this.highest = Math.max(this.highest, kind);
           if (kind === 10) this.watermelons++;
         }
         this.score += points; this.merges++;
-        this.events.push({ x, y, kind: Math.min(kind, 10), points, time: this.time, cleared, bodyId });
+        this.events.push({ id:this.merges, chain, sources, x, y, kind: Math.min(kind, 10), points, time: this.time, cleared, bodyId });
       }
     }
     // The dashed guide never ends a round. A whole fruit must spill outside.

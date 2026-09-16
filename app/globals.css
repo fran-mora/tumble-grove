@@ -155,3 +155,11 @@
 .dark [data-slot="dialog-overlay"],.dark [data-slot="alert-dialog-overlay"]{background:#060e0b80}
 /* Retain full 44px controls on the narrowest phones. */
 @media(max-width:360px) and (orientation:portrait){.topbar .brand{font-size:21px;letter-spacing:-1px;gap:4px}.topbar .brand>.fruit-image{width:24px;height:24px}}
+
+/* A celebration replaces the theme in its existing row, keeping mobile height fixed. */
+.round-theme.merge-moment{color:#6f5019;gap:7px}
+.merge-points{font-weight:800;color:#356645;font-variant-numeric:tabular-nums}
+.merge-moment-copy{animation:merge-moment-arrive .45s cubic-bezier(.2,.7,.2,1)}
+.dark .round-theme.merge-moment{color:#f2d08b}
+.dark .merge-points{color:#c1df9f}
+@keyframes merge-moment-arrive{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}

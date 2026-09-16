@@ -56,7 +56,7 @@ test('inspection cannot start on an empty or finished board and resets with the 
   assert.equal(game.inspecting,false);assert.equal(game.inspectedId,null);assert.equal(game.paused,false);
 });
 
-test('merge labels retain the new body and actual round variety for two seconds, then expire',()=>{
+test('merge labels retain the new body and actual round variety, then expire',()=>{
   for(let kind=0;kind<FRUITS.length;kind++){
     const game=new MergeGame(()=>.8);
     game.addFruit(kind,205,330).age=2;game.addFruit(kind,225,330).age=2;game.step();
@@ -76,6 +76,7 @@ function canvasRecorder(clientWidth,height){
   const text=[],boxes=[];
   const ctx=new Proxy({
     canvas:{width:504,height:height+64,clientWidth},
+    createRadialGradient(){return {addColorStop(){}};},
     measureText(value){return {width:value.length*parseFloat(this.font.replace('bold ',''))*.6};},
     fillText(value){text.push(value);},
     roundRect(x,y,width,height){boxes.push({x,y,width,height});},
@@ -99,11 +100,23 @@ test('Inspect renders every fruit name within a small phone canvas in both appea
 test('large merge names remain visible with reduced motion and cleared pairs do not announce a new fruit',()=>{
   for(const darkMode of [false,true])for(const reducedMotion of [false,true]){
     const game=new MergeGame(()=>.7);const body=game.addFruit(9,220,400);
-    game.events=[{x:220,y:400,kind:9,points:45,time:0,cleared:false,bodyId:body.id}];game.time=1.6;
+    game.events=[{id:1,chain:1,sources:[],x:220,y:400,kind:9,points:45,time:0,cleared:false,bodyId:body.id}];game.time=1.6;
     const visible=canvasRecorder(374,game.height);renderGame(visible.ctx,game,[],reducedMotion,darkMode);
     assert.ok(visible.text.includes(game.getFruit(9).name));
     game.events[0].cleared=true;game.bodies=[];
     const cleared=canvasRecorder(374,game.height);renderGame(cleared.ctx,game,[],reducedMotion,darkMode);
     assert.ok(!cleared.text.includes(game.getFruit(9).name));
+  }
+});
+
+
+test('cascade labels fit every fruit name at narrow arena edges in both appearances',()=>{
+  for(const darkMode of [false,true])for(const fruit of FRUIT_COLLECTION){
+    const game=new MergeGame(()=>0);game.lineup[fruit.level]=fruit.id;
+    const body=game.addFruit(fruit.level,fruit.id%2?0:440,570);body.angle=1.2;
+    game.events=[{id:1,chain:8,sources:[],x:body.x,y:body.y,kind:fruit.level,points:55,time:0,cleared:false,bodyId:body.id}];game.time=.6;
+    const {ctx,text,boxes}=canvasRecorder(180,game.height);renderGame(ctx,game,[],false,darkMode);
+    assert.ok(text.includes(fruit.name));assert.ok(text.includes('+55 · 8-step cascade'));
+    for(const box of boxes){assert.ok(box.x>=-VIEW_PADDING&&box.x+box.width<=440+VIEW_PADDING);assert.ok(box.y>=-VIEW_PADDING&&box.y+box.height<=game.height+VIEW_PADDING);}
   }
 });
