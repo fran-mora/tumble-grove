@@ -30,6 +30,19 @@ for (const file of ['fruit-sizes.html','credits.html','legal/project-license.txt
   assert.equal(await (await documentResponse).text(),await readFile(new URL(file,root),'utf8'));
 }
 for (const [,path] of html.matchAll(/(?:src|href)="([^\"]+)"/g)) { if (path.startsWith('https://')) continue; assert.ok(await cache.match(new URL(path,scope).href),path); }
+// An active worker may have updated while a tab still runs the previous bundle.
+const entry=[...stored.keys()].find(url=>url.endsWith('.js'));
+assert.ok(entry);
+async function readiness(entry){
+  let result;
+  handlers.message({data:{type:'CHECK_OFFLINE',entry},ports:[{postMessage:data=>{result=data;}}],waitUntil:p=>{pending=p;}});
+  await pending;return result;
+}
+assert.equal((await readiness(entry)).current,true);
+const older=await readiness(scope+'assets/previous-release.js');
+assert.equal(older.ready,true);assert.equal(older.current,false);
+assert.equal((await readiness()).current,undefined); // Older clients remain compatible.
 stored.delete(scope+'fruits.png');
+assert.equal((await readiness(scope+'assets/previous-release.js')).ready,false); // Never offer an incomplete offline update.
 handlers.message({data:{type:'CHECK_OFFLINE'},ports:[{postMessage:data=>{ready=data.ready;}}],waitUntil:p=>{pending=p;}}); await pending; assert.equal(ready,false);
-console.log('Offline checks passed: installation, game/size/credits/licence navigation, all assets, missing-cache detection.');
+console.log('Offline checks passed: installation, game/size/credits/licence navigation, all assets, missing-cache detection, current/older client versions.');

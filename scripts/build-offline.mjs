@@ -32,7 +32,7 @@ self.addEventListener('message', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     const entries = await Promise.all(urls.map(url => cache.match(url)));
-    event.ports[0]?.postMessage({ready:entries.every(Boolean)});
+    event.ports[0]?.postMessage({ready:entries.every(Boolean),current:typeof event.data.entry==='string'?urls.includes(event.data.entry):undefined});
   })());
 });
 `;

@@ -26,7 +26,7 @@
 
 .brand{white-space:nowrap}.topbar{gap:12px}@media(max-width:640px){.brand{font-size:24px;letter-spacing:-1.2px}.brand>.fruit-image{width:32px;height:32px}.toolbar{flex-shrink:0}}
 
-.offline-status{text-align:center;padding:0 18px max(18px,env(safe-area-inset-bottom));margin:0;font-size:13px;color:#326c48}
+.offline-status{display:block;text-align:center;padding:0 18px max(18px,env(safe-area-inset-bottom));margin:0;font-size:13px;color:#326c48}
 
 .board-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .board-heading{gap:10px;flex-wrap:wrap}
@@ -163,3 +163,6 @@
 .dark .round-theme.merge-moment{color:#f2d08b}
 .dark .merge-points{color:#c1df9f}
 @keyframes merge-moment-arrive{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+.offline-status.has-update{display:flex;align-items:center;justify-content:center;gap:10px}
+.offline-update{min-height:44px;padding:6px 12px;border:1px solid var(--border);border-radius:10px;background:var(--accent);font-size:12px;font-weight:700;color:var(--foreground)}
