@@ -1,5 +1,5 @@
-const CACHE = 'tumble-grove-9ea9cce424d5335e';
-const FILES = ["artwork-prompt.txt","assets/index-CGSZGg13.css","assets/index-uYw-DCQo.js","credits.html","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","legal/bundled-dependencies.json","legal/dependency-inventory.json","legal/project-license.txt","legal/third-party-notices.txt","manifest.webmanifest"];
+const CACHE = 'tumble-grove-52465472c3a2be72';
+const FILES = ["artwork-prompt.txt","assets/index-BpiOkHiF.css","assets/index-DTKJxMLT.js","credits.html","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","legal/bundled-dependencies.json","legal/dependency-inventory.json","legal/project-license.txt","legal/third-party-notices.txt","manifest.webmanifest"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
