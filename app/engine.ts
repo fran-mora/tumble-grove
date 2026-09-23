@@ -1,6 +1,6 @@
 import { FRUIT_COLLECTION } from './fruit-collection.ts';
-import { chooseThemedRound, parseFruitHistory, type FruitHistory, type RoundTheme } from './fruit-themes.ts';
-import { basketWalls, bowlWalls, collideWithWalls, outsideBasket, outsideBowl, MOUTH_HALF_ANGLE } from './arena.ts';
+import { chooseColourfulRound, parseFruitHistory, type FruitHistory } from './fruit-selection.ts';
+import { basketWalls, bowlWalls, collideWithWalls, containInBasket, containInBowl, outsideBasket, outsideBowl, MOUTH_HALF_ANGLE } from './arena.ts';
 import { fruitHull, hullContact, circleTravel } from './collision.ts';
 export const WIDTH = 440;
 export const HEIGHT = 570;
@@ -55,15 +55,14 @@ export class MergeGame {
   private serial = 0;
   random: () => number;
   lineup: number[];
-  theme: RoundTheme;
   historyRevision = 0;
   private history: FruitHistory;
   private encountered = new Set<number>();
   private appearanceRandom:()=>number;
   constructor(random: () => number = Math.random, appearanceRandom:()=>number=random, savedHistory?:unknown) {
     this.random=random;this.appearanceRandom=appearanceRandom;this.history=parseFruitHistory(savedHistory);
-    const round=chooseThemedRound(appearanceRandom,this.history);
-    this.lineup=round.lineup;this.theme=round.theme;this.historyRevision++;
+    const round=chooseColourfulRound(appearanceRandom,this.history);
+    this.lineup=round.lineup;this.historyRevision++;
     this.rememberFruit(0);
   }
   getFruitHistory(){return parseFruitHistory(this.history);}
@@ -160,8 +159,8 @@ export class MergeGame {
     return true;
   }
   reset() {
-    const round=chooseThemedRound(this.appearanceRandom,this.history,this.lineup);
-    this.lineup=round.lineup;this.theme=round.theme;this.historyRevision++;this.encountered.clear();this.rememberFruit(0);
+    const round=chooseColourfulRound(this.appearanceRandom,this.history,this.lineup);
+    this.lineup=round.lineup;this.historyRevision++;this.encountered.clear();this.rememberFruit(0);
     this.bodies = []; this.events = []; this.score = 0; this.drops = 0; this.merges = 0;
     this.highest = 0; this.current = 0; this.next = 0; this.aim = WIDTH / 2;
     this.time = 0; this.cooldown = 0; this.danger = 0; this.over = false; this.paused = false;
@@ -169,7 +168,7 @@ export class MergeGame {
     this.watermelons = 0; this.serial = 0;
   }
   snapshot() {
-    return { theme:{id:this.theme.id,name:this.theme.name}, lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, celebrations:this.events.map(e=>({id:e.id,chain:e.chain,kind:e.kind,name:this.getFruit(e.kind).name,age:Math.round((this.time-e.time)*100)/100,cleared:e.cleared,bodyId:e.bodyId})), bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, celebrations:this.events.map(e=>({id:e.id,chain:e.chain,kind:e.kind,name:this.getFruit(e.kind).name,age:Math.round((this.time-e.time)*100)/100,cleared:e.cleared,bodyId:e.bodyId})), bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
   }
   private readyToMerge(body:FruitBody) {
     return body.age>.08 && (!body.birth || this.time-body.birth.time>=mergeHoldSeconds(body.birth.chain));
@@ -187,6 +186,11 @@ export class MergeGame {
       if(length>.045)this.gravityDirection={x:this.gravity.x/length,y:this.gravity.y/length};
     }
     const walls=this.mode==='gravity'?bowlWalls(CIRCLE,CIRCLE.radius,this.down):basketWalls(WIDTH,HEIGHT);
+    const references=new Map(this.bodies.map(body=>[body.id,{x:body.x,y:body.y}]));
+    const contain=(body:FruitBody,shape:ReturnType<MergeGame['getShape']>,reference:{x:number;y:number},bounce=true)=>{
+      if(this.mode==='classic')containInBasket(body,shape,reference,WIDTH,HEIGHT,bounce);
+      else containInBowl(body,shape,reference,CIRCLE,CIRCLE.radius,this.down,bounce);
+    };
     for (const b of this.bodies) {
       b.age += dt; b.vx += (this.mode==='gravity'?this.gravity.x:0)*1050*dt; b.vy += (this.mode==='gravity'?this.gravity.y:1)*1050*dt;
       b.vx *= Math.exp(-.8 * dt);
@@ -195,6 +199,8 @@ export class MergeGame {
     }
     // Rotation stays fixed during position solving; only world translations change.
     const shapes = new Map(this.bodies.map(b => [b.id, this.getShape(b.kind,b.angle)]));
+    // Stop fast motion at solid boundaries before looking for merge contacts.
+    for(const body of this.bodies)contain(body,shapes.get(body.id)!,references.get(body.id)!);
     const removed = new Set<number>();
     const pairs: [FruitBody, FruitBody][] = [];
     for (let iteration = 0; iteration < 8; iteration++) {
@@ -230,7 +236,9 @@ export class MergeGame {
       for (const b of this.bodies) {
         if (removed.has(b.id)) continue;
         const shape = shapes.get(b.id)!;
+        contain(b,shape,references.get(b.id)!);
         collideWithWalls(b,shape,walls);
+        contain(b,shape,references.get(b.id)!);
       }
     }
     if (pairs.length) {
@@ -247,8 +255,16 @@ export class MergeGame {
           const fruit = this.addFruit(kind, x, y);
           bodyId = fruit.id;
           fruit.birth={time:this.time,chain};
-          if(this.mode==='gravity'){fruit.vx=(a.vx+b.vx)/2-this.down.x*35;fruit.vy=(a.vy+b.vy)/2-this.down.y*35;}
-          else{fruit.vx = (a.vx + b.vx) / 2; fruit.vy = Math.min(0, (a.vy + b.vy) / 2) - 35;}
+          // Preserve the parents' average velocity; celebration is visual, never a kick.
+          fruit.vx=(a.vx+b.vx)/2;fruit.vy=(a.vy+b.vy)/2;
+          const shape=this.getShape(kind);
+          const startA=references.get(a.id)!,startB=references.get(b.id)!;
+          const reference={x:(startA.x+startB.x)/2,y:(startA.y+startB.y)/2};
+          // The larger silhouette must fit before it is rendered or checked for a spill.
+          contain(fruit,shape,reference,false);
+          collideWithWalls(fruit,shape,walls);
+          contain(fruit,shape,reference,false);
+          shapes.set(fruit.id,shape);
           this.highest = Math.max(this.highest, kind);
           if (kind === 10) this.watermelons++;
         }

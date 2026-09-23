@@ -57,14 +57,19 @@
       "bytes": 4121
     },
     {
-      "path": "app/fruit-themes.ts",
-      "sha256": "18bd24b2ed47747f077d759929c125ee09a7316dade3c90561b8fe010a76367c",
-      "bytes": 5984
+      "path": "app/fruit-selection.ts",
+      "sha256": "73498d33bc2bbe5320a67845f382dd1e7e1d549973f15637877012b6200101da",
+      "bytes": 3789
     },
     {
-      "path": "docs/fruit-themes.md",
-      "sha256": "c3197140d71b7a243714a898c7e764a697e6b6493215ec315bf0ace4408fd1d5",
-      "bytes": 6565
+      "path": "app/fruit-colours.ts",
+      "sha256": "3c7af110850bb0d88b901baa05673a6c5a9f5f0d03a84cf42b9d7c7b04ff4ccd",
+      "bytes": 7461
+    },
+    {
+      "path": "docs/fruit-colours.md",
+      "sha256": "1059764a5be1c3f2a24ec57aff16ed0ad090c727af120836c5a5220db612a5ae",
+      "bytes": 2475
     },
     {
       "path": "scripts/trace-fruit-shapes.py",
@@ -75,6 +80,11 @@
       "path": "scripts/trace-collection.py",
       "sha256": "08c3b9b37c14a4595efc7d8068599250ff253409f5624866b1a0f8c37ebd2601",
       "bytes": 3882
+    },
+    {
+      "path": "scripts/measure-fruit-colours.py",
+      "sha256": "af3c5607a00e7f94b872264358dd3165f77b2f8febbd5e4bd1c04fb953a81315",
+      "bytes": 2427
     },
     {
       "path": "docs/fruit-size-research.json",

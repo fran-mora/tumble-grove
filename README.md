@@ -16,7 +16,7 @@ Use the moon/sun button in the top-right toolbar to switch dark mode on or off w
 
 Newly merged fruit show their names and earned points for three seconds. Labels follow the result, stay upright, and remain readable with reduced motion enabled. Busy chain reactions show up to three names of surviving results at a time, so consumed fruit do not leave misleading labels behind. Choose **Inspect** above the arena to freeze the board and tap a fruit to see its name and highlight its silhouette; **Resume** returns to play. Inspection pauses gravity, merges and cooldowns and prevents pointer, keyboard and tool-driven drops. It becomes available after the first drop. Keyboard users can press **I** to inspect, use the arrows to select fruit, and press **Escape** to resume. Selected names and merge discoveries are also announced to screen readers. Neither feature reveals fruit that have not yet appeared.
 
-Touching identical fruit merge through 11 growth levels. Each new round randomly picks Tropical Grove, Temperate Orchard, Mediterranean Market (30% each), or Wild Mix (10%), then picks one character at each level from 110 fruit and variety characters (10 choices per level). Matching fruit are favoured, with room for guests. Within-level selection history balances repeated appearances, with a small boost for fruit not yet encountered. That family remains fixed for the whole round, and the next round changes every level’s character. Merges score triangular points (1, 3, 6, …, 55). Two final-level fruit clear for 100 points. The dashed line is only a guide: fruit can stack above it indefinitely. A round ends only when a whole fruit spills outside. The basket has finite side walls and an open rim; the circular bowl has a visible opening that rotates with gravity. Fruit may protrude through the opening without immediately ending the round.
+Touching identical fruit merge through 11 growth levels. Each new round mixes the entire collection, picking one character at each level from 110 fruit and variety characters (10 choices per level). Colours already in the lineup are less likely to repeat, especially in neighbouring levels; there are no climate or region themes. Within-level selection history balances repeated appearances, with a small boost for fruit not yet encountered. That family remains fixed for the whole round, and the next round changes every level’s character. Merges score triangular points (1, 3, 6, …, 55). Two final-level fruit clear for 100 points. The dashed line is only a guide: fruit can stack above it indefinitely. A round ends only when a whole fruit spills outside. The basket has finite side walls and an open rim; the circular bowl has a visible opening that rotates with gravity. Fruit may protrude through the opening without immediately ending the round.
 
 Includes a next-fruit preview, aim guide, optional synthesized sound, pause, restart confirmation, final-level celebration, reduced-motion support, and local personal-best storage. The fruit waiting to drop has a name label that follows the preview, stays upright with phone tilt, and moves around the sprite to fit within the arena. Browser storage may be unavailable or cleared; this never prevents play. The active round is not saved on refresh. Fruit selection/discovery history is saved locally when storage is available, independently of best scores.
 
@@ -84,16 +84,27 @@ GitHub Pages is the only deployment target. Publish the contents of `dist-pages`
 
 The source repository is https://github.com/fran-mora/tumble-grove. Install the Home Screen app from the Tumble Grove address above. Best scores migrate in the current browser or Home Screen installation without clearing the old data. Legacy storage keys are read when migrating to the new name. Historical artwork prompts retain their original wording.
 
-## Random round themes
+## Colourful mixed rounds
 
-The theme is rolled by the game; there is no player selection. A compact “This round” label shows the theme without revealing the lineup. Themes are overlapping growing and market associations, not native-origin claims. Size levels, merge rules, and drop odds stay the same. History distinguishes hidden lineup selections from fruit actually displayed or created, and records each encounter once per round.
+Each round favours a spread of colours measured from the actual artwork. This is a soft preference: repeated colours remain possible, and history balancing keeps all varieties in rotation. Size levels, merge rules and drop odds stay the same. History distinguishes hidden lineup selections from fruit actually displayed or created, and records each encounter once per round. Existing saved history is preserved.
 
-[Theme associations, sources and balancing details](docs/fruit-themes.md) explain the current coverage and weighting. Run `npm run test:themes` for tests or `npm run simulate:themes` for a reproducible 30,000-round distribution check.
+[Colour measurement and balancing details](docs/fruit-colours.md) explain the selection and its limits. Run `npm run test:selection` for tests or `npm run simulate:selection` for a reproducible 30,000-round comparison against uniform random selection.
 
 ## Merge celebrations and cascade pacing
 
 The consumed pair gathers for about a quarter of a second, then the full-size result reveals with a warm glow, an expanding ring and a small burst of sparkles. Its fruit name and actual earned points remain readable for three seconds. Reduced motion replaces gathering, animated rings and particles with a steady outline and the same paced result and labels.
 
-A newly grown fruit remains solid and moves normally, but cannot merge again for 1.05 seconds. Consecutive cascade steps add 0.1 seconds to that interval, capped at 1.35 seconds. Normal drop cooldown and the world physics speed are unchanged. A cascade follows a result merging again within three seconds; unrelated simultaneous matches each start at step one. The cascade count celebrates successive merges and does not multiply the score. The existing theme row briefly shows the celebration without adding height on mobile.
+A newly grown fruit remains solid and moves normally, but cannot merge again for 1.05 seconds. Consecutive cascade steps add 0.1 seconds to that interval, capped at 1.35 seconds. Normal drop cooldown and the world physics speed are unchanged. A cascade follows a result merging again within three seconds; unrelated simultaneous matches each start at step one. The cascade count celebrates successive merges and does not multiply the score. The round caption briefly shows the celebration without adding height on mobile.
 
 Optional two/three-note chimes accompany the reveal and rise with cascade depth. A final-fruit dialog waits until current celebrations finish. Pausing or inspecting freezes animation time along with physics. Resetting clears all birth/celebration state. Tests cover protected results still colliding, causal counting, independent matches, expiry, final pair clearing, four-step cascades in both arenas and narrow-screen label bounds.
+
+## Solid-wall containment
+
+A merge inherits the parents' average velocity without an extra kick. Its new,
+larger hull is fitted against the solid walls immediately, before rendering and
+spill detection. One-sided interior constraints also stop collision pressure or
+fast movement from resolving through the back of the thin basket base/sides or
+closed bowl arc. Finite rim contacts and the bowl mouth remain open, so genuine
+spills still end a round. Regression tests cover every merging alternative at
+floor corners and rotated bowl walls, fast motion, dense stacks, normal spills,
+and paced cascades. Four of these regression tests fail against the previous code.

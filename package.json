@@ -15,8 +15,8 @@
     "format": "oxfmt",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "build:pages": "npm run build",
-    "test:themes": "node --experimental-strip-types --test tests/themes.test.mjs",
-    "simulate:themes": "node --experimental-strip-types scripts/simulate-themes.mjs"
+    "test:selection": "node --experimental-strip-types --test tests/selection.test.mjs",
+    "simulate:selection": "node --experimental-strip-types scripts/simulate-selection.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

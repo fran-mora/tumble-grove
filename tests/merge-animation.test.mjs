@@ -84,7 +84,9 @@ test('final pairs clear once and preserve the cascade without creating an out-of
 
 test('four-step cascades progress one reveal at a time in a basket and bowl',()=>{
   for(const mode of ['classic','gravity']){
-    const game=new MergeGame(()=>0);game.setMode(mode);const x=mode==='gravity'?220:400;
+    // A rounded lineup keeps this stack in contact without depending on a merge kick.
+    let seed=1;const appearance=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+    const game=new MergeGame(()=>0,mode==='classic'?appearance:()=>0);game.setMode(mode);const x=mode==='gravity'?220:400;
     for(const [kind,dx,y] of [[0,-8,250],[0,8,250],[1,0,290],[2,0,345],[3,0,400]])game.addFruit(kind,x+dx,y).age=2;
     const completed=[];let previous=0;
     for(let step=0;step<5/STEP;step++){
