@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const buildDirectory=process.argv[2]??'dist-pages';
+if(!['dist-pages','ios/TumbleGrove/Web'].includes(buildDirectory))throw new Error('Unexpected build directory');
 const read = file => readFile(path.join(root, file), 'utf8');
 const json = async file => JSON.parse(await read(file));
 const sha256 = content => createHash('sha256').update(content).digest('hex');
@@ -13,7 +15,7 @@ const save = async (file, content) => {
   await writeFile(target, content);
 };
 const lock = await json('package-lock.json');
-const bundled = await json('dist-pages/legal/bundled-dependencies.json');
+const bundled = await json(`${buildDirectory}/legal/bundled-dependencies.json`);
 const additions = await json('docs/legal/third-party-sources.json');
 const accepted = new Set(['MIT', 'ISC', 'Apache-2.0', '0BSD', 'BSD-2-Clause', 'BSD-3-Clause']);
 const selected = new Map();
@@ -82,7 +84,7 @@ const inventory = JSON.stringify({
 const projectLicense = await read('LICENSE');
 await save('THIRD_PARTY_NOTICES.txt', notices);
 await save('docs/legal/dependency-inventory.json', inventory);
-for (const directory of ['public/legal', 'dist-pages/legal']) {
+for (const directory of ['public/legal', `${buildDirectory}/legal`]) {
   await save(`${directory}/third-party-notices.txt`, notices);
   await save(`${directory}/project-license.txt`, projectLicense);
   await save(`${directory}/dependency-inventory.json`, inventory);
@@ -93,6 +95,7 @@ const assets = [
   'public/fruit-collection-a.png', 'public/fruit-collection-a-prompt.txt',
   'public/fruit-collection-b.png', 'public/fruit-collection-b-prompt.txt',
   'public/favicon.svg', 'public/manifest.webmanifest',
+  'public/ios-app-icon.png', 'public/ios-app-icon-prompt.txt',
   'app/fruit-shapes.ts', 'app/collection-shapes.ts', 'app/fruit-collection.ts',
   'app/fruit-selection.ts', 'app/fruit-colours.ts', 'docs/fruit-colours.md',
   'scripts/trace-fruit-shapes.py', 'scripts/trace-collection.py', 'scripts/measure-fruit-colours.py',

@@ -32,3 +32,12 @@ yarn-error.log*
 *.tsbuildinfo
 
 /dist-pages/
+
+# Native build output and local Xcode state
+/ios/TumbleGrove/Web/
+/ios/build/
+**/xcuserdata/
+*.xcuserstate
+*.xcarchive
+*.ipa
+/ios/ExportOptions.local.plist

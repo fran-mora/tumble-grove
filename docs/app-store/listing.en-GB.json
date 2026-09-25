@@ -1,0 +1,17 @@
+{
+  "name": "Tumble Grove",
+  "subtitle": "A colourful fruit puzzle",
+  "promotionalText": "Meet a fresh mix of fruit every round. Stack, merge and discover new varieties, or tilt your phone to send them tumbling around a circular bowl.",
+  "description": "A little fruit. A satisfying chain reaction. One more round.\n\nDrop colourful fruit into the basket and bring matching pairs together. Each merge grows a larger fruit, with a gentle reveal that lets you enjoy every step of a cascade. Keep stacking until a fruit spills out.\n\nDISCOVER YOUR NEXT FAVOURITE FRUIT\nExplore 110 fruit and variety characters, from familiar favourites to less familiar discoveries. Each round picks a fresh mix across 11 growth levels, favouring a spread of colours. The fruit waiting to drop shows its name, and new merges introduce themselves too. Curious about one already in the basket? Pause with Inspect and tap it to learn its name.\n\nGIVE GRAVITY A TWIST\nPlay the classic basket, or switch on Gravity mode and tilt your phone to move fruit around a circular bowl. The opening and drop guide turn with gravity.\n\nPLAY AT YOUR OWN PACE\nEnjoy optional sound, light and dark modes, pause controls and reduced-motion support. Challenge your own best score in each mode.\n\nThe complete game works offline, with no account, ads or in-app purchases. Best scores and fruit-selection history stay on your device. A fresh launch starts a new round.\n\nFruit illustrations are playful interpretations. Real fruit sizes vary by variety and growing conditions.",
+  "keywords": "fruit,merge,puzzle,physics,relaxing,offline,tilt,stack,colourful,discovery,casual",
+  "primaryLanguage": "en-GB",
+  "primaryCategory": "GAMES",
+  "gameSubcategories": [
+    "PUZZLE",
+    "CASUAL"
+  ],
+  "marketingURL": "https://fran-mora.github.io/tumble-grove/",
+  "privacyPolicyURL": "https://fran-mora.github.io/tumble-grove/privacy.html",
+  "supportURL": "https://fran-mora.github.io/tumble-grove/support.html",
+  "reviewNotes": "Tumble Grove is a complete offline fruit-merging physics game. All game code, fruit artwork and gameplay resources are included in the app; no login, server or additional download is required.\n\nTo play, drag across the arena to aim and release to drop a fruit. Identical fruit merge into the next growth level. New rounds select a different lineup from 110 fruit and variety characters. A round ends when a whole fruit spills outside the basket or through the circular bowl opening. Crossing the dotted guide is allowed.\n\nAfter dropping a fruit, choose Inspect to pause the game, then tap fruit to see their names. Choose Resume to continue. The moon/sun control changes appearance. Sound is optional.\n\nOn a physical iPhone, enable Gravity mode and tilt the device to change the direction of gravity. Any requested motion access is used locally for this feature. The classic basket remains playable without motion access.\n\nBest scores, appearance and fruit-selection history are stored locally. The current round is not restored after the app process restarts. There are no ads, in-app purchases, accounts, tracking SDKs or developer-operated gameplay servers. Credits, licences and the fruit-size research are available in Help."
+}

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Home from '../app/page';
+import { isNativeApp } from '../app/native';
 import '../app/globals.css';
 
 function OfflineStatus() {
   const [status, setStatus] = useState(()=> 'serviceWorker' in navigator?'Saving for offline play…':'Offline saving unavailable in this browser');
   const [updateReady, setUpdateReady] = useState(false);
   useEffect(() => {
-    if (import.meta.env.DEV) return;
+    if (import.meta.env.DEV || isNativeApp()) return;
     let alive = true, checkingUpdate = false;
     let registration: ServiceWorkerRegistration | undefined;
     const channels = new Map<MessageChannel, ReturnType<typeof setTimeout>>();
@@ -48,6 +49,6 @@ function OfflineStatus() {
       for(const [channel,timer] of channels){clearTimeout(timer);channel.port1.close();}channels.clear();
     };
   }, []);
-  return import.meta.env.DEV ? null : <output className={`offline-status ${updateReady?'has-update':''}`}><span>{status}</span>{updateReady&&<button className="offline-update" onClick={()=>window.location.reload()} title="Load the latest game and start a new round">Update &amp; restart</button>}</output>;
+  return import.meta.env.DEV || isNativeApp() ? null : <output className={`offline-status ${updateReady?'has-update':''}`}><span>{status}</span>{updateReady&&<button className="offline-update" onClick={()=>window.location.reload()} title="Load the latest game and start a new round">Update &amp; restart</button>}</output>;
 }
 createRoot(document.getElementById('root')!).render(<><Home/><OfflineStatus/></>);

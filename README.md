@@ -2,6 +2,10 @@
 
 A complete fruit dropping and merging web game, built as a separate project alongside Little Orchard.
 
+The [native iPhone/iPad project](ios/README.md) bundles the same game for iOS,
+with native tilt controls and offline resources. See the [App Store release
+status](docs/app-store/release-status.md) for validation and submission progress.
+
 ## Licensing and credits
 
 Original contributions are **rights reserved**, with personal play and offline saving allowed by the [project rights notice](LICENSE). This is not an open-source release. Third-party components and adapted UI source retain their upstream licences; their full text is in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). The game's Help dialog links to [Credits & licences](https://fran-mora.github.io/tumble-grove/credits.html), which also works offline.
@@ -74,13 +78,13 @@ Sensor access needs a secure context and a browser exposing DeviceOrientationEve
 
 Implementation references: [MDN device coordinate frames](https://developer.mozilla.org/en-US/docs/Web/API/Device_orientation_events/Orientation_and_motion_data_explained), [MDN orientation permission](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/requestPermission_static), and [W3C screen orientation](https://www.w3.org/TR/screen-orientation/#dfn-current-orientation-angle).
 
-## Offline iPhone app and GitHub Pages
+## Offline Home Screen app and GitHub Pages
 
 Play at https://fran-mora.github.io/tumble-grove/ . In Safari, choose Share → Add to Home Screen, keep Open as Web App enabled if shown, and tap Add. Open the new icon while online and wait for **Ready for offline play** beneath the game. Then turn on airplane mode and reopen the app to check it before traveling. Classic and phone gravity modes both run locally. A round resets when the app reloads; best scores remain on that device.
 
 `npm run build` (also available as `npm run build:pages`) creates the static app in `dist-pages`, including a versioned service worker that saves every game asset before reporting offline readiness. `node scripts/check-offline.mjs` checks cached navigation, assets, and readiness with networking disabled. `npm start` previews the production build locally. Service worker registration is enabled only in production builds. Returning to an open tab or reconnecting checks for a newer release. When the offline cache is ready but the open tab still runs an older bundle, an **Update & restart** button appears; it explicitly starts a new round instead of reloading an active game automatically. Best scores and saved preferences are retained.
 
-GitHub Pages is the only deployment target. Publish the contents of `dist-pages` to the `gh-pages` branch of `fran-mora/tumble-grove`; GitHub Pages serves that branch's root. Keep source code on `main`.
+GitHub Pages is the only web hosting target. Publish the contents of `dist-pages` to the `gh-pages` branch of `fran-mora/tumble-grove`; GitHub Pages serves that branch's root. Keep source code on `main`. The [native iOS build](ios/README.md) uses its own bundled resources and release process.
 
 The source repository is https://github.com/fran-mora/tumble-grove. Install the Home Screen app from the Tumble Grove address above. Best scores migrate in the current browser or Home Screen installation without clearing the old data. Legacy storage keys are read when migrating to the new name. Historical artwork prompts retain their original wording.
 

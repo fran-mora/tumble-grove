@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } fr
 import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
 import { requestPhoneTilt, type GravityVector } from './tilt';
+import { isNativeApp, observeNativeActivity } from './native';
 import { FRUIT_COLLECTION } from './fruit-collection';
 import { FRUIT_HISTORY_KEY } from './fruit-selection';
 import { VIEW_PADDING } from './arena';
@@ -37,6 +38,8 @@ export default function Home() {
   const [best,setBest]=useState(0);
   const [sound,setSound]=useState(false);
   const [paused,setPaused]=useState(false);
+  const [appActivity,setAppActivity]=useState({inactive:false});
+  const appInactiveRef=useRef(false);
   const [tiltBusy,setTiltBusy]=useState(false);
   const [tiltError,setTiltError]=useState('');
   const [pendingMode,setPendingMode]=useState<GameMode>('gravity');
@@ -69,7 +72,7 @@ export default function Home() {
   },[]);
   const sync=useCallback(()=>{const g=gameRef.current;if(g)setHud(getHud(g));},[]);
   const doDrop=useCallback((x?:number)=>{
-    const game=gameRef.current;if(!game||busyRef.current)return false;
+    const game=gameRef.current;if(!game||busyRef.current||appInactiveRef.current)return false;
     unlockAudio();const dropped=game.drop(x);if(dropped){playTone(0,true);sync();}return dropped;
   },[playTone,sync,unlockAudio]);
   const reset=useCallback(()=>{pointRef.current=null;gameRef.current?.reset();setPaused(false);setModal(null);modalRef.current=null;setNotice('A fresh mix of fruit.');sync();canvasRef.current?.focus();},[sync]);
@@ -98,7 +101,7 @@ export default function Home() {
     const animate=(now:number)=>{
       if(!alive)return;
       const delta=last?Math.min((now-last)/1000,.05):0;last=now;
-      if(!game.paused&&!game.over){accumulator+=delta;while(accumulator>=STEP){game.step();accumulator-=STEP;}}else accumulator=0;
+      if(!appInactiveRef.current&&!game.paused&&!game.over){accumulator+=delta;while(accumulator>=STEP){game.step();accumulator-=STEP;}}else accumulator=0;
       if(game.score!==previousScore){previousScore=game.score;if(game.score>bestRef.current){bestRef.current=game.score;bestScoresRef.current[game.mode]=game.score;setBest(game.score);try{localStorage.setItem(game.mode==='classic'?'tumblegrove.best':'tumblegrove.best.gravity',String(game.score));}catch{}}}
       const reveals=game.events.filter(event=>!announcedEvents.has(event)&&game.time-event.time>=MERGE_GATHER_SECONDS);
       for(const event of reveals)announcedEvents.add(event);
@@ -118,12 +121,25 @@ export default function Home() {
       frame=requestAnimationFrame(animate);
     };
     frame=requestAnimationFrame(animate);
-    const visibility=()=>{saveFruitHistory();if(document.hidden&&game.drops>0&&!game.over){game.paused=true;setPaused(true);}};
+    const native=isNativeApp();let nativeActive=true;
+    const updateNativeActivity=()=>{
+      const inactive=!nativeActive||document.hidden;
+      appInactiveRef.current=inactive;setAppActivity({inactive});last=0;accumulator=0;
+      if(inactive){
+        pointRef.current=null;game.paused=true;saveFruitHistory();
+        void audioRef.current?.suspend().catch(()=>{});
+      }else if(soundRef.current){void audioRef.current?.resume().catch(()=>{});}
+      // Resuming only removes this pause reason. The effect below retains a
+      // manual pause, inspection, an open dialog, or a pending tilt connection.
+    };
+    const stopNativeActivity=observeNativeActivity(active=>{nativeActive=active;updateNativeActivity();});
+    const visibility=()=>{saveFruitHistory();if(native)updateNativeActivity();else if(document.hidden&&game.drops>0&&!game.over){pointRef.current=null;game.paused=true;setPaused(true);}};
+    if(native)updateNativeActivity();
     document.addEventListener('visibilitychange',visibility);
     window.addEventListener('pagehide',saveFruitHistory);
-    return()=>{saveFruitHistory();window.removeEventListener('pagehide',saveFruitHistory);alive=false;tiltControllerRef.current?.abort();tiltStopRef.current?.();cancelAnimationFrame(frame);observer.disconnect();document.removeEventListener('visibilitychange',visibility);void audioRef.current?.close().catch(()=>{});audioRef.current=null;};
+    return()=>{saveFruitHistory();stopNativeActivity();window.removeEventListener('pagehide',saveFruitHistory);alive=false;tiltControllerRef.current?.abort();tiltStopRef.current?.();cancelAnimationFrame(frame);observer.disconnect();document.removeEventListener('visibilitychange',visibility);void audioRef.current?.close().catch(()=>{});audioRef.current=null;};
   },[playTone]);
-  useEffect(()=>{modalRef.current=modal;if(gameRef.current)gameRef.current.paused=paused||hud.inspecting||modal!==null||tiltBusy;},[paused,hud.inspecting,modal,tiltBusy]);
+  useEffect(()=>{modalRef.current=modal;if(gameRef.current)gameRef.current.paused=paused||hud.inspecting||modal!==null||tiltBusy||appActivity.inactive;},[paused,hud.inspecting,modal,tiltBusy,appActivity]);
   useEffect(()=>{
     if(!notice)return;const timer=setTimeout(()=>setNotice(''),3500);return()=>clearTimeout(timer);
   },[notice]);
@@ -157,7 +173,7 @@ export default function Home() {
       busyRef.current=true;setTiltBusy(true);game.paused=true;
       const controller=new AbortController();tiltControllerRef.current?.abort();tiltControllerRef.current=controller;
       try{
-        const stop=await requestPhoneTilt(vector=>{latestTiltRef.current=vector;if(game.mode==='gravity')game.setGravity(vector.x,vector.y);},{signal:controller.signal});
+        const stop=await requestPhoneTilt(vector=>{latestTiltRef.current=vector;if(game.mode==='gravity')game.setGravity(vector.x,vector.y);},{signal:controller.signal,onError:error=>{if(!controller.signal.aborted){setTiltError(error.message);game.paused=true;setPaused(true);}}});
         if(controller.signal.aborted){stop();return;}
         tiltStopRef.current=stop;game.setMode('gravity');game.setGravity(latestTiltRef.current.x,latestTiltRef.current.y);
         bestRef.current=bestScoresRef.current.gravity;setBest(bestRef.current);setPaused(false);setNotice('Gravity mode on. Tilt your phone to move the fruit.');

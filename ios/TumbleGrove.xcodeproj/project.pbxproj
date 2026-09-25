@@ -1,0 +1,454 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		12330255334BBBD61AF23A26 /* BundledResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F9EBC62F6E98D7600DE963B /* BundledResources.swift */; };
+		4E47D2CBE6D717BD532B407A /* Web in Resources */ = {isa = PBXBuildFile; fileRef = A5957A4E40200871656CB6D6 /* Web */; };
+		753418027815672601DEAEFB /* ScreenGravity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF9EEFE68887D37D12E0D31 /* ScreenGravity.swift */; };
+		8C2BA2B7CF95EDC3D4876333 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 56A90135DCCFC7E3C0A8FB2C /* Assets.xcassets */; };
+		9616A93071560C26482F2266 /* TumbleGroveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058C1F357A623CDCAD599201 /* TumbleGroveApp.swift */; };
+		BB7E25A2585BA6C5812F9C88 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13BFA8861286328C1E0AC600 /* PrivacyInfo.xcprivacy */; };
+		C90C2993CA0439DFC906FA2B /* DocumentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541C335A22D8F60518B57A66 /* DocumentScreen.swift */; };
+		DF0811F468DCABB8FB09AC9B /* NativeShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D17ACCDE2934EFFA82B1842B /* NativeShellTests.swift */; };
+		E6441AB284764D89EC6627C0 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE508D7C97F63C32083CFC58 /* GameController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3E73FD4B4164E8EC236AC194 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 71F549EA543165C3943092D9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 92FD4D38C0EF0440A6947D6B;
+			remoteInfo = TumbleGrove;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		058C1F357A623CDCAD599201 /* TumbleGroveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TumbleGroveApp.swift; sourceTree = "<group>"; };
+		13BFA8861286328C1E0AC600 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		4F9EBC62F6E98D7600DE963B /* BundledResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledResources.swift; sourceTree = "<group>"; };
+		541C335A22D8F60518B57A66 /* DocumentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentScreen.swift; sourceTree = "<group>"; };
+		56A90135DCCFC7E3C0A8FB2C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7EF9EEFE68887D37D12E0D31 /* ScreenGravity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenGravity.swift; sourceTree = "<group>"; };
+		8A7AB7E4F8A820B873D71180 /* TumbleGroveTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TumbleGroveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BA4F630B483DA5C63EE52BA /* TumbleGrove.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TumbleGrove.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A5957A4E40200871656CB6D6 /* Web */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Web; path = TumbleGrove/Web; sourceTree = SOURCE_ROOT; };
+		D17ACCDE2934EFFA82B1842B /* NativeShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeShellTests.swift; sourceTree = "<group>"; };
+		EE508D7C97F63C32083CFC58 /* GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0F89E8A89EA44622F216719F /* TumbleGroveTests */ = {
+			isa = PBXGroup;
+			children = (
+				D17ACCDE2934EFFA82B1842B /* NativeShellTests.swift */,
+			);
+			path = TumbleGroveTests;
+			sourceTree = "<group>";
+		};
+		83C86D5F997A5AADFE1B60F0 = {
+			isa = PBXGroup;
+			children = (
+				E670694553F459B667A0144A /* TumbleGrove */,
+				0F89E8A89EA44622F216719F /* TumbleGroveTests */,
+				F500EF132188BD982D187B42 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA9407816668A4157A59FA38 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				4F9EBC62F6E98D7600DE963B /* BundledResources.swift */,
+				541C335A22D8F60518B57A66 /* DocumentScreen.swift */,
+				EE508D7C97F63C32083CFC58 /* GameController.swift */,
+				7EF9EEFE68887D37D12E0D31 /* ScreenGravity.swift */,
+				058C1F357A623CDCAD599201 /* TumbleGroveApp.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		E670694553F459B667A0144A /* TumbleGrove */ = {
+			isa = PBXGroup;
+			children = (
+				56A90135DCCFC7E3C0A8FB2C /* Assets.xcassets */,
+				13BFA8861286328C1E0AC600 /* PrivacyInfo.xcprivacy */,
+				A5957A4E40200871656CB6D6 /* Web */,
+				AA9407816668A4157A59FA38 /* Sources */,
+			);
+			path = TumbleGrove;
+			sourceTree = "<group>";
+		};
+		F500EF132188BD982D187B42 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8BA4F630B483DA5C63EE52BA /* TumbleGrove.app */,
+				8A7AB7E4F8A820B873D71180 /* TumbleGroveTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		92FD4D38C0EF0440A6947D6B /* TumbleGrove */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA4B60BACDAB1647D5693610 /* Build configuration list for PBXNativeTarget "TumbleGrove" */;
+			buildPhases = (
+				0BCF8DA1A44293D2F4BAA02A /* Sources */,
+				62EA8C4877929230AAF47E06 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TumbleGrove;
+			packageProductDependencies = (
+			);
+			productName = TumbleGrove;
+			productReference = 8BA4F630B483DA5C63EE52BA /* TumbleGrove.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D543F9639E1FED79EA3DB385 /* TumbleGroveTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5F40C2B5FBF93BFB8A1701D9 /* Build configuration list for PBXNativeTarget "TumbleGroveTests" */;
+			buildPhases = (
+				4F4F537B56419104777D2A16 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				79905612DCE5CC10E160BD25 /* PBXTargetDependency */,
+			);
+			name = TumbleGroveTests;
+			packageProductDependencies = (
+			);
+			productName = TumbleGroveTests;
+			productReference = 8A7AB7E4F8A820B873D71180 /* TumbleGroveTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		71F549EA543165C3943092D9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					92FD4D38C0EF0440A6947D6B = {
+						DevelopmentTeam = 8XX87M89M2;
+						ProvisioningStyle = Automatic;
+					};
+					D543F9639E1FED79EA3DB385 = {
+						DevelopmentTeam = 8XX87M89M2;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A339230D6D23222F15F435CF /* Build configuration list for PBXProject "TumbleGrove" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 83C86D5F997A5AADFE1B60F0;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				92FD4D38C0EF0440A6947D6B /* TumbleGrove */,
+				D543F9639E1FED79EA3DB385 /* TumbleGroveTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		62EA8C4877929230AAF47E06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8C2BA2B7CF95EDC3D4876333 /* Assets.xcassets in Resources */,
+				BB7E25A2585BA6C5812F9C88 /* PrivacyInfo.xcprivacy in Resources */,
+				4E47D2CBE6D717BD532B407A /* Web in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0BCF8DA1A44293D2F4BAA02A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12330255334BBBD61AF23A26 /* BundledResources.swift in Sources */,
+				C90C2993CA0439DFC906FA2B /* DocumentScreen.swift in Sources */,
+				E6441AB284764D89EC6627C0 /* GameController.swift in Sources */,
+				753418027815672601DEAEFB /* ScreenGravity.swift in Sources */,
+				9616A93071560C26482F2266 /* TumbleGroveApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F4F537B56419104777D2A16 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DF0811F468DCABB8FB09AC9B /* NativeShellTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		79905612DCE5CC10E160BD25 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 92FD4D38C0EF0440A6947D6B /* TumbleGrove */;
+			targetProxy = 3E73FD4B4164E8EC236AC194 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		410DBB9D14BE3528688AFC25 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TumbleGrove/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.franmora.tumblegrove;
+				PRODUCT_NAME = TumbleGrove;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C218B424F8BD84A34FBE873C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.franmora.tumblegrove.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TumbleGrove.app/TumbleGrove";
+			};
+			name = Debug;
+		};
+		C528EE338BF44819E846A155 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 8XX87M89M2;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C53036AA97E4877D894F4294 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TumbleGrove/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.franmora.tumblegrove;
+				PRODUCT_NAME = TumbleGrove;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F31365DD0C9D07DAB199BCC9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.franmora.tumblegrove.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TumbleGrove.app/TumbleGrove";
+			};
+			name = Release;
+		};
+		F9F532E57A2AC492DAE43A82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 8XX87M89M2;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5F40C2B5FBF93BFB8A1701D9 /* Build configuration list for PBXNativeTarget "TumbleGroveTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C218B424F8BD84A34FBE873C /* Debug */,
+				F31365DD0C9D07DAB199BCC9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A339230D6D23222F15F435CF /* Build configuration list for PBXProject "TumbleGrove" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9F532E57A2AC492DAE43A82 /* Debug */,
+				C528EE338BF44819E846A155 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EA4B60BACDAB1647D5693610 /* Build configuration list for PBXNativeTarget "TumbleGrove" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				410DBB9D14BE3528688AFC25 /* Debug */,
+				C53036AA97E4877D894F4294 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 71F549EA543165C3943092D9 /* Project object */;
+}

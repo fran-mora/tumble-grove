@@ -42,6 +42,16 @@
       "bytes": 253
     },
     {
+      "path": "public/ios-app-icon.png",
+      "sha256": "78edac9c4f5821aad59147086cb9dbed1934d4a253b9990adfa71a6e7ec6aac9",
+      "bytes": 1199940
+    },
+    {
+      "path": "public/ios-app-icon-prompt.txt",
+      "sha256": "280bea113a1437b35fc4157b8d6727447c8a61334eeeb1b21341210de7d8815d",
+      "bytes": 2242
+    },
+    {
       "path": "app/fruit-shapes.ts",
       "sha256": "c7378b16715379503f55e66fb9ae05a79a39f98650c1000c23b3a382e6b5ef7a",
       "bytes": 5669
