@@ -1,8 +1,8 @@
 # iOS release status
 
-Status recorded 25 September 2026. **Version 1.0, build 1 was uploaded to App
-Store Connect successfully and entered processing. It has not been submitted
-for review, approved, or published on the App Store.** These notes distinguish
+Status recorded 25 September 2026. **Version 1.0, build 1 completed processing:
+TestFlight shows upload Complete and build Ready to Submit, with a 90-day expiry.
+It has not been submitted for review, approved, or published on the App Store.** These notes distinguish
 local packaging and simulator evidence from Apple's distribution process.
 
 ## Implemented and checked
@@ -43,19 +43,30 @@ local packaging and simulator evidence from Apple's distribution process.
 - One standard Xcode App Store Connect upload of the same signed archive
   succeeded at **11:09:28 Europe/London on 25 September 2026**. Xcode reported
   “Uploaded package is processing” and “Upload succeeded”, and exited with code
-  0. This records accepted delivery for processing, not final build processing,
-  review approval or public release. Local upload log:
+  0. App Store Connect subsequently confirmed processing completion: TestFlight
+  shows upload Complete and build 1 Ready to Submit, with a 90-day expiry.
+  This does not record review approval or public release. Local upload log:
   `/private/tmp/tumble-ios-upload.log`.
 - Two authentic 6.9-inch iPhone screenshots have been captured and visually
   checked: classic gameplay with a cascade, and dark-mode Mangosteen inspection.
   Opaque JPEG upload copies and provenance are in [screenshots](screenshots/README.md).
   They have not been uploaded to App Store Connect; an iPad capture is outstanding.
-- The App Store description, promotional text, keywords, marketing URL,
-  copyright and review notes were entered and Save was clicked; sign-in was
-  marked unnecessary. Browser timeouts prevented confirming the final persisted
-  form, so recheck these fields before submission. No private review contact was
-  entered. Screenshot upload, age rating, categories, pricing, territories and
-  privacy declarations remain unfinished.
+  The browser screenshot-upload attempt failed with “Not allowed” because
+  AllowFileURLs was unavailable; no screenshot upload was completed.
+- The main version listing was rechecked: promotional text, description,
+  keywords, marketing URL, copyright and sign-in-not-required persisted. The
+  App Review Notes textbox was observed empty and needs to be filled again.
+  No private App Review contact was entered.
+- App Information saved the subtitle “A colourful fruit puzzle” and the
+  Games / Puzzle / Casual categories; its Saved indicator was observed.
+- The age-rating questionnaire was answered with all listed content absent or
+  No. Apple calculated 4+; the category choice was Not Applicable rather than
+  Made for Kids. The modal Save was clicked. Content rights was set to Yes for
+  licensed third-party content and Done was clicked. **Persistence of these age
+  and content-rights choices is not confirmed:** the parent form still needed
+  saving, and navigation produced an unsaved-changes prompt.
+- The existing per-app Non-Trader status was visible. No new trader-status
+  declaration was made. Pricing, territories and App Privacy remain unfinished.
 
 The signing setup uses automatic signing for team `8XX87M89M2`, bundle ID
 `com.franmora.tumblegrove`, version 1.0, build 1. Private signing keys and account
@@ -81,22 +92,29 @@ Local artifacts are ignored by Git:
 
 - Remaining native UI checks continue. Physical-device tilt, permission denial,
   interruptions, cold-launch performance and prolonged play have not been verified.
-- The Mac became locked during the remaining store workflow. Its owner must
-  unlock it before UI work can resume. The two task-created test simulators were
-  shut down after the Mac developed severe load; no user applications were stopped.
+- The Mac is now unlocked. The owner needs to bring App Store Connect to the
+  front and cancel the leave-page prompt so the pending form can be saved and
+  verified. An unrelated Chrome window was foreground, and automatic approval
+  review blocked interaction with that unrelated window. The two task-created
+  test simulators had been shut down after severe Mac load; no user applications
+  were stopped.
 - App Store Connect is signed in, and app record **6816024635** has been created
   for `com.franmora.tumblegrove` in Prepare for Submission. An updated developer
-  agreement is awaiting the owner's acceptance. Build 1 delivery succeeded;
-  confirm processing completes and resolve any subsequent Apple feedback.
+  agreement is awaiting the owner's acceptance. Build 1 completed processing
+  and is Ready to Submit; this is not a review submission.
 - The public support email/contact needs owner approval. Privacy and support
   documents are drafts only; their proposed public URLs have not been published
   and the game does **not yet include those links in Help**. Credits and fruit
   sizes are already available there.
+- Permission to use the owner's private App Review contact details is pending.
+  Keep those details out of the public repository and policy/support pages.
 - Finish and publish the approved policy/support pages, include them in the
   native resources, add Help links, and verify those links and listing claims.
-- Finish authentic native screenshots for the declared device families; record
-  the actual age rating, eligible territories, price/release choice, content
-  rights and privacy declarations in App Store Connect using verified facts.
+- Finish authentic native screenshots for the declared device families and
+  upload them through a permitted file-selection path. Save and verify the
+  pending age-rating/content-rights choices, refill App Review Notes, and record
+  eligible territories, price/release choice and privacy declarations using
+  verified facts.
 - After the remaining content changes, increment the build number, rebuild and
   validate the final archive/IPA, upload, wait for Apple's processing, select the
   processed build and submit the complete record. Record
