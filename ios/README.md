@@ -34,7 +34,7 @@ IPAs and personal Xcode state are ignored by Git.
 
 `project.yml` is the source of truth for XcodeGen. The app target is
 `TumbleGrove`, deployment target iOS 17, bundle ID `com.franmora.tumblegrove`,
-version 1.0 / build 1. Signing uses automatic provisioning for team 8XX87M89M2.
+version 1.0 / build 2. Signing uses automatic provisioning for team 8XX87M89M2.
 The signing identity and App Store app record must match before distribution.
 Increase `CURRENT_PROJECT_VERSION` before uploading another build after Apple
 has accepted a previous build with the same version and build number.
@@ -135,8 +135,9 @@ policy. The main game does not navigate to web pages. Bundled reference pages
 open in a separate sheet with Back and Done controls and no native bridge or
 JavaScript. User-activated HTTP/HTTPS reference links open in the system browser;
 arbitrary URL schemes are rejected. Credits and fruit-size references are
-bundled. Privacy and support pages remain drafts and are not yet linked in Help;
-complete those before submission.
+bundled alongside privacy and support pages, all linked from Help. The support
+page links to the public GitHub Issues tracker in the system browser; posting
+there requires a GitHub account and an internet connection.
 
 There is no native service-worker registration, web install status, or web update
 prompt. App Store updates replace bundled resources; the GitHub Pages release

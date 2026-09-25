@@ -24,7 +24,7 @@ for (const url of [scope,scope+'?launch=1',...stored.keys()]) {
 }
 const html=await readFile(new URL('index.html',root),'utf8');
 // Offline links must return their actual documents, rather than the game shell.
-for (const file of ['fruit-sizes.html','credits.html','legal/project-license.txt','legal/third-party-notices.txt','legal/dependency-inventory.json']) {
+for (const file of ['fruit-sizes.html','credits.html','privacy.html','support.html','legal/project-license.txt','legal/third-party-notices.txt','legal/dependency-inventory.json']) {
   let documentResponse;
   handlers.fetch({request:{url:scope+file+'?from=help',method:'GET',mode:'navigate'},respondWith:p=>{documentResponse=p;}});
   assert.equal(await (await documentResponse).text(),await readFile(new URL(file,root),'utf8'));
@@ -45,4 +45,4 @@ assert.equal((await readiness()).current,undefined); // Older clients remain com
 stored.delete(scope+'fruits.png');
 assert.equal((await readiness(scope+'assets/previous-release.js')).ready,false); // Never offer an incomplete offline update.
 handlers.message({data:{type:'CHECK_OFFLINE'},ports:[{postMessage:data=>{ready=data.ready;}}],waitUntil:p=>{pending=p;}}); await pending; assert.equal(ready,false);
-console.log('Offline checks passed: installation, game/size/credits/licence navigation, all assets, missing-cache detection, current/older client versions.');
+console.log('Offline checks passed: installation, game/size/credits/privacy/support/licence navigation, all assets, missing-cache detection, current/older client versions.');

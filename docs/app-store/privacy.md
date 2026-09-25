@@ -1,66 +1,55 @@
-# Tumble Grove privacy policy — publication draft
-
-Prepared 23 September 2026. This text is for the bundled iOS app. Before copying
-it to the public policy and the app, add the verified publisher identity and
-private support contact, confirm the support handling below, and audit the final
-native build. Do not publish this editorial paragraph as policy text.
-
----
+Publication source: [public/privacy.html](../../public/privacy.html). The support route is public GitHub Issues; no private email or phone contact is published.
 
 # Privacy in Tumble Grove
 
-Tumble Grove is an offline fruit puzzle game. You can play without an account.
-The game includes no advertising or third-party analytics and does not send
-gameplay, scores or motion readings to a developer-operated server.
+Last updated: 25 September 2026
+
+A fruit puzzle you can play without an account, advertising or third-party analytics.
+
+Tumble Grove is published by **Francesco Moramarco**. This policy covers the iOS game, the browser version and support for the game. Gameplay, scores and motion readings are not sent to a developer-operated server.
 
 ## Information kept on your device
 
-The game stores your personal best scores, light/dark appearance preference and
-fruit-selection and discovery history in the app's local storage. This makes
-future rounds more varied and remembers your preferences. The current round is
-held in memory and is not restored after the app process restarts.
+The game stores personal best scores for each mode, your light/dark appearance preference, and fruit-selection and discovery history in local storage. This remembers your preferences and helps vary future fruit lineups. These records are not linked to an account or uploaded by the game.
 
-These records are not linked to an account and are not uploaded by the game.
-They remain until the app's data is removed. Deleting the app, rather than
-offloading it, removes its local data. Your device's backup and restore settings
-may retain or restore app data; those services are controlled by you and Apple.
+The current round is held in memory. Returning to an app that is still running preserves the round; reloading the page or restarting the app process starts a new one.
+
+The installed iOS game contains its game code, fruit artwork and reference pages. The browser version can save those resources in its offline cache. This cache supports offline play and is not used for advertising or tracking.
+
+Local records remain until the app or browser data is removed. Deleting the iOS app, rather than offloading it, removes its local data. In a browser, use its website-data controls to clear Tumble Grove's data. Device backups may retain or restore app data according to your settings and Apple's services.
 
 ## Optional motion controls
 
-Gravity mode uses your device's motion or orientation to change gravity in the
-game. These readings are processed on your device, are not stored as a history
-and are not sent to the developer. Turn Gravity mode off to stop the feature.
-Classic mode is available without motion controls.
+Gravity mode uses your device's motion or orientation to change gravity in the game. The readings are processed on your device, are not stored as a history, and are not sent to the developer.
 
-## Websites and support
+Turn Gravity mode off to stop the feature. Classic mode works without motion controls. In the iOS app, motion updates stop while the app is inactive or a separate reference sheet is open.
 
-The game can open support and reference websites in your browser. Those websites
-receive the information normally sent by a browser and have their own privacy
-practices. The game's website is hosted by GitHub Pages. See
-[GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
-for its services.
+## Websites and platform services
 
-If you choose to contact the developer, the message and contact details you
-provide are used to respond and investigate your request. Provide only the
-information needed to explain the issue. Public GitHub issues, including your
-username and anything you post, are visible to others; do not post private or
-sensitive information there.
+Opening an external reference or project link takes you to your browser. That website receives the information normally sent when you visit it and follows its own privacy policy.
 
-Support correspondence is kept only as long as needed to handle the request and
-any related legal obligations. You can use the private contact on the support
-page to request access, correction or deletion of personal information you have
-provided. Public content and copies controlled by third-party platforms are
-also subject to their policies.
+The public game and information pages are hosted on GitHub Pages. Online visits involve GitHub's hosting service, which may process connection and usage information, such as an IP address and request time. Read [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement) for its practices. The installed iOS game does not need to contact GitHub to play or read its bundled information pages.
 
-## Your choices
+Apple handles App Store downloads, device backups and other platform services under its own policies and your device settings. Tumble Grove does not use advertising identifiers, tracking SDKs or third-party analytics.
 
-You can play offline, leave Gravity mode off, remove local app data by deleting
-the app, and choose whether to contact support or open external websites. The
-game does not use advertising identifiers or track you across other apps.
+## When you contact support
 
-Apple handles App Store downloads and platform services under its own policies.
-Any future change to the game's data handling will be reflected in this policy
-and the App Store privacy information.
+Support is available through [Tumble Grove's public GitHub Issues](https://github.com/fran-mora/tumble-grove/issues). Posting requires a GitHub account and an internet connection. This is a public forum, not a private support channel. Do not post passwords, email addresses, phone numbers or other personal or sensitive information.
 
-For privacy questions, use the private contact on the
-[Tumble Grove support page](https://fran-mora.github.io/tumble-grove/support.html).
+If you choose to post an issue, your GitHub username, message and attachments are visible to others. Francesco Moramarco uses the information you choose to share to respond and investigate the issue. The game does not automatically send support reports, gameplay records or device information to GitHub.
+
+Issues and comments remain on GitHub according to its features and policies; closing an issue does not delete its contents. Use GitHub's controls to edit your own posts, and its privacy and support routes for requests concerning data held by GitHub. Public copies, notifications and content controlled by others may remain outside the developer's control.
+
+## Your choices and questions
+
+You can play offline, leave Gravity mode off, remove local data, and choose whether to contact support or open an external website. Changes to the game's data handling will be reflected in this policy and, where relevant, the App Store privacy information.
+
+**Questions for Francesco Moramarco**
+
+[Ask a question on GitHub Issues](https://github.com/fran-mora/tumble-grove/issues)
+
+A GitHub account is needed to post. Posts are public; ask general questions without sharing personal or sensitive details. For a request involving data held by GitHub, use the contact routes in [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+For gameplay questions and troubleshooting, visit [Tumble Grove support](../../public/support.html).
+
+In the iOS app, tap Done to return to your game. External websites and posting a support issue need an internet connection.
