@@ -1,5 +1,5 @@
-const CACHE = 'tumble-grove-fecf8457f871028a';
-const FILES = ["artwork-prompt.txt","assets/index-Cpa6Q6oA.js","assets/index-Cu89fTHB.css","credits.html","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","ios-app-icon-prompt.txt","ios-app-icon.png","legal/bundled-dependencies.json","legal/dependency-inventory.json","legal/project-license.txt","legal/third-party-notices.txt","manifest.webmanifest","privacy.html","support.html"];
+const CACHE = 'tumble-grove-59467fdc38e7f233';
+const FILES = ["artwork-prompt.txt","assets/index-Btl8fDDP.css","assets/index-CcKHondp.js","credits.html","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","ios-app-icon-prompt.txt","ios-app-icon.png","legal/bundled-dependencies.json","legal/dependency-inventory.json","legal/project-license.txt","legal/third-party-notices.txt","manifest.webmanifest","privacy.html","support.html"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
