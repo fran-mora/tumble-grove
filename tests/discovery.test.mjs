@@ -4,6 +4,7 @@ import { MergeGame, FRUITS, MERGE_LABEL_SECONDS, STEP } from '../app/engine.ts';
 import { FRUIT_COLLECTION } from '../app/fruit-collection.ts';
 import { renderGame } from '../app/render.ts';
 import { VIEW_PADDING } from '../app/arena.ts';
+import { POWER_DETAILS } from '../app/powers.ts';
 const advance=(game,seconds)=>{for(let i=0;i<Math.ceil(seconds/STEP);i++)game.step();};
 
 test('inspection freezes fruit, pending merges, gravity, guide direction, and cooldown',()=>{
@@ -73,15 +74,16 @@ test('merge labels retain the new body and actual round variety, then expire',()
 
 // Record actual renderer output without requiring a browser or loading artwork.
 function canvasRecorder(clientWidth,height){
-  const text=[],boxes=[];
+  const text=[],boxes=[],arcs=[];
   const ctx=new Proxy({
     canvas:{width:504,height:height+64,clientWidth},
     createRadialGradient(){return {addColorStop(){}};},
     measureText(value){return {width:value.length*parseFloat(this.font.replace('bold ',''))*.6};},
     fillText(value){text.push(value);},
     roundRect(x,y,width,height){boxes.push({x,y,width,height});},
+    arc(x,y,radius){arcs.push({x,y,radius});},
   },{get:(target,key)=>key in target?target[key]:()=>{}});
-  return {ctx,text,boxes};
+  return {ctx,text,boxes,arcs};
 }
 
 test('Inspect renders every fruit name within a small phone canvas in both appearances, including rotated edge fruit',()=>{
@@ -119,4 +121,39 @@ test('cascade labels fit every fruit name at narrow arena edges in both appearan
     assert.ok(text.includes(fruit.name));assert.ok(text.includes('+55 · 8-step cascade'));
     for(const box of boxes){assert.ok(box.x>=-VIEW_PADDING&&box.x+box.width<=440+VIEW_PADDING);assert.ok(box.y>=-VIEW_PADDING&&box.y+box.height<=game.height+VIEW_PADDING);}
   }
+});
+
+test('power names remain readable and within a narrow canvas when dropping or inspecting every variety',()=>{
+  for(const darkMode of [false,true])for(const fruit of FRUIT_COLLECTION)for(const inspecting of [false,true]){
+    const game=new MergeGame(()=>0);game.powersEnabled=true;game.lineup[fruit.level]=fruit.id;
+    game.current=fruit.level;game.aim=fruit.id%2?0:440;
+    if(inspecting){const body=game.addFruit(fruit.level,game.aim,570);body.angle=1.2;game.setInspecting(true);game.inspectedId=body.id;}
+    const {ctx,text,boxes}=canvasRecorder(180,game.height);renderGame(ctx,game,[],true,darkMode);
+    assert.ok(text.includes(fruit.name),fruit.name);
+    assert.ok(text.some(value=>value.includes(POWER_DETAILS[game.getPower(fruit.level)].name)),fruit.name);
+    for(const box of boxes){assert.ok(box.x>=-VIEW_PADDING&&box.x+box.width<=440+VIEW_PADDING);assert.ok(box.y>=-VIEW_PADDING&&box.y+box.height<=game.height+VIEW_PADDING);}
+  }
+});
+
+test('power effects are limited to three, stay still with reduced motion, and disappear when disabled',()=>{
+  const game=new MergeGame(()=>0);game.powersEnabled=true;
+  game.powerEffects=['gather','gather','zest','choose'].map((power,id)=>({id,power,kind:1,x:200,y:300,time:0,duration:3,radius:90+id}));
+  for(const time of [.2,1.6]){
+    game.time=time;
+    const {ctx,arcs}=canvasRecorder(374,game.height);renderGame(ctx,game,[],true);
+    assert.deepEqual(arcs.map(arc=>arc.radius),[91,92,93]);
+  }
+  game.powersEnabled=false;
+  const {ctx,arcs,text}=canvasRecorder(374,game.height);renderGame(ctx,game,[],true);
+  assert.equal(arcs.length,0);
+  assert.ok(!text.some(value=>Object.values(POWER_DETAILS).some(power=>value.includes(power.name))));
+});
+
+test('merge labels announce the triggering power rather than the newborn power',()=>{
+  const game=new MergeGame(()=>0);game.powersEnabled=true;
+  const body=game.addFruit(6,220,350);
+  const power=Object.keys(POWER_DETAILS).find(key=>key!==game.getPower(6));
+  game.events=[{id:1,chain:8,sources:[],x:220,y:350,kind:6,points:55,time:0,cleared:false,bodyId:body.id,power}];game.time=.6;
+  const {ctx,text}=canvasRecorder(180,game.height);renderGame(ctx,game,[],true);
+  assert.ok(text.some(value=>value.includes(POWER_DETAILS[power].name)&&value.includes('×8')));
 });

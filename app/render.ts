@@ -3,6 +3,7 @@ import { RIM_Y, VIEW_PADDING, MOUTH_HALF_ANGLE } from './arena.ts';
 import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MERGE_LABEL_SECONDS, MERGE_GATHER_SECONDS, type MergeEvent, MergeGame } from './engine.ts';
 import { FRUIT_SHAPES } from './fruit-shapes.ts';
 import { landingY, directionalLanding } from './collision.ts';
+import { POWER_DETAILS, type FruitPower } from './powers.ts';
 const BOARD_COLOURS = {
   light: {surface:'#fffdf1',rim:'#b7c99f',stackGuide:'#dcc2a1',stackText:'#978367',aim:'#a8bf8f',landing:'#bbc79c44',label:'#fffdf1f5',labelBorder:'#d6dfc4',labelText:'#356645',discoveryBorder:'#85a576',discoveryText:'#28583b',highlight:'#397447'},
   dark: {surface:'#1b2d24',rim:'#82a77b',stackGuide:'#9f8969',stackText:'#c2ae90',aim:'#8bb880',landing:'#a5ca8944',label:'#253e31f5',labelBorder:'#688962',labelText:'#e1efd3',discoveryBorder:'#91bd83',discoveryText:'#edfadf',highlight:'#b4df93'},
@@ -37,6 +38,45 @@ export function drawFruit(ctx:CanvasRenderingContext2D,sprites:HTMLCanvasElement
   ctx.restore();
 }
 const clamp01=(value:number)=>Math.max(0,Math.min(1,value));
+const POWER_MARKS:Record<FruitPower,string>={gather:'◎',zest:'≈',choose:'✦'};
+const powerLabel=(power:FruitPower)=>`${POWER_MARKS[power]} ${POWER_DETAILS[power].name}`;
+function drawPowerEffects(ctx:CanvasRenderingContext2D,game:MergeGame,reducedMotion:boolean){
+  if(!game.powersEnabled||game.inspecting)return;
+  // Show the area the ability actually reaches, without obscuring a busy cascade.
+  for(const effect of game.powerEffects.slice(-3)){
+    const progress=clamp01((game.time-effect.time)/effect.duration);
+    if(progress>=1)continue;
+    const {x,y,radius,power}=effect;
+    ctx.save();ctx.strokeStyle=POWER_DETAILS[power].color;ctx.fillStyle=POWER_DETAILS[power].color;
+    ctx.lineWidth=1.8;ctx.globalAlpha=.32*(1-progress);
+    if(reducedMotion){
+      ctx.setLineDash(power==='gather'?[3,6]:power==='zest'?[10,5]:[2,8]);
+      ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();
+    }else if(power==='gather'){
+      ctx.setLineDash([3,7]);ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+      const phase=(progress*1.6)%1,reach=radius*(1-.72*phase);
+      ctx.globalAlpha=.38*(1-progress);ctx.beginPath();ctx.arc(x,y,reach,0,Math.PI*2);ctx.stroke();
+      for(let i=0;i<6;i++){
+        const angle=i*Math.PI/3+effect.id*.37;
+        ctx.beginPath();ctx.arc(x+Math.cos(angle)*reach,y+Math.sin(angle)*reach,2.5,0,Math.PI*2);ctx.fill();
+      }
+    }else if(power==='zest'){
+      for(let i=0;i<2;i++){
+        const phase=(progress*1.5+i*.5)%1;
+        ctx.globalAlpha=.35*(1-progress)*(1-phase);
+        ctx.beginPath();ctx.arc(x,y,radius*(.22+.78*phase),0,Math.PI*2);ctx.stroke();
+      }
+    }else{
+      for(let i=0;i<5;i++){
+        const angle=i*Math.PI*2/5+effect.id*.37,reach=radius*(.35+.5*progress);
+        const px=x+Math.cos(angle)*reach,py=y+Math.sin(angle)*reach,size=3+2*Math.sin(progress*Math.PI);
+        ctx.globalAlpha=.65*(1-progress);ctx.beginPath();
+        ctx.moveTo(px,py-size);ctx.lineTo(px,py+size);ctx.moveTo(px-size,py);ctx.lineTo(px+size,py);ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+}
 function mergePosition(game:MergeGame,event:MergeEvent){
   return game.bodies.find(body=>body.id===event.bodyId)??event;
 }
@@ -97,7 +137,12 @@ function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardC
   const minX=-VIEW_PADDING+padding,maxX=WIDTH+VIEW_PADDING-padding;
   const minY=-VIEW_PADDING+padding,maxY=game.height+VIEW_PADDING-padding;
   ctx.save();ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
-  const width=ctx.measureText(fruit.name).width+padding*2,height=fontSize+10*unit;
+  const nameWidth=ctx.measureText(fruit.name).width,detailSize=Math.max(12,11*unit);
+  const subtitle=game.powersEnabled?powerLabel(game.getPower(game.current)):'';
+  ctx.font=`bold ${detailSize}px Trebuchet MS, sans-serif`;
+  const width=Math.min(Math.max(nameWidth,subtitle?ctx.measureText(subtitle).width:0)+padding*2,maxX-minX);
+  const nameHeight=fontSize+10*unit,height=nameHeight+(subtitle?detailSize+4*unit:0);
+  ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
   // Use the complete sprite bounds so the label also clears leaves and stems.
   const left=spawn.x-geometry.center[0]*fruitScale,right=left+geometry.crop[2]*fruitScale;
   const top=spawn.y-geometry.center[1]*fruitScale,bottom=top+geometry.crop[3]*fruitScale;
@@ -108,9 +153,13 @@ function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardC
   const position=positions.find(p=>p.x>=minX&&p.x+width<=maxX&&p.y>=minY&&p.y+height<=maxY)??positions[0];
   const x=Math.max(minX,Math.min(maxX-width,position.x)),y=Math.max(minY,Math.min(maxY-height,position.y));
   ctx.fillStyle=colours.label;ctx.strokeStyle=colours.labelBorder;ctx.lineWidth=unit;
-  ctx.beginPath();ctx.roundRect(x,y,width,height,height/2);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.roundRect(x,y,width,height,subtitle?12*unit:height/2);ctx.fill();ctx.stroke();
   ctx.fillStyle=colours.labelText;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(fruit.name,x+width/2,y+height/2);
+  ctx.fillText(fruit.name,x+width/2,y+nameHeight/2,width-padding*2);
+  if(subtitle){
+    ctx.font=`bold ${detailSize}px Trebuchet MS, sans-serif`;
+    ctx.fillText(subtitle,x+width/2,y+nameHeight+detailSize/2-2*unit,width-padding*2);
+  }
   ctx.restore();
 }
 type LabelBox = {x:number;y:number;width:number;height:number};
@@ -187,6 +236,7 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
     drawFruit(ctx,sprites,game.current,spawn.x,spawn.y,radius,0,game.canDrop?1:.38,game.getFruit(game.current));
   }
   if(!game.inspecting)for(const event of game.events)drawMergeGlow(ctx,game,event,reducedMotion,colours);
+  drawPowerEffects(ctx,game,reducedMotion);
   for(const b of game.bodies){
     // The new silhouette stays full-sized; only its reveal fades, never its collider.
     const opacity=reducedMotion||game.inspecting||!b.birth?1:clamp01((game.time-b.birth.time-.1)/.3);
@@ -204,7 +254,7 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
       ctx.save();ctx.strokeStyle=colours.highlight;ctx.lineWidth=2.5*unit;ctx.lineJoin='round';ctx.beginPath();
       shape.points.forEach((p,i)=>{if(i===0)ctx.moveTo(body.x+p.x,body.y+p.y);else ctx.lineTo(body.x+p.x,body.y+p.y);});
       ctx.closePath();ctx.stroke();ctx.restore();
-      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours);
+      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours,game.powersEnabled?`${powerLabel(game.getPower(body.kind))} on merge`:'');
     }
   }else if(!game.over){
     const occupied:LabelBox[]=[];
@@ -212,7 +262,10 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
     for(const e of game.events.filter(e=>!e.cleared&&game.time-e.time>=MERGE_GATHER_SECONDS&&game.time-e.time<MERGE_LABEL_SECONDS&&game.bodies.some(b=>b.id===e.bodyId)).slice(-3).reverse()){
       const body=game.bodies.find(b=>b.id===e.bodyId),age=game.time-e.time;
       ctx.save();ctx.globalAlpha=reducedMotion?1:Math.min(1,(MERGE_LABEL_SECONDS-age)/.4);
-      drawBodyName(ctx,game,e.kind,body?.x??e.x,body?.y??e.y,body?.angle??0,occupied,colours,`+${e.points}${e.chain>1?` · ${e.chain}-step cascade`:''}`);
+      const achievement=`+${e.points}${e.chain>1?` · ${e.chain}-step cascade`:''}`;
+      // The trigger belongs to the fruit that merged, not the newly discovered fruit.
+      const detail=game.powersEnabled&&e.power?`+${e.points} · ${powerLabel(e.power)}${e.chain>1?` · ×${e.chain}`:''}`:achievement;
+      drawBodyName(ctx,game,e.kind,body?.x??e.x,body?.y??e.y,body?.angle??0,occupied,colours,detail);
       ctx.restore();
     }
   }

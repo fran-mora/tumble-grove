@@ -112,3 +112,31 @@ closed bowl arc. Finite rim contacts and the bowl mouth remain open, so genuine
 spills still end a round. Regression tests cover every merging alternative at
 floor corners and rotated bowl walls, fast motion, dense stacks, normal spills,
 and paced cascades. Four of these regression tests fail against the previous code.
+
+## Optional fruit powers
+
+Turn on **Fruit powers** beside Gravity mode to play with three merge abilities.
+It is off by default and remembered locally. Switching it during a round asks
+before starting a new game. Classic and gravity each keep separate personal
+bests with powers on and off; existing ordinary-mode scores are preserved.
+
+Each fruit has a fixed, playful ability across rounds and growth buckets. Its
+power appears beside the ready-to-drop fruit, in Inspect, and in merge labels.
+The pair being merged determines the ability; the resulting growth level
+controls its strength. Powers activate once, at the merge reveal:
+
+- **Gather** gently draws nearby matching pairs together with capped attraction.
+- **Zest** temporarily reduces friction and drag for nearby fruit so they can
+  slide and settle. Neither power changes fruit sizes or bypasses solid walls.
+- **Choose** pauses the basket and offers replacements for the fruit ready to
+  drop, including keeping the current one. Select a fruit, then aim and drop
+  normally. Escape keeps the current fruit. Bigger merges offer up to four
+  options, with level-six drops possible only from the largest Choose merges.
+
+Powers work in both arenas. Pausing and inspecting freeze their timers;
+restarting clears effects and choices. Merge points and the ordinary paced
+cascade rules stay the same. Reduced motion uses static power outlines.
+The abilities are gameplay traits, not claims about real fruit.
+
+The current App Store build 2 predates this web feature. A future native release
+must rebuild, retest, increment its build number and update its store metadata.

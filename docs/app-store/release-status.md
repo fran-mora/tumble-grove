@@ -5,6 +5,17 @@ and is selected and saved on the App Store version. The app remains in Prepare
 for Submission; it has not been submitted for review, approved, or published on
 the App Store.**
 
+## Later web update
+
+The GitHub Pages game now has an optional Fruit powers mode (Gather, Zest and
+Choose), a saved on/off preference and separate best scores. **Uploaded native
+build 2 predates this feature** and its bundled pages remain the version audited
+below. App Store submission work is paused at the owner's request while they are
+on their phone. Before resuming, decide whether to ship that existing build or
+include powers in a new numbered build; update and verify screenshots, metadata
+and tests against whichever binary is submitted. The four approval requests
+below remain pending. The web deployment does not submit or modify the binary.
+
 ## Current build and validation
 
 - The SwiftUI/WKWebView app bundles the complete game, artwork, fruit research,

@@ -2,6 +2,7 @@ import { FRUIT_COLLECTION } from './fruit-collection.ts';
 import { chooseColourfulRound, parseFruitHistory, type FruitHistory } from './fruit-selection.ts';
 import { basketWalls, bowlWalls, collideWithWalls, containInBasket, containInBowl, outsideBasket, outsideBowl, MOUTH_HALF_ANGLE } from './arena.ts';
 import { fruitHull, hullContact, circleTravel } from './collision.ts';
+import { fruitPower, powerStrength, type FruitPower } from './powers.ts';
 export const WIDTH = 440;
 export const HEIGHT = 570;
 export const DANGER_Y = 100;
@@ -29,7 +30,9 @@ export const FRUITS = [
 ] as const;
 export type FruitBody = { id: number; kind: number; x: number; y: number; vx: number; vy: number; angle: number; age: number; birth?: { time:number; chain:number } };
 export type MergeSource = Pick<FruitBody, 'kind' | 'x' | 'y' | 'angle'>;
-export type MergeEvent = { id:number; chain:number; sources:MergeSource[]; x: number; y: number; kind: number; points: number; time: number; cleared: boolean; bodyId: number | null };
+export type MergeEvent = { id:number; chain:number; sources:MergeSource[]; x: number; y: number; kind: number; points: number; time: number; cleared: boolean; bodyId: number | null; power?:FruitPower };
+export type PowerEffect = {id:number;power:FruitPower;kind:number;x:number;y:number;time:number;duration:number;radius:number};
+type PendingPower = {id:number;power:FruitPower;kind:number;x:number;y:number;time:number};
 export class MergeGame {
   bodies: FruitBody[] = [];
   events: MergeEvent[] = [];
@@ -45,6 +48,10 @@ export class MergeGame {
   danger = 0;
   over = false;
   paused = false;
+  powersEnabled = false;
+  powerEffects: PowerEffect[] = [];
+  choiceOptions: number[] = [];
+  private pendingPowers: PendingPower[] = [];
   inspecting = false;
   inspectedId: number | null = null;
   watermelons = 0;
@@ -71,6 +78,16 @@ export class MergeGame {
     this.encountered.add(id);this.history.seen[id]=Math.min(1_000_000,this.history.seen[id]+1);this.historyRevision++;
   }
   getFruit(kind:number){return FRUIT_COLLECTION[this.lineup[kind]];}
+  getPower(kind:number):FruitPower{return fruitPower(this.lineup[kind]);}
+  private clearPowers(){this.powerEffects=[];this.choiceOptions=[];this.pendingPowers=[];}
+  setPowers(enabled:boolean){
+    if(this.powersEnabled===enabled)return;
+    this.powersEnabled=enabled;this.reset();
+  }
+  chooseFruit(kind:number):boolean {
+    if(this.paused||this.over||!this.powersEnabled||!this.choiceOptions.includes(kind))return false;
+    this.current=kind;this.choiceOptions=[];this.rememberFruit(kind);this.setAim(this.aim);return true;
+  }
   getShape(kind:number,angle=0){return fruitHull(kind,FRUITS[kind].radius,angle,this.getFruit(kind).geometry);}
   get height() { return this.mode === 'gravity' ? WIDTH : HEIGHT; }
   get down() { return this.mode === 'gravity' ? this.gravityDirection : {x:0,y:1}; }
@@ -98,7 +115,7 @@ export class MergeGame {
     const travel=Math.max(0,circleTravel(base,shape,{x:-d.x,y:-d.y},CIRCLE,CIRCLE.radius)-18);
     return {x:base.x-d.x*travel,y:base.y-d.y*travel};
   }
-  get canDrop() { return !this.over && !this.paused && !this.inspecting && this.cooldown <= 0; }
+  get canDrop() { return !this.over && !this.paused && !this.inspecting && !this.choiceOptions.length && this.cooldown <= 0; }
   setInspecting(enabled: boolean) {
     if (enabled && (this.over || !this.bodies.length)) return false;
     this.inspecting = enabled;
@@ -159,6 +176,7 @@ export class MergeGame {
     return true;
   }
   reset() {
+    this.clearPowers();
     const round=chooseColourfulRound(this.appearanceRandom,this.history,this.lineup);
     this.lineup=round.lineup;this.historyRevision++;this.encountered.clear();this.rememberFruit(0);
     this.bodies = []; this.events = []; this.score = 0; this.drops = 0; this.merges = 0;
@@ -168,17 +186,75 @@ export class MergeGame {
     this.watermelons = 0; this.serial = 0;
   }
   snapshot() {
-    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, celebrations:this.events.map(e=>({id:e.id,chain:e.chain,kind:e.kind,name:this.getFruit(e.kind).name,age:Math.round((this.time-e.time)*100)/100,cleared:e.cleared,bodyId:e.bodyId})), bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+    return { lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})), powersEnabled:this.powersEnabled,choiceOptions:[...this.choiceOptions],powerEffects:this.powerEffects.map(e=>({...e})),mode: this.mode, height:this.height, gravity:this.gravity, direction:this.down, spawn:this.getSpawn(), score: this.score, drops: this.drops, merges: this.merges, highest: this.highest, current: this.current, next: this.next, canDrop: this.canDrop, paused: this.paused, inspecting: this.inspecting, inspectedId: this.inspectedId, over: this.over, danger: this.danger, watermelons: this.watermelons, celebrations:this.events.map(e=>({id:e.id,chain:e.chain,kind:e.kind,name:this.getFruit(e.kind).name,age:Math.round((this.time-e.time)*100)/100,cleared:e.cleared,bodyId:e.bodyId,...(e.power?{power:e.power}:{})})), bodies: this.bodies.map(b => ({ id: b.id, name: this.getFruit(b.kind).name, kind: b.kind, x: Math.round(b.x), y: Math.round(b.y) })) };
+  }
+  private activatePowers(){
+    this.powerEffects=this.powerEffects.filter(effect=>this.time-effect.time<effect.duration);
+    const ready=this.pendingPowers.filter(effect=>this.time-effect.time>=MERGE_GATHER_SECONDS);
+    this.pendingPowers=this.pendingPowers.filter(effect=>this.time-effect.time<MERGE_GATHER_SECONDS);
+    let choiceKind=0;
+    for(const pending of ready){
+      const strength=powerStrength(pending.kind);
+      this.powerEffects.push({...pending,time:this.time,duration:strength.duration,radius:strength.radius});
+      if(pending.power==='choose')choiceKind=Math.max(choiceKind,pending.kind);
+    }
+    if(choiceKind){
+      const {choices,maxDropKind}=powerStrength(choiceKind);
+      const candidates=Array.from({length:maxDropKind+1},(_,kind)=>kind).filter(kind=>kind!==this.current);
+      const options=[this.current];
+      while(options.length<choices&&candidates.length){
+        const value=this.random();
+        const fraction=Number.isFinite(value)?Math.max(0,Math.min(1-Number.EPSILON,value)):0;
+        options.push(candidates.splice(Math.floor(fraction*candidates.length),1)[0]);
+      }
+      this.choiceOptions=options;
+      for(const kind of options)this.rememberFruit(kind);
+    }
+  }
+  private applyGather(dt:number){
+    const acceleration=new Map<number,{x:number;y:number}>();
+    for(const effect of this.powerEffects){
+      if(effect.power!=='gather')continue;
+      const nearby=this.bodies.filter(body=>Math.hypot(body.x-effect.x,body.y-effect.y)<=effect.radius);
+      const pairs:{a:FruitBody;b:FruitBody;distance:number}[]=[];
+      for(let i=0;i<nearby.length;i++)for(let j=i+1;j<nearby.length;j++){
+        const a=nearby[i],b=nearby[j];if(a.kind!==b.kind)continue;
+        const distance=Math.hypot(b.x-a.x,b.y-a.y);
+        if(distance>1&&distance<effect.radius*1.2)pairs.push({a,b,distance});
+      }
+      const paired=new Set<number>();
+      // Each fruit follows at most one matching partner per pulse, with smooth,
+      // bounded acceleration. The ordinary collision/containment solver still runs.
+      for(const {a,b,distance} of pairs.sort((a,b)=>a.distance-b.distance)){
+        if(paired.has(a.id)||paired.has(b.id))continue;
+        paired.add(a.id);paired.add(b.id);
+        const nx=(b.x-a.x)/distance,ny=(b.y-a.y)/distance;
+        const closing=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
+        const envelope=Math.sin(Math.PI*Math.min(1,(this.time-effect.time)/effect.duration));
+        const force=Math.min(powerStrength(effect.kind).acceleration*envelope,Math.max(0,(65-closing)/(2*dt)));
+        for(const [body,sign] of [[a,1],[b,-1]] as const){
+          const total=acceleration.get(body.id)??{x:0,y:0};
+          total.x+=nx*force*sign;total.y+=ny*force*sign;acceleration.set(body.id,total);
+        }
+      }
+    }
+    for(const body of this.bodies){
+      const force=acceleration.get(body.id);if(!force)continue;
+      const scale=Math.min(1,145/Math.max(1,Math.hypot(force.x,force.y)));
+      body.vx+=force.x*scale*dt;body.vy+=force.y*scale*dt;
+    }
   }
   private readyToMerge(body:FruitBody) {
     return body.age>.08 && (!body.birth || this.time-body.birth.time>=mergeHoldSeconds(body.birth.chain));
   }
   step(dt = STEP) {
-    if (this.paused || this.inspecting || this.over || dt <= 0 || !Number.isFinite(dt)) return;
+    if (this.paused || this.inspecting || this.over || this.choiceOptions.length || dt <= 0 || !Number.isFinite(dt)) return;
     dt = Math.min(dt, 1 / 60);
     this.time += dt;
     this.cooldown = Math.max(0, this.cooldown - dt);
     this.events = this.events.filter(e => this.time - e.time < MERGE_LABEL_SECONDS);
+    if(this.powersEnabled){this.activatePowers();if(this.choiceOptions.length)return;this.applyGather(dt);}
+    const zesty=new Set(this.powersEnabled?this.bodies.filter(body=>this.powerEffects.some(effect=>effect.power==='zest'&&Math.hypot(body.x-effect.x,body.y-effect.y)<=effect.radius)).map(body=>body.id):[]);
     if(this.mode==='gravity'){
       const mix=1-Math.exp(-10*dt);
       this.gravity.x+=(this.gravityTarget.x-this.gravity.x)*mix;this.gravity.y+=(this.gravityTarget.y-this.gravity.y)*mix;
@@ -193,7 +269,7 @@ export class MergeGame {
     };
     for (const b of this.bodies) {
       b.age += dt; b.vx += (this.mode==='gravity'?this.gravity.x:0)*1050*dt; b.vy += (this.mode==='gravity'?this.gravity.y:1)*1050*dt;
-      b.vx *= Math.exp(-.8 * dt);
+      b.vx *= Math.exp(-(zesty.has(b.id)?.12:.8) * dt);
       b.x += b.vx * dt; b.y += b.vy * dt;
       b.angle += b.vx * dt / FRUITS[b.kind].radius * .38;
     }
@@ -227,7 +303,8 @@ export class MergeGame {
             a.vx -= impulse * nx * invA; a.vy -= impulse * ny * invA;
             b.vx += impulse * nx * invB; b.vy += impulse * ny * invB;
             const tangent = (b.vx - a.vx) * -ny + (b.vy - a.vy) * nx;
-            const friction = Math.max(-impulse * .22, Math.min(impulse * .22, -tangent / total));
+            const coefficient=zesty.has(a.id)||zesty.has(b.id)?.04:.22;
+            const friction = Math.max(-impulse * coefficient, Math.min(impulse * coefficient, -tangent / total));
             a.vx -= friction * -ny * invA; a.vy -= friction * nx * invA;
             b.vx += friction * -ny * invB; b.vy += friction * nx * invB;
           }
@@ -269,7 +346,9 @@ export class MergeGame {
           if (kind === 10) this.watermelons++;
         }
         this.score += points; this.merges++;
-        this.events.push({ id:this.merges, chain, sources, x, y, kind: Math.min(kind, 10), points, time: this.time, cleared, bodyId });
+        const power=this.powersEnabled?this.getPower(a.kind):undefined;
+        this.events.push({ id:this.merges, chain, sources, x, y, kind: Math.min(kind, 10), points, time: this.time, cleared, bodyId,...(power?{power}:{}) });
+        if(power)this.pendingPowers.push({id:this.merges,power,kind,x,y,time:this.time});
       }
     }
     // The dashed guide never ends a round. A whole fruit must spill outside.
