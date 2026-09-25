@@ -113,30 +113,46 @@ spills still end a round. Regression tests cover every merging alternative at
 floor corners and rotated bowl walls, fast motion, dense stacks, normal spills,
 and paced cascades. Four of these regression tests fail against the previous code.
 
-## Optional fruit powers
+## Optional cascade powers
 
-Turn on **Fruit powers** beside Gravity mode to play with three merge abilities.
-It is off by default and remembered locally. Switching it during a round asks
-before starting a new game. Classic and gravity each keep separate personal
-bests with powers on and off; existing ordinary-mode scores are preserved.
+Turn on **Fruit powers** beside Gravity mode to earn and save abilities. It is
+off by default and remembered locally. Changing it asks before starting a new
+round. Classic and gravity keep separate best scores with powers on and off.
 
-Each fruit has a fixed, playful ability across rounds and growth buckets. Its
-power appears beside the ready-to-drop fruit, in Inspect, and in merge labels.
-The pair being merged determines the ability; the resulting growth level
-controls its strength. Powers activate once, at the merge reveal:
+A single merge gives points only. Its resulting fruit must merge again to start
+earning a power: 2 connected merges earn level 1, 3 earn level 2, up to level 5
+for 6 or more. When the chain settles (three seconds without another linked
+merge), it gives one random power at its highest tier. A fresh drop starts a new
+chain; unrelated simultaneous matches do not add together. Power selection
+favours types absent from your inventory and avoids the most recent reward.
 
-- **Gather** gently draws nearby matching pairs together with capped attraction.
-- **Zest** temporarily reduces friction and drag for nearby fruit so they can
-  slide and settle. Neither power changes fruit sizes or bypasses solid walls.
-- **Choose** pauses the basket and offers replacements for the fruit ready to
-  drop, including keeping the current one. Select a fruit, then aim and drop
-  normally. Escape keeps the current fruit. Bigger merges offer up to four
-  options, with level-six drops possible only from the largest Choose merges.
+Save up to three powers. Tap one to pause the basket and target a fruit or area;
+Cancel is free. Wild seed and Choose require an explicit action before use.
+A full inventory offers Swap or Skip without stopping play. If another reward
+arrives before that offer is resolved, the higher-tier offer is kept. Rewards,
+active effects and rescued fruit last only for this round.
 
-Powers work in both arenas. Pausing and inspecting freeze their timers;
-restarting clears effects and choices. Merge points and the ordinary paced
-cascade rules stay the same. Reduced motion uses static power outlines.
-The abilities are gameplay traits, not claims about real fruit.
+| Power | Action |
+| --- | --- |
+| Gather | Draw nearby matching pairs together with bounded attraction. |
+| Ripen | Grow one eligible fruit by one level, without merge points. |
+| Juice | Remove one eligible fruit with a splash. |
+| Wild seed | Prepare a seed that merges with the first eligible fruit it touches. |
+| Rescue | Save one eligible fruit outside the basket; prepare it for a later drop. |
+| Shake | Give fruit in an area a gentle sideways wobble. |
+| Squeeze | Shrink fruit in an area until their next merge; artwork and collision hull shrink together. |
+| Choose | Replace the fruit ready to drop; keeping the current one is free. |
 
-The current App Store build 2 predates this web feature. A future native release
+Higher power levels expand the eligible growth levels, area, duration or choices.
+Power-caused merges still earn ordinary points but cannot generate more powers;
+this restriction follows affected fruit and their descendants, even after a
+visual effect ends. A later natural drop can begin a fresh eligible chain.
+There are no automatic abilities assigned to fruit identities.
+
+Both arenas retain their solid-wall containment and open exits. Pausing,
+inspection and targeting freeze the simulation and reward timers. Reduced motion
+uses static effect outlines. Touch, mouse and keyboard are supported; while
+targeting, arrows move the target, Enter activates, and Escape cancels.
+
+The current App Store build 2 predates these web features. A future native release
 must rebuild, retest, increment its build number and update its store metadata.

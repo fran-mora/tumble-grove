@@ -1,9 +1,9 @@
 import { FRUIT_COLLECTION, type FruitAppearance } from './fruit-collection.ts';
 import { RIM_Y, VIEW_PADDING, MOUTH_HALF_ANGLE } from './arena.ts';
-import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MERGE_LABEL_SECONDS, MERGE_GATHER_SECONDS, type MergeEvent, MergeGame } from './engine.ts';
+import { DANGER_Y, FRUITS, HEIGHT, WIDTH, CIRCLE, CIRCLE_DANGER, MERGE_LABEL_SECONDS, MERGE_GATHER_SECONDS, WILD_RADIUS, type FruitBody, type MergeEvent, MergeGame } from './engine.ts';
 import { FRUIT_SHAPES } from './fruit-shapes.ts';
 import { landingY, directionalLanding } from './collision.ts';
-import { POWER_DETAILS, type FruitPower } from './powers.ts';
+import { POWER_DETAILS, powerStrength } from './powers.ts';
 const BOARD_COLOURS = {
   light: {surface:'#fffdf1',rim:'#b7c99f',stackGuide:'#dcc2a1',stackText:'#978367',aim:'#a8bf8f',landing:'#bbc79c44',label:'#fffdf1f5',labelBorder:'#d6dfc4',labelText:'#356645',discoveryBorder:'#85a576',discoveryText:'#28583b',highlight:'#397447'},
   dark: {surface:'#1b2d24',rim:'#82a77b',stackGuide:'#9f8969',stackText:'#c2ae90',aim:'#8bb880',landing:'#a5ca8944',label:'#253e31f5',labelBorder:'#688962',labelText:'#e1efd3',discoveryBorder:'#91bd83',discoveryText:'#edfadf',highlight:'#b4df93'},
@@ -38,8 +38,28 @@ export function drawFruit(ctx:CanvasRenderingContext2D,sprites:HTMLCanvasElement
   ctx.restore();
 }
 const clamp01=(value:number)=>Math.max(0,Math.min(1,value));
-const POWER_MARKS:Record<FruitPower,string>={gather:'◎',zest:'≈',choose:'✦'};
-const powerLabel=(power:FruitPower)=>`${POWER_MARKS[power]} ${POWER_DETAILS[power].name}`;
+function drawWildSeed(ctx:CanvasRenderingContext2D,x:number,y:number,r:number,angle=0,opacity=1){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=opacity;
+  const pearl=ctx.createRadialGradient(-r*.3,-r*.35,r*.05,0,0,r);
+  pearl.addColorStop(0,'#ffffff');pearl.addColorStop(.5,'#d7f5e1');pearl.addColorStop(1,'#76bea8');
+  ctx.fillStyle=pearl;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  ctx.lineWidth=Math.max(2,r*.15);ctx.lineCap='round';
+  for(const [i,color] of ['#bd83df','#f0bc52','#56bbad'].entries()){
+    ctx.strokeStyle=color;ctx.beginPath();ctx.arc(0,0,r*.78,i*Math.PI*2/3+.15,(i+1)*Math.PI*2/3-.15);ctx.stroke();
+  }
+  ctx.fillStyle='#356645';ctx.font=`bold ${r*1.1}px Trebuchet MS, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',0,r*.04);
+  ctx.restore();
+}
+function drawBody(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:HTMLCanvasElement[],body:Pick<FruitBody,'kind'|'x'|'y'|'angle'|'scale'|'wild'>,opacity=1,size=1){
+  const scale=(body.scale??1)*size;
+  if(body.wild)drawWildSeed(ctx,body.x,body.y,WILD_RADIUS*scale,body.angle,opacity);
+  else drawFruit(ctx,sprites,body.kind,body.x,body.y,FRUITS[body.kind].radius*scale,body.angle,opacity,game.getFruit(body.kind));
+}
+function traceBody(ctx:CanvasRenderingContext2D,game:MergeGame,body:FruitBody){
+  const shape=game.getBodyShape(body);ctx.beginPath();
+  shape.points.forEach((p,i)=>{if(i===0)ctx.moveTo(body.x+p.x,body.y+p.y);else ctx.lineTo(body.x+p.x,body.y+p.y);});
+  ctx.closePath();
+}
 function drawPowerEffects(ctx:CanvasRenderingContext2D,game:MergeGame,reducedMotion:boolean){
   if(!game.powersEnabled||game.inspecting)return;
   // Show the area the ability actually reaches, without obscuring a busy cascade.
@@ -50,7 +70,7 @@ function drawPowerEffects(ctx:CanvasRenderingContext2D,game:MergeGame,reducedMot
     ctx.save();ctx.strokeStyle=POWER_DETAILS[power].color;ctx.fillStyle=POWER_DETAILS[power].color;
     ctx.lineWidth=1.8;ctx.globalAlpha=.32*(1-progress);
     if(reducedMotion){
-      ctx.setLineDash(power==='gather'?[3,6]:power==='zest'?[10,5]:[2,8]);
+      ctx.setLineDash(power==='gather'?[3,6]:power==='shake'?[10,5]:[2,8]);
       ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();
     }else if(power==='gather'){
       ctx.setLineDash([3,7]);ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
@@ -60,15 +80,27 @@ function drawPowerEffects(ctx:CanvasRenderingContext2D,game:MergeGame,reducedMot
         const angle=i*Math.PI/3+effect.id*.37;
         ctx.beginPath();ctx.arc(x+Math.cos(angle)*reach,y+Math.sin(angle)*reach,2.5,0,Math.PI*2);ctx.fill();
       }
-    }else if(power==='zest'){
+    }else if(power==='shake'||power==='rescue'){
       for(let i=0;i<2;i++){
         const phase=(progress*1.5+i*.5)%1;
         ctx.globalAlpha=.35*(1-progress)*(1-phase);
-        ctx.beginPath();ctx.arc(x,y,radius*(.22+.78*phase),0,Math.PI*2);ctx.stroke();
+        ctx.beginPath();ctx.arc(x,y,radius*(.22+.78*phase),power==='rescue'?0:Math.PI*.1,power==='rescue'?Math.PI:Math.PI*1.9);ctx.stroke();
+      }
+    }else if(power==='juice'){
+      for(let i=0;i<8;i++){
+        const angle=i*Math.PI/4+effect.id*.37,reach=radius*(.2+.7*progress);
+        ctx.globalAlpha=.65*(1-progress);ctx.beginPath();ctx.ellipse(x+Math.cos(angle)*reach,y+Math.sin(angle)*reach,radius*.045*(1-progress*.6),radius*.07*(1-progress*.6),angle,0,Math.PI*2);ctx.fill();
+      }
+    }else if(power==='squeeze'){
+      const reach=radius*(1-.45*progress),arm=8;
+      ctx.globalAlpha=.55*(1-progress);
+      for(let i=0;i<4;i++){
+        const angle=Math.PI/4+i*Math.PI/2,px=x+Math.cos(angle)*reach,py=y+Math.sin(angle)*reach;
+        ctx.save();ctx.translate(px,py);ctx.rotate(angle);ctx.beginPath();ctx.moveTo(arm,-arm);ctx.lineTo(0,0);ctx.lineTo(arm,arm);ctx.stroke();ctx.restore();
       }
     }else{
-      for(let i=0;i<5;i++){
-        const angle=i*Math.PI*2/5+effect.id*.37,reach=radius*(.35+.5*progress);
+      for(let i=0;i<(power==='ripen'?7:5);i++){
+        const angle=i*Math.PI*2/(power==='ripen'?7:5)+effect.id*.37,reach=radius*(.35+.5*progress);
         const px=x+Math.cos(angle)*reach,py=y+Math.sin(angle)*reach,size=3+2*Math.sin(progress*Math.PI);
         ctx.globalAlpha=.65*(1-progress);ctx.beginPath();
         ctx.moveTo(px,py-size);ctx.lineTo(px,py+size);ctx.moveTo(px-size,py);ctx.lineTo(px+size,py);ctx.stroke();
@@ -81,7 +113,7 @@ function mergePosition(game:MergeGame,event:MergeEvent){
   return game.bodies.find(body=>body.id===event.bodyId)??event;
 }
 function drawMergeGlow(ctx:CanvasRenderingContext2D,game:MergeGame,event:MergeEvent,reducedMotion:boolean,colours:BoardColours){
-  const age=game.time-event.time,point=mergePosition(game,event),radius=FRUITS[event.kind].radius;
+  const age=game.time-event.time,point=mergePosition(game,event),body=game.bodies.find(body=>body.id===event.bodyId),radius=FRUITS[event.kind].radius*(body?.scale??1);
   if(age>=1.6)return;
   ctx.save();
   if(reducedMotion){
@@ -106,13 +138,13 @@ function drawGatheringFruit(ctx:CanvasRenderingContext2D,game:MergeGame,event:Me
   const point=mergePosition(game,event),progress=clamp01(age/duration),ease=progress*progress*(3-2*progress);
   for(const source of event.sources??[]){
     const x=source.x+(point.x-source.x)*ease,y=source.y+(point.y-source.y)*ease;
-    drawFruit(ctx,sprites,source.kind,x,y,FRUITS[source.kind].radius*(1-.6*ease),source.angle*(1-ease),1-ease,game.getFruit(source.kind));
+    drawBody(ctx,game,sprites,{...source,x,y,angle:source.angle*(1-ease)},1-ease,1-.6*ease);
   }
 }
 function drawMergeSparkles(ctx:CanvasRenderingContext2D,game:MergeGame,event:MergeEvent,colours:BoardColours){
   const age=game.time-event.time-MERGE_GATHER_SECONDS;
   if(age<0||age>=1.35)return;
-  const point=mergePosition(game,event),progress=age/1.35,radius=FRUITS[event.kind].radius;
+  const point=mergePosition(game,event),body=game.bodies.find(body=>body.id===event.bodyId),progress=age/1.35,radius=FRUITS[event.kind].radius*(body?.scale??1);
   const count=10+Math.min(3,event.chain-1)*3;
   ctx.save();ctx.globalAlpha=Math.pow(1-progress,1.4);
   for(let i=0;i<count;i++){
@@ -130,6 +162,7 @@ function drawMergeSparkles(ctx:CanvasRenderingContext2D,game:MergeGame,event:Mer
 }
 function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardColours){
   const fruit=game.getFruit(game.current),spawn=game.getSpawn();
+  const name=game.wildReady?'Wild seed':fruit.name;
   const geometry=fruit.geometry,fruitScale=FRUITS[game.current].radius/geometry.radius;
   // Keep the name readable when the arena shrinks to fit a phone's viewport.
   const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
@@ -137,15 +170,15 @@ function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardC
   const minX=-VIEW_PADDING+padding,maxX=WIDTH+VIEW_PADDING-padding;
   const minY=-VIEW_PADDING+padding,maxY=game.height+VIEW_PADDING-padding;
   ctx.save();ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
-  const nameWidth=ctx.measureText(fruit.name).width,detailSize=Math.max(12,11*unit);
-  const subtitle=game.powersEnabled?powerLabel(game.getPower(game.current)):'';
+  const nameWidth=ctx.measureText(name).width,detailSize=Math.max(12,11*unit);
+  const subtitle=game.wildReady?`Matches levels 1–${game.wildReady.maxKind+1}`:'';
   ctx.font=`bold ${detailSize}px Trebuchet MS, sans-serif`;
   const width=Math.min(Math.max(nameWidth,subtitle?ctx.measureText(subtitle).width:0)+padding*2,maxX-minX);
   const nameHeight=fontSize+10*unit,height=nameHeight+(subtitle?detailSize+4*unit:0);
   ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
   // Use the complete sprite bounds so the label also clears leaves and stems.
-  const left=spawn.x-geometry.center[0]*fruitScale,right=left+geometry.crop[2]*fruitScale;
-  const top=spawn.y-geometry.center[1]*fruitScale,bottom=top+geometry.crop[3]*fruitScale;
+  const left=spawn.x-(game.wildReady?WILD_RADIUS:geometry.center[0]*fruitScale),right=left+(game.wildReady?WILD_RADIUS*2:geometry.crop[2]*fruitScale);
+  const top=spawn.y-(game.wildReady?WILD_RADIUS:geometry.center[1]*fruitScale),bottom=top+(game.wildReady?WILD_RADIUS*2:geometry.crop[3]*fruitScale);
   const horizontal=[{x:right+gap,y:spawn.y-height/2},{x:left-gap-width,y:spawn.y-height/2}];
   const vertical=[{x:spawn.x-width/2,y:top-gap-height},{x:spawn.x-width/2,y:bottom+gap}];
   // Prefer a position beside the drop guide; the text always stays upright.
@@ -155,7 +188,7 @@ function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardC
   ctx.fillStyle=colours.label;ctx.strokeStyle=colours.labelBorder;ctx.lineWidth=unit;
   ctx.beginPath();ctx.roundRect(x,y,width,height,subtitle?12*unit:height/2);ctx.fill();ctx.stroke();
   ctx.fillStyle=colours.labelText;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(fruit.name,x+width/2,y+nameHeight/2,width-padding*2);
+  ctx.fillText(name,x+width/2,y+nameHeight/2,width-padding*2);
   if(subtitle){
     ctx.font=`bold ${detailSize}px Trebuchet MS, sans-serif`;
     ctx.fillText(subtitle,x+width/2,y+nameHeight+detailSize/2-2*unit,width-padding*2);
@@ -163,14 +196,14 @@ function drawDropName(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardC
   ctx.restore();
 }
 type LabelBox = {x:number;y:number;width:number;height:number};
-function drawBodyName(ctx:CanvasRenderingContext2D,game:MergeGame,kind:number,x:number,y:number,angle=0,occupied:LabelBox[]=[],colours:BoardColours=BOARD_COLOURS.light,subtitle='') {
-  const fruit=game.getFruit(kind),geometry=fruit.geometry,scale=FRUITS[kind].radius/geometry.radius;
+function drawBodyName(ctx:CanvasRenderingContext2D,game:MergeGame,kind:number,x:number,y:number,angle=0,occupied:LabelBox[]=[],colours:BoardColours=BOARD_COLOURS.light,subtitle='',bodyScale=1,wild=false) {
+  const fruit=game.getFruit(kind),name=wild?'Wild seed':fruit.name,geometry=fruit.geometry,scale=FRUITS[kind].radius/geometry.radius*bodyScale;
   const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
   const padding=8*unit,gap=8*unit,fontSize=Math.max(14,12*unit),height=fontSize+10*unit;
   const minX=-VIEW_PADDING+padding,maxX=WIDTH+VIEW_PADDING-padding;
   const minY=-VIEW_PADDING+padding,maxY=game.height+VIEW_PADDING-padding;
   ctx.save();ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
-  const nameWidth=ctx.measureText(fruit.name).width,detailSize=Math.max(12,11*unit);
+  const nameWidth=ctx.measureText(name).width,detailSize=Math.max(12,11*unit);
   ctx.font=`bold ${detailSize}px Trebuchet MS, sans-serif`;
   const width=Math.min(Math.max(nameWidth,subtitle?ctx.measureText(subtitle).width:0)+padding*2,maxX-minX);
   const labelHeight=height+(subtitle?detailSize+5*unit:0);
@@ -180,8 +213,8 @@ function drawBodyName(ctx:CanvasRenderingContext2D,game:MergeGame,kind:number,x:
     const dx=(cx-geometry.center[0])*scale,dy=(cy-geometry.center[1])*scale;
     return {x:x+dx*Math.cos(angle)-dy*Math.sin(angle),y:y+dx*Math.sin(angle)+dy*Math.cos(angle)};
   });
-  const left=Math.min(...corners.map(p=>p.x)),right=Math.max(...corners.map(p=>p.x));
-  const top=Math.min(...corners.map(p=>p.y)),bottom=Math.max(...corners.map(p=>p.y));
+  const left=wild?x-WILD_RADIUS*bodyScale:Math.min(...corners.map(p=>p.x)),right=wild?x+WILD_RADIUS*bodyScale:Math.max(...corners.map(p=>p.x));
+  const top=wild?y-WILD_RADIUS*bodyScale:Math.min(...corners.map(p=>p.y)),bottom=wild?y+WILD_RADIUS*bodyScale:Math.max(...corners.map(p=>p.y));
   const candidates=[{x:x-width/2,y:top-gap-labelHeight},{x:right+gap,y:y-labelHeight/2},{x:left-gap-width,y:y-labelHeight/2},{x:x-width/2,y:bottom+gap}]
     .map(p=>({x:Math.max(minX,Math.min(maxX-width,p.x)),y:Math.max(minY,Math.min(maxY-labelHeight,p.y)),width,height:labelHeight}));
   const box=candidates.find(p=>occupied.every(o=>p.x+p.width+gap<=o.x||p.x>=o.x+o.width+gap||p.y+p.height+gap<=o.y||p.y>=o.y+o.height+gap));
@@ -190,12 +223,36 @@ function drawBodyName(ctx:CanvasRenderingContext2D,game:MergeGame,kind:number,x:
   ctx.fillStyle=colours.label;ctx.strokeStyle=colours.discoveryBorder;ctx.lineWidth=unit;
   ctx.beginPath();ctx.roundRect(box.x,box.y,width,labelHeight,subtitle?12*unit:height/2);ctx.fill();ctx.stroke();
   ctx.fillStyle=colours.discoveryText;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(fruit.name,box.x+width/2,box.y+height/2,width-padding*2);
+  ctx.fillText(name,box.x+width/2,box.y+height/2,width-padding*2);
   if(subtitle){
     ctx.font=`bold ${detailSize}px Trebuchet MS, sans-serif`;
     ctx.fillStyle=colours.labelText;
     ctx.fillText(subtitle,box.x+width/2,box.y+height+detailSize/2-2*unit,width-padding*2);
   }
+  ctx.restore();
+}
+function drawPowerTarget(ctx:CanvasRenderingContext2D,game:MergeGame,colours:BoardColours){
+  if(!game.targeting||game.paused||game.over||!game.targetPoint)return;
+  const charge=game.inventory.find(item=>item.id===game.armedPowerId);if(!charge)return;
+  const detail=POWER_DETAILS[charge.type];if(detail.target==='none')return;
+  const {x,y}=game.targetPoint,valid=game.isPowerTargetValid(x,y);
+  const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+  ctx.save();ctx.strokeStyle=valid?detail.color:colours.stackText;ctx.fillStyle=detail.color;ctx.lineWidth=2*unit;
+  if(detail.target==='area'){
+    ctx.beginPath();ctx.arc(x,y,powerStrength(charge.level).radius,0,Math.PI*2);
+    ctx.globalAlpha=valid?.08:.03;ctx.fill();ctx.globalAlpha=valid?.8:.45;
+    ctx.setLineDash(valid?[]:[5*unit,5*unit]);ctx.stroke();ctx.setLineDash([]);
+  }else{
+    const body=valid?game.getPowerTargetBody(x,y):undefined;
+    if(body){
+      traceBody(ctx,game,body);ctx.globalAlpha=.13;ctx.fill();ctx.globalAlpha=.95;ctx.stroke();
+      ctx.restore();
+      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours,`${detail.name} · Level ${charge.level}`,body.scale??1,!!body.wild);
+      return;
+    }
+  }
+  ctx.globalAlpha=valid?.85:.6;ctx.beginPath();ctx.arc(x,y,7*unit,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-12*unit,y);ctx.lineTo(x+12*unit,y);ctx.moveTo(x,y-12*unit);ctx.lineTo(x,y+12*unit);ctx.stroke();
   ctx.restore();
 }
 export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:HTMLCanvasElement[],reducedMotion:boolean,darkMode=false){
@@ -221,11 +278,11 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
   ctx.fillText('STACK HIGH · DON’T SPILL',circular?0:WIDTH-15,limitY-11);
   ctx.restore();
   if(!game.over){
-    const radius=FRUITS[game.current].radius,shape=game.getShape(game.current),spawn=game.getSpawn();
-    const obstacles=game.bodies.map(b=>({x:b.x,y:b.y,shape:game.getShape(b.kind,b.angle)}));
+    const radius=game.wildReady?WILD_RADIUS:FRUITS[game.current].radius,shape=game.getDropShape(),spawn=game.getSpawn();
+    const obstacles=game.bodies.map(b=>({x:b.x,y:b.y,shape:game.getBodyShape(b)}));
     const target=circular?directionalLanding(spawn,shape,direction,obstacles,CIRCLE,CIRCLE.radius):{x:game.aim,y:landingY(game.aim,43,shape,obstacles,HEIGHT-.005)};
     const support=Math.max(...shape.points.map(p=>p.x*direction.x+p.y*direction.y));
-    if(!game.paused){
+    if(!game.paused&&!game.targeting){
       ctx.save();ctx.setLineDash([3,7]);ctx.strokeStyle=colours.aim;ctx.beginPath();ctx.moveTo(spawn.x+direction.x*support,spawn.y+direction.y*support);ctx.lineTo(target.x,target.y);ctx.stroke();ctx.setLineDash([]);
       if(circular){
         const tip={x:spawn.x+direction.x*(support+27),y:spawn.y+direction.y*(support+27)};
@@ -233,14 +290,15 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
       }else{ctx.beginPath();ctx.ellipse(target.x,target.y+shape.maxY,radius*.65,3,0,0,Math.PI*2);ctx.fillStyle=colours.landing;ctx.fill();}
       ctx.restore();
     }
-    drawFruit(ctx,sprites,game.current,spawn.x,spawn.y,radius,0,game.canDrop?1:.38,game.getFruit(game.current));
+    if(game.wildReady)drawWildSeed(ctx,spawn.x,spawn.y,radius,0,game.canDrop?1:.38);
+    else drawFruit(ctx,sprites,game.current,spawn.x,spawn.y,radius,0,game.canDrop?1:.38,game.getFruit(game.current));
   }
   if(!game.inspecting)for(const event of game.events)drawMergeGlow(ctx,game,event,reducedMotion,colours);
   drawPowerEffects(ctx,game,reducedMotion);
   for(const b of game.bodies){
     // The new silhouette stays full-sized; only its reveal fades, never its collider.
     const opacity=reducedMotion||game.inspecting||!b.birth?1:clamp01((game.time-b.birth.time-.1)/.3);
-    drawFruit(ctx,sprites,b.kind,b.x,b.y,FRUITS[b.kind].radius,b.angle,opacity,game.getFruit(b.kind));
+    drawBody(ctx,game,sprites,b,opacity);
   }
   if(!reducedMotion&&!game.inspecting)for(const event of game.events){
     drawGatheringFruit(ctx,game,event,sprites);
@@ -249,25 +307,22 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
   if(game.inspecting){
     const body=game.bodies.find(b=>b.id===game.inspectedId);
     if(body){
-      const shape=game.getShape(body.kind,body.angle);
       const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
-      ctx.save();ctx.strokeStyle=colours.highlight;ctx.lineWidth=2.5*unit;ctx.lineJoin='round';ctx.beginPath();
-      shape.points.forEach((p,i)=>{if(i===0)ctx.moveTo(body.x+p.x,body.y+p.y);else ctx.lineTo(body.x+p.x,body.y+p.y);});
-      ctx.closePath();ctx.stroke();ctx.restore();
-      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours,game.powersEnabled?`${powerLabel(game.getPower(body.kind))} on merge`:'');
+      ctx.save();ctx.strokeStyle=colours.highlight;ctx.lineWidth=2.5*unit;ctx.lineJoin='round';
+      traceBody(ctx,game,body);ctx.stroke();ctx.restore();
+      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours,body.wild?`Matches levels 1–${body.wild.maxKind+1}`:(body.scale??1)<1?'Squeezed':'',body.scale??1,!!body.wild);
     }
-  }else if(!game.over){
+  }else if(!game.over&&!game.targeting){
     const occupied:LabelBox[]=[];
     // Keep a busy chain reaction readable; the most recent discoveries take priority.
     for(const e of game.events.filter(e=>!e.cleared&&game.time-e.time>=MERGE_GATHER_SECONDS&&game.time-e.time<MERGE_LABEL_SECONDS&&game.bodies.some(b=>b.id===e.bodyId)).slice(-3).reverse()){
       const body=game.bodies.find(b=>b.id===e.bodyId),age=game.time-e.time;
       ctx.save();ctx.globalAlpha=reducedMotion?1:Math.min(1,(MERGE_LABEL_SECONDS-age)/.4);
       const achievement=`+${e.points}${e.chain>1?` · ${e.chain}-step cascade`:''}`;
-      // The trigger belongs to the fruit that merged, not the newly discovered fruit.
-      const detail=game.powersEnabled&&e.power?`+${e.points} · ${powerLabel(e.power)}${e.chain>1?` · ×${e.chain}`:''}`:achievement;
-      drawBodyName(ctx,game,e.kind,body?.x??e.x,body?.y??e.y,body?.angle??0,occupied,colours,detail);
+      drawBodyName(ctx,game,e.kind,body?.x??e.x,body?.y??e.y,body?.angle??0,occupied,colours,achievement,body?.scale??1,!!body?.wild);
       ctx.restore();
     }
   }
-  if(!game.over&&!game.paused)drawDropName(ctx,game,colours);
+  drawPowerTarget(ctx,game,colours);
+  if(!game.over&&!game.paused&&!game.targeting)drawDropName(ctx,game,colours);
 }

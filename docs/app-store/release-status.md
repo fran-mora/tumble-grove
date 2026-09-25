@@ -7,8 +7,9 @@ the App Store.**
 
 ## Later web update
 
-The GitHub Pages game now has an optional Fruit powers mode (Gather, Zest and
-Choose), a saved on/off preference and separate best scores. **Uploaded native
+The GitHub Pages game now has an optional cascade-earned Fruit powers mode
+(Gather, Ripen, Juice, Wild seed, Rescue, Shake, Squeeze and Choose), a three-slot
+inventory, a saved on/off preference and separate best scores. **Uploaded native
 build 2 predates this feature** and its bundled pages remain the version audited
 below. App Store submission work is paused at the owner's request while they are
 on their phone. Before resuming, decide whether to ship that existing build or

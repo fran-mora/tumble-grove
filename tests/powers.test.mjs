@@ -1,172 +1,239 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {MergeGame,STEP,MERGE_GATHER_SECONDS,WIDTH,HEIGHT,CIRCLE} from '../app/engine.ts';
-import {FRUIT_COLLECTION,FRUIT_LEVELS} from '../app/fruit-collection.ts';
-import {fruitPower,powerStrength,POWER_DETAILS} from '../app/powers.ts';
+import {MergeGame,STEP,CASCADE_LINK_SECONDS,WIDTH,HEIGHT,CIRCLE,WILD_RADIUS} from '../app/engine.ts';
+import {FRUIT_LEVELS} from '../app/fruit-collection.ts';
+import {POWER_TYPES,POWER_DETAILS,powerStrength} from '../app/powers.ts';
 import {RIM_Y,MOUTH_HALF_ANGLE} from '../app/arena.ts';
-const advance=(game,seconds)=>{for(let n=0;n<Math.ceil(seconds/STEP);n++)game.step();};
-const identities={gather:0,zest:32,choose:21};
-function gameWithPower(power,kind=0,mode='classic'){
-  const game=new MergeGame(()=>.99,()=>0);game.setMode(mode);game.setPowers(true);
-  game.lineup[kind]=identities[power];
-  for(const x of [210,225])game.addFruit(kind,x,280).age=2;
-  game.step();assert.equal(game.merges,1);return game;
+import {hullContact} from '../app/collision.ts';
+const advance=(g,seconds)=>{for(let n=0;n<Math.ceil(seconds/STEP);n++)g.step();};
+function fresh(mode='classic'){const g=new MergeGame(()=>0);g.setMode(mode);g.setPowers(true);return g;}
+let chargeSerial=10000;
+function charge(g,type,level=1){const c={id:++chargeSerial,type,level};g.inventory.push(c);assert.equal(g.armPower(c.id),true);return c;}
+function pair(g,kind=0,x=220,y=280){for(const dx of [-7,7])g.addFruit(kind,x+dx,y).age=2;g.step();return g.bodies.at(-1);}
+function link(g,result,other=null){
+  const partner=other??g.addFruit(result.kind,220,280);partner.age=2;
+  const before=g.merges;
+  for(let n=0;n<300&&g.merges===before;n++){
+    result.x=partner.x=220;result.y=partner.y=280;result.vx=result.vy=partner.vx=partner.vy=0;g.step();
+  }
+  assert.equal(g.merges,before+1);return g.bodies.at(-1);
 }
-function activeEffect(game,power,kind=1,x=220,y=300){
-  const {radius,duration}=powerStrength(kind);
-  game.powerEffects.push({id:101,power,kind,x,y,time:game.time,duration,radius});
-}
-function assertContained(game,body){
-  assert.ok([body.x,body.y,body.vx,body.vy,body.angle].every(Number.isFinite));
-  const shape=game.getShape(body.kind,body.angle);
-  if(game.mode==='classic'){
-    assert.ok(body.y+shape.maxY<=HEIGHT+.02,'solid basket base');
-    if(body.y+shape.minY>=RIM_Y){assert.ok(body.x+shape.minX>=-.02,'left side');assert.ok(body.x+shape.maxX<=WIDTH+.02,'right side');}
-  }else{
-    for(const p of shape.points){
-      const x=body.x+p.x-CIRCLE.x,y=body.y+p.y-CIRCLE.y,distance=Math.hypot(x,y);
-      if(-(x*game.down.x+y*game.down.y)<distance*Math.cos(MOUTH_HALF_ANGLE))assert.ok(distance<=CIRCLE.radius+.04,'solid bowl arc');
-    }
+function cascade(g,count,startKind=0){let result=pair(g,startKind);for(let n=1;n<count;n++)result=link(g,result);return result;}
+function award(g,count,startKind=0){const result=cascade(g,count,startKind);advance(g,CASCADE_LINK_SECONDS+.02);return result;}
+function contained(g,b){
+  assert.ok([b.x,b.y,b.vx,b.vy,b.angle,b.scale??1].every(Number.isFinite));const s=g.getBodyShape(b);
+  if(g.mode==='classic'){
+    assert.ok(b.y+s.maxY<=HEIGHT+.04,'basket base');
+    if(b.y+s.minY>=RIM_Y){assert.ok(b.x+s.minX>=-.04,'left wall');assert.ok(b.x+s.maxX<=WIDTH+.04,'right wall');}
+  }else for(const p of s.points){
+    const x=b.x+p.x-CIRCLE.x,y=b.y+p.y-CIRCLE.y,r=Math.hypot(x,y);
+    if(-(x*g.down.x+y*g.down.y)<r*Math.cos(MOUTH_HALF_ANGLE))assert.ok(r<=CIRCLE.radius+.04,'closed bowl arc');
   }
 }
 
-test('all 110 artwork identities have a stable, described ability independent of their growth bucket',()=>{
-  assert.equal(FRUIT_COLLECTION.length,110);
-  const counts={gather:0,zest:0,choose:0};
-  for(const fruit of FRUIT_COLLECTION){const power=fruitPower(fruit.id);counts[power]++;assert.ok(POWER_DETAILS[power].name);assert.equal(fruitPower(fruit.id),power);}
-  for(const count of Object.values(counts))assert.ok(count>=25&&count<=55);
-  assert.equal(fruitPower(0),'gather');assert.equal(fruitPower(32),'zest');assert.equal(fruitPower(73),'choose');
-  for(const id of [-1,110,NaN,.5])assert.throws(()=>fruitPower(id));
+test('all eight collectible abilities have targets and bounded five-tier strength',()=>{
+  assert.deepEqual(POWER_TYPES,['gather','ripen','juice','wild','rescue','shake','squeeze','choose']);
+  for(const type of POWER_TYPES){assert.ok(POWER_DETAILS[type].name);assert.ok(['area','fruit','none'].includes(POWER_DETAILS[type].target));}
+  for(let level=1;level<=5;level++){
+    const s=powerStrength(level);assert.ok(s.maxKind>=2&&s.maxKind<=9);assert.ok(s.scale>=.75&&s.scale<=.9);
+    if(level>1){assert.ok(s.radius>powerStrength(level-1).radius);assert.ok(s.maxKind>powerStrength(level-1).maxKind);}
+  }
+  assert.deepEqual(powerStrength(Infinity),powerStrength(1));assert.deepEqual(powerStrength(99),powerStrength(5));
 });
 
-test('powers are opt-in and disabled merges have no effect, no choice, and unchanged points',()=>{
-  const game=new MergeGame(()=>0);game.lineup[0]=21;
-  game.addFruit(0,205,300).age=2;game.addFruit(0,220,300).age=2;
-  advance(game,.7);assert.equal(game.powersEnabled,false);assert.equal(game.score,1);assert.equal(game.merges,1);
-  assert.equal(game.events[0].power,undefined);assert.deepEqual(game.powerEffects,[]);assert.deepEqual(game.choiceOptions,[]);
+test('disabled powers leave ordinary merges, points, and the basket unchanged',()=>{
+  const g=new MergeGame(()=>0);cascade(g,3);advance(g,4);
+  assert.equal(g.powersEnabled,false);assert.equal(g.merges,3);assert.equal(g.score,10);assert.deepEqual(g.inventory,[]);
+  assert.deepEqual(g.powerEffects,[]);assert.equal(g.rewardProgress,null);assert.equal(g.armPower(1),false);
 });
 
-test('a merge activates its parents’ power exactly once, after the visual reveal',()=>{
-  const game=gameWithPower('gather');game.lineup[1]=21;
-  assert.equal(game.events[0].power,'gather');assert.equal(game.powerEffects.length,0);
-  advance(game,MERGE_GATHER_SECONDS-STEP);assert.equal(game.powerEffects.length,0);
-  advance(game,STEP*2);assert.equal(game.powerEffects.length,1);assert.equal(game.powerEffects[0].power,'gather');
-  const first=game.powerEffects[0];assert.ok(first.time-game.events[0].time>=MERGE_GATHER_SECONDS);
-  advance(game,.5);assert.equal(game.powerEffects.length,1);assert.equal(game.powerEffects[0].id,first.id);
-  advance(game,4);assert.equal(game.powerEffects.length,0);assert.equal(game.merges,1);assert.equal(game.score,1);
-});
-
-test('larger merges extend power reach and duration; the final pair also activates exactly once',()=>{
-  let previous=powerStrength(1);
-  for(let kind=2;kind<=11;kind++){const next=powerStrength(kind);assert.ok(next.radius>previous.radius);assert.ok(next.duration>previous.duration);assert.ok(next.acceleration>previous.acceleration);previous=next;}
-  const game=gameWithPower('zest',10);assert.equal(game.bodies.length,0);advance(game,.3);
-  assert.equal(game.powerEffects.length,1);assert.equal(game.powerEffects[0].kind,11);
-  assert.equal(game.score,100);advance(game,4);assert.equal(game.powerEffects.length,0);assert.equal(game.score,100);
-});
-
-test('Gather gently moves matching pairs towards each other while leaving unrelated fruit alone',()=>{
-  const game=new MergeGame(()=>0);game.setPowers(true);
-  for(const [kind,x] of [[0,170],[0,270],[2,100]])game.addFruit(kind,x,250).age=2;
-  activeEffect(game,'gather',5,220,310);const [a,b,other]=game.bodies;
-  advance(game,.35);assert.ok(a.x>170.3);assert.ok(b.x<269.7);assert.equal(other.x,100);
-  assert.ok(Math.abs(a.vx)<35&&Math.abs(b.vx)<35);assert.equal(game.score,0);
-});
-
-test('overlapping Gather pulses cap added acceleration and remain finite',()=>{
-  const game=new MergeGame(()=>0);game.setPowers(true);
-  const a=game.addFruit(0,160,280),b=game.addFruit(0,280,280);a.age=b.age=2;
-  for(let i=0;i<20;i++)activeEffect(game,'gather',11,220,280);
-  game.time=1;game.step();assert.ok(Math.abs(a.vx)<=145*STEP);assert.ok(Math.abs(b.vx)<=145*STEP);
-  for(const body of game.bodies)assertContained(game,body);
-});
-
-test('Zest reduces damping locally and ends cleanly, without injecting an impulse',()=>{
-  const control=new MergeGame(()=>0),game=new MergeGame(()=>0);game.setPowers(true);game.lineup=[...control.lineup];
-  for(const g of [control,game]){const body=g.addFruit(0,220,180);body.vx=80;body.age=2;}
-  activeEffect(game,'zest',8,220,260);
-  advance(control,.35);advance(game,.35);
-  assert.ok(game.bodies[0].vx>control.bodies[0].vx+10);assert.ok(game.bodies[0].vx<80);
-  assert.ok(game.bodies[0].x>control.bodies[0].x+2);assert.equal(game.score,0);
-  advance(game,4);assert.equal(game.powerEffects.length,0);
-});
-
-test('Zest lets contacting fruit slide past each other by reducing tangential friction',()=>{
-  const simulate=zest=>{
-    const game=new MergeGame(()=>0),lineup=[...game.lineup];game.setPowers(true);game.lineup=lineup;
-    const a=game.addFruit(0,200,260),b=game.addFruit(4,225,300);a.vx=160;a.vy=160;a.age=b.age=2;
-    if(zest)activeEffect(game,'zest',5,220,290);
-    game.step();return a;
-  };
-  const normal=simulate(false),sliding=simulate(true);
-  assert.ok(sliding.vx>normal.vx+20,'contact tangential motion is preserved');
-  assert.ok(Math.abs(sliding.vy-normal.vy)<.01,'the normal collision remains solid');
-});
-
-test('Choose offers valid replacements, freezes physics, blocks drops, and preserves next and score',()=>{
-  const game=gameWithPower('choose');game.current=2;game.next=4;advance(game,.3);
-  assert.equal(game.choiceOptions.length,2);assert.equal(game.choiceOptions[0],2);assert.equal(new Set(game.choiceOptions).size,2);
-  assert.ok(game.choiceOptions.every(kind=>kind>=0&&kind<=4));
-  const state=JSON.stringify(game.snapshot()),time=game.time;advance(game,5);
-  assert.equal(JSON.stringify(game.snapshot()),state);assert.equal(game.time,time);assert.equal(game.canDrop,false);assert.equal(game.drop(),false);
-  assert.equal(game.chooseFruit(-1),false);assert.equal(game.chooseFruit(10),false);assert.equal(JSON.stringify(game.snapshot()),state);
-  const selected=game.choiceOptions[1];game.setAim(10000);assert.equal(game.chooseFruit(selected),true);
-  assert.equal(game.current,selected);assert.equal(game.next,4);assert.equal(game.score,1);assert.equal(game.merges,1);assert.deepEqual(game.choiceOptions,[]);
-  assert.ok(game.getSpawn().x+game.getShape(selected).maxX<=WIDTH);advance(game,.6);assert.equal(game.canDrop,true);
-});
-
-test('large Choose offers more options including an occasional larger drop; visible options count as encounters',()=>{
-  for(const [kind,count,max] of [[0,2,4],[4,3,4],[8,4,5]]){
-    const game=gameWithPower('choose',kind);advance(game,.3);
-    assert.equal(game.choiceOptions.length,count);assert.ok(Math.max(...game.choiceOptions)<=max);
-    if(max===5)assert.ok(game.choiceOptions.includes(5));
-    const history=game.getFruitHistory();for(const option of game.choiceOptions)assert.ok(history.seen[game.lineup[option]]>0);
+test('one merge earns no charge; a connected cascade earns exactly one highest-tier charge after settling',()=>{
+  for(let count=1;count<=7;count++){
+    const g=fresh();cascade(g,count);assert.equal(g.inventory.length,0);
+    assert.deepEqual(g.rewardProgress,{chain:count,level:Math.min(5,count-1)});
+    advance(g,CASCADE_LINK_SECONDS-.03);assert.equal(g.inventory.length,0);
+    advance(g,.05);assert.equal(g.inventory.length,count===1?0:1);
+    if(count>1)assert.equal(g.inventory[0].level,Math.min(5,count-1));
+    advance(g,4);assert.equal(g.inventory.length,count===1?0:1);assert.equal(g.rewardProgress,null);
   }
 });
 
-test('simultaneous Choose merges coalesce while other due powers activate and later pending powers resume',()=>{
-  const game=new MergeGame(()=>0);game.setPowers(true);game.lineup[0]=21;game.lineup[2]=32;
-  for(const [kind,x,y] of [[0,65,230],[0,80,230],[0,210,230],[0,225,230],[2,355,350],[2,370,350]])game.addFruit(kind,x,y).age=2;
-  game.step();assert.equal(game.merges,3);advance(game,.3);
-  assert.equal(game.choiceOptions.length,2);assert.equal(game.powerEffects.filter(e=>e.power==='choose').length,2);assert.equal(game.powerEffects.filter(e=>e.power==='zest').length,1);
-  assert.equal(game.chooseFruit(game.current),true);game.step();assert.equal(game.choiceOptions.length,0);
-  advance(game,3);assert.equal(game.choiceOptions.length,0);assert.equal(game.powerEffects.length,0);
+test('unrelated simultaneous matches do not add together, but connected branches consolidate one reward',()=>{
+  const g=fresh();const a=pair(g,0,70,280),b=pair(g,0,360,280);
+  assert.equal(g.merges,2);assert.equal(g.rewardProgress.chain,1);assert.equal(g.inventory.length,0);
+  link(g,a,b);assert.equal(g.rewardProgress.chain,2);advance(g,3.1);
+  assert.equal(g.inventory.length,1);assert.equal(g.inventory[0].level,1);
+  const separate=fresh();pair(separate,0,70,280);pair(separate,0,360,280);advance(separate,3.1);assert.equal(separate.inventory.length,0);
 });
 
-test('a power scheduled just after Choose waits safely until the selection is resolved',()=>{
-  const game=new MergeGame(()=>0);game.setPowers(true);game.lineup[0]=21;game.lineup[2]=0;
-  for(const x of [65,80])game.addFruit(0,x,280).age=2;
-  game.step();
-  for(const x of [315,330])game.addFruit(2,x,320).age=2;
-  game.step();
-  for(let n=0;n<60&&!game.choiceOptions.length;n++)game.step();
-  assert.equal(game.choiceOptions.length,2);assert.equal(game.powerEffects.filter(e=>e.power==='gather').length,0);
-  game.chooseFruit(game.current);advance(game,STEP*2);
-  assert.equal(game.powerEffects.filter(e=>e.power==='gather').length,1);assert.equal(game.choiceOptions.length,0);
+test('a later fresh normal drop starts a new reward chain without changing legacy animation cadence',()=>{
+  const g=fresh();const old=pair(g);g.current=old.kind;assert.equal(g.drop(220),true);
+  const dropped=g.bodies.at(-1);assert.ok(dropped.dropId>old.dropId);
+  const result=link(g,old,dropped);assert.equal(g.events.at(-1).chain,2);assert.equal(g.rewardProgress.chain,1);
+  link(g,result);assert.equal(g.rewardProgress.chain,2);advance(g,3.1);assert.equal(g.inventory.length,1);assert.equal(g.inventory[0].level,1);
 });
 
-test('pause and inspection preserve powers and choices; reset, arena changes, and toggling clear transient state',()=>{
-  const game=gameWithPower('choose');game.paused=true;const pendingTime=game.time;advance(game,1);assert.equal(game.time,pendingTime);
-  game.paused=false;advance(game,.3);assert.equal(game.choiceOptions.length,2);
-  game.paused=true;const before=JSON.stringify(game.snapshot());advance(game,1);assert.equal(JSON.stringify(game.snapshot()),before);assert.equal(game.chooseFruit(game.current),false);
-  game.paused=false;assert.equal(game.setInspecting(true),true);const inspecting=JSON.stringify(game.snapshot());advance(game,1);assert.equal(JSON.stringify(game.snapshot()),inspecting);
-  game.setInspecting(false);assert.equal(game.chooseFruit(game.current),true);
-  game.reset();assert.equal(game.powersEnabled,true);assert.deepEqual(game.powerEffects,[]);assert.deepEqual(game.choiceOptions,[]);advance(game,.4);assert.deepEqual(game.powerEffects,[]);
-  for(const action of [()=>game.setMode('gravity'),()=>game.setPowers(false)]){
-    activeEffect(game,'gather');game.choiceOptions=[0,1];action();assert.equal(game.bodies.length,0);assert.deepEqual(game.powerEffects,[]);assert.deepEqual(game.choiceOptions,[]);
+test('failed drops and unrelated fresh drops do not inflate or erase the existing causal chain',()=>{
+  const g=fresh();const first=pair(g);g.cooldown=1;assert.equal(g.drop(),false);const second=link(g,first);assert.equal(g.rewardProgress.chain,2);
+  g.cooldown=0;assert.equal(g.drop(35),true);const unrelated=g.bodies.at(-1);unrelated.x=35;unrelated.y=100;
+  link(g,second);assert.equal(g.rewardProgress.chain,3);
+});
+
+test('the last watermelon clear can finish a cascade and award once without a remaining body',()=>{
+  const g=fresh();const large=pair(g,9);link(g,large);
+  assert.equal(g.bodies.length,0);assert.equal(g.events.at(-1).cleared,true);assert.equal(g.events.at(-1).bodyId,null);
+  advance(g,3.1);assert.equal(g.inventory.length,1);assert.equal(g.inventory[0].level,1);const score=g.score;advance(g,4);assert.equal(g.score,score);assert.equal(g.inventory.length,1);
+});
+
+test('reward selection prefers variety and sanitizes hostile random results',()=>{
+  const g=fresh();for(let i=0;i<3;i++){g.bodies=[];award(g,2);}assert.equal(new Set(g.inventory.map(c=>c.type)).size,3);
+  for(const value of [NaN,Infinity,-1,1]){const h=fresh();h.random=()=>value;award(h,2);assert.ok(POWER_TYPES.includes(h.inventory[0].type));}
+});
+
+test('a full tray keeps three powers and one highest-tier offer with explicit swap or skip',()=>{
+  const g=fresh();g.inventory=POWER_TYPES.slice(0,3).map((type,i)=>({id:100+i,type,level:1}));
+  award(g,2);assert.equal(g.inventory.length,3);const first=g.pendingReward;assert.equal(first.level,1);assert.equal(g.canDrop,true);
+  g.bodies=[];award(g,4);const higher=g.pendingReward;assert.equal(higher.level,3);assert.notEqual(higher.id,first.id);
+  g.bodies=[];award(g,2);assert.equal(g.pendingReward.id,higher.id);
+  assert.equal(g.acceptReward(-1),false);assert.equal(g.pendingReward.id,higher.id);
+  const replace=g.inventory[1].id;assert.equal(g.acceptReward(replace),true);assert.equal(g.inventory.length,3);assert.equal(g.inventory[1].id,higher.id);assert.equal(g.pendingReward,null);assert.equal(g.acceptReward(replace),false);
+  g.bodies=[];award(g,2);assert.ok(g.pendingReward);const saved=JSON.stringify(g.inventory);g.skipReward();assert.equal(g.pendingReward,null);assert.equal(JSON.stringify(g.inventory),saved);
+});
+
+test('arming freezes time, effects and physics; cancellation, misses, and paused actions cost nothing',()=>{
+  const g=fresh();g.addFruit(0,220,280);const c=charge(g,'juice');
+  assert.equal(g.targeting,true);const state=JSON.stringify(g.snapshot());advance(g,5);assert.equal(JSON.stringify(g.snapshot()),state);assert.equal(g.drop(),false);
+  assert.equal(g.usePowerAt(20,20),false);assert.equal(g.usePowerAt(NaN,280),false);assert.equal(g.inventory[0].id,c.id);assert.equal(g.armedPowerId,c.id);
+  g.paused=true;assert.equal(g.usePowerAt(220,280),false);assert.equal(g.activatePower(),false);g.paused=false;
+  g.cancelPower();assert.equal(g.inventory.length,1);assert.equal(g.targeting,false);advance(g,.1);assert.ok(g.time>0);
+});
+
+test('Gather attracts only eligible matching pairs gently and cannot earn another charge',()=>{
+  const g=fresh();const a=g.addFruit(0,170,250),b=g.addFruit(0,270,250),other=g.addFruit(2,100,250);a.age=b.age=other.age=2;
+  charge(g,'gather',3);assert.equal(g.usePowerAt(220,300),true);advance(g,.35);
+  assert.ok(a.x>170.3&&b.x<269.7);assert.equal(other.x,100);assert.ok(Math.abs(a.vx)<35&&Math.abs(b.vx)<35);assert.ok(a.powerBlocked&&b.powerBlocked);
+  const result=link(g,a,b);link(g,result);advance(g,3.1);assert.equal(g.inventory.length,0);assert.equal(g.rewardProgress,null);assert.equal(g.merges,2);
+});
+
+test('a later fresh normal drop can earn a new natural cascade after a power-assisted result',()=>{
+  const g=fresh();const a=g.addFruit(0,210,280);charge(g,'ripen',1);assert.equal(g.usePowerAt(a.x,a.y),true);advance(g,1.2);
+  g.current=a.kind;assert.equal(g.drop(),true);const dropped=g.bodies.at(-1);const result=link(g,a,dropped);
+  assert.equal(result.powerBlocked,false);assert.equal(g.rewardProgress.chain,1);
+  const oldPowered=g.addFruit(result.kind,220,280);oldPowered.powerBlocked=true;oldPowered.dropId=0;
+  link(g,result,oldPowered);assert.equal(g.rewardProgress.chain,2);advance(g,3.1);assert.equal(g.inventory.length,1);
+});
+
+test('Ripen grows one eligible fruit, fits the larger hull, and creates no points or fake merge',()=>{
+  const g=fresh();const a=g.addFruit(2,20,HEIGHT-10);a.age=2;g.step();const before=g.score;
+  charge(g,'ripen',1);assert.equal(g.usePowerAt(a.x,a.y),true);assert.equal(a.kind,3);assert.equal(g.score,before);assert.equal(g.merges,0);assert.equal(g.events.length,0);assert.ok(a.powerBlocked);contained(g,a);
+  charge(g,'ripen',1);assert.equal(g.usePowerAt(a.x,a.y),false);assert.equal(g.inventory.length,1);
+});
+
+test('Juice removes exactly the selected eligible fruit and prevents a falling-pile reward loop',()=>{
+  const g=fresh();const a=g.addFruit(0,120,300),b=g.addFruit(3,320,300);charge(g,'juice',1);
+  assert.equal(g.usePowerAt(b.x,b.y),false);assert.equal(g.usePowerAt(a.x,a.y),true);
+  assert.deepEqual(g.bodies.map(x=>x.id),[b.id]);assert.equal(g.score,0);assert.equal(g.merges,0);assert.ok(b.powerBlocked);assert.equal(g.powerEffects.at(-1).power,'juice');
+});
+
+test('Rescue stores one fruit, refuses an occupied reserve, and later replaces the ready fruit without dropping',()=>{
+  const g=fresh();const a=g.addFruit(2,120,300),b=g.addFruit(1,320,300);charge(g,'rescue',1);assert.equal(g.usePowerAt(a.x,a.y),true);
+  assert.deepEqual(g.rescuedFruit,{kind:2});charge(g,'rescue',1);assert.equal(g.usePowerAt(b.x,b.y),false);g.cancelPower();
+  const next=g.next,drops=g.drops;assert.equal(g.releaseRescue(),true);assert.equal(g.current,2);assert.equal(g.next,next);assert.equal(g.drops,drops);assert.equal(g.rescuedFruit,null);assert.equal(g.releaseRescue(),false);
+  assert.equal(g.drop(),true);assert.equal(g.bodies.at(-1).powerBlocked,true);
+});
+
+test('Wild drops a separate seed, preserves the normal queue, and merges with the first eligible unlike fruit',()=>{
+  const g=fresh();g.current=2;g.next=4;charge(g,'wild',2);assert.equal(g.activatePower(),true);assert.equal(g.inventory.length,0);
+  assert.equal(g.getDropShape().maxX,WILD_RADIUS);const ready=g.wildReady;charge(g,'wild',1);assert.equal(g.activatePower(),false);assert.equal(g.wildReady,ready);g.cancelPower();
+  assert.equal(g.drop(),true);assert.equal(g.current,2);assert.equal(g.next,4);const seed=g.bodies.at(-1);assert.ok(seed.wild);assert.equal(seed.powerBlocked,true);
+  seed.x=215;seed.y=280;seed.age=2;const target=g.addFruit(3,225,280);target.age=2;g.step();
+  assert.equal(g.merges,1);assert.equal(g.bodies[0].kind,4);assert.equal(g.score,10);assert.equal(g.events[0].sources[0].wild.maxKind,4);assert.equal(g.bodies[0].powerBlocked,true);
+  link(g,g.bodies[0]);advance(g,3.1);assert.equal(g.inventory.length,1,'only the unused second Wild charge remains');
+});
+
+test('Wild refuses fruit above its tier cap and two wild seeds never merge together',()=>{
+  const g=fresh();const seed=g.addFruit(0,215,280);seed.wild={level:1,maxKind:2};seed.age=2;
+  g.addFruit(3,225,280).age=2;g.step();assert.equal(g.merges,0);
+  g.bodies=[];for(const x of [215,225]){const b=g.addFruit(0,x,280);b.wild={level:1,maxKind:2};b.age=2;}g.step();assert.equal(g.merges,0);
+});
+
+test('Shake visibly oscillates sideways with capped acceleration in either arena',()=>{
+  for(const mode of ['classic','gravity']){
+    const g=fresh(mode);const b=g.addFruit(0,220,250);charge(g,'shake',5);assert.equal(g.usePowerAt(220,300),true);
+    const positions=[];for(let i=0;i<80;i++){g.step();positions.push(b.vx);contained(g,b);}
+    assert.ok(Math.max(...positions)>5);assert.ok(Math.min(...positions)<-5);assert.ok(b.powerBlocked);assert.equal(g.merges,0);
   }
-  game.addFruit(0,220,300);game.setPowers(false);assert.equal(game.bodies.length,1,'setting same mode does not reset');
 });
 
-test('active Gather and Zest keep growing fruit behind solid basket and bowl boundaries',()=>{
-  for(const mode of ['classic','gravity'])for(const kind of [0,3,6,9])for(const id of FRUIT_LEVELS[kind]){
-    const game=new MergeGame(()=>0);game.setMode(mode);game.setPowers(true);game.lineup[kind]=id;
-    const x=mode==='classic'?75:220,y=mode==='classic'?HEIGHT-80:350;
-    for(const dx of [-3,3])game.addFruit(kind,x+dx,y).age=2;
-    activeEffect(game,'gather',11,x,y);activeEffect(game,'zest',11,x,y);
-    for(let step=0;step<48;step++){
-      if(game.choiceOptions.length)game.chooseFruit(game.current);
-      game.step();for(const body of game.bodies)assertContained(game,body);assert.equal(game.over,false);
-    }
-    assert.equal(game.merges,1);assert.equal(game.score,(kind+1)*(kind+2)/2);
+test('Squeeze shrinks both artwork geometry and collision hull until the next merge, without compounding',()=>{
+  const g=fresh();const a=g.addFruit(2,170,300),b=g.addFruit(2,240,300);a.age=b.age=2;
+  const original=g.getBodyShape(a);charge(g,'squeeze',5);assert.equal(g.usePowerAt(205,300),true);
+  assert.equal(a.scale,.75);assert.equal(g.getBodyShape(a).maxX,original.maxX*.75);assert.equal(g.getBodyShape(a).points[3].y,original.points[3].y*.75);
+  assert.equal(hullContact(a,g.getBodyShape(a),b,g.getBodyShape(b)),null);
+  charge(g,'squeeze',1);assert.equal(g.usePowerAt(205,300),false);g.cancelPower();
+  const result=link(g,a,b);assert.equal(result.scale??1,1);assert.equal(g.events.at(-1).sources[0].scale,.75);assert.equal(result.powerBlocked,true);
+});
+
+test('Choose keeps charge until a different fruit is selected, preserves next, and marks the changed drop as powered',()=>{
+  const g=fresh();g.current=2;g.next=4;const c=charge(g,'choose',5);assert.equal(g.activatePower(),true);
+  assert.equal(g.choiceOptions.length,4);assert.equal(g.inventory[0].id,c.id);const snapshot=JSON.stringify(g.snapshot());advance(g,5);assert.equal(JSON.stringify(g.snapshot()),snapshot);
+  assert.equal(g.chooseFruit(10),false);assert.equal(g.inventory.length,1);assert.equal(g.chooseFruit(g.current),true);assert.equal(g.inventory.length,1);assert.equal(g.targeting,false);
+  assert.equal(g.armPower(c.id),true);assert.equal(g.activatePower(),true);const selected=g.choiceOptions[1];assert.equal(g.chooseFruit(selected),true);
+  assert.equal(g.current,selected);assert.equal(g.next,4);assert.equal(g.inventory.length,0);assert.equal(g.drops,0);assert.equal(g.score,0);assert.equal(g.drop(),true);assert.ok(g.bodies.at(-1).powerBlocked);
+});
+
+test('pause and inspection freeze reward/effect timers; reset and mode switches clear inventory and transient state',()=>{
+  const g=fresh();cascade(g,2);charge(g,'shake',2);g.usePowerAt(220,300);g.paused=true;const before=JSON.stringify(g.snapshot());advance(g,10);assert.equal(JSON.stringify(g.snapshot()),before);
+  g.paused=false;g.setInspecting(true);const inspected=JSON.stringify(g.snapshot());advance(g,10);assert.equal(JSON.stringify(g.snapshot()),inspected);g.setInspecting(false);
+  g.wildReady={level:1,maxKind:2};g.rescuedFruit={kind:1};g.pendingReward={id:999,type:'choose',level:4};g.reset();
+  assert.equal(g.powersEnabled,true);assert.deepEqual(g.inventory,[]);assert.equal(g.wildReady,null);assert.equal(g.rescuedFruit,null);assert.equal(g.pendingReward,null);assert.equal(g.rewardProgress,null);assert.deepEqual(g.powerEffects,[]);
+  charge(g,'juice');g.setMode('gravity');assert.deepEqual(g.inventory,[]);assert.equal(g.targeting,false);g.setPowers(false);assert.equal(g.powersEnabled,false);
+});
+
+test('Ripen, Squeeze, and growing powered bodies respect solid walls for every eligible artwork and tilted bowl direction',()=>{
+  for(const mode of ['classic','gravity'])for(const theta of mode==='gravity'?[0,Math.PI/2,Math.PI,3*Math.PI/2]:[0])for(const kind of [0,3,6,9])for(const id of FRUIT_LEVELS[kind]){
+    const g=fresh(mode);if(mode==='gravity'){g.setGravity(Math.cos(theta),Math.sin(theta));advance(g,1.2);}g.lineup[kind]=id;
+    const d=g.down,shape=g.getShape(kind),extent=Math.max(...shape.points.map(p=>p.x*d.x+p.y*d.y));
+    const x=mode==='classic'?Math.max(40,-shape.minX+.02):CIRCLE.x+d.x*(CIRCLE.radius-extent-.2),y=mode==='classic'?HEIGHT-shape.maxY-.02:CIRCLE.y+d.y*(CIRCLE.radius-extent-.2);
+    const body=g.addFruit(kind,x,y);body.age=2;g.step();charge(g,'ripen',5);assert.equal(g.usePowerAt(body.x,body.y),true);contained(g,body);
+    if(body.kind<=9){charge(g,'squeeze',5);assert.equal(g.usePowerAt(body.x,body.y),true);charge(g,'shake',5);assert.equal(g.usePowerAt(body.x,body.y),true);}
+    for(let i=0;i<35;i++){g.step();for(const b of g.bodies)contained(g,b);assert.equal(g.over,false);}
+    assert.equal(g.score,0);assert.equal(g.merges,0);
+  }
+});
+
+test('Choose cancellation cannot reroll the saved power or reveal extra alternatives',()=>{
+  const g=fresh();let sample=0;g.random=()=>((sample++%5)+.2)/5;const c=charge(g,'choose',1);g.activatePower();const options=[...g.choiceOptions],history=JSON.stringify(g.getFruitHistory());
+  for(let n=0;n<6;n++){g.cancelPower();g.armPower(c.id);g.activatePower();assert.deepEqual(g.choiceOptions,options);assert.equal(JSON.stringify(g.getFruitHistory()),history);}
+  assert.equal(g.inventory.length,1);
+});
+
+test('spending a saved power fills the newly free slot with the waiting offer exactly once',()=>{
+  const g=fresh();g.inventory=[{id:901,type:'wild',level:1},{id:902,type:'ripen',level:2},{id:903,type:'juice',level:1}];g.pendingReward={id:904,type:'choose',level:4};
+  assert.equal(g.armPower(901),true);assert.equal(g.activatePower(),true);
+  assert.deepEqual(g.inventory.map(c=>c.id),[902,903,904]);assert.equal(g.pendingReward,null);assert.equal(g.acceptReward(901),false);
+});
+
+test('indirect collisions and removed support cannot farm charges outside a power’s visual radius',()=>{
+  for(const power of ['gather','ripen','juice','rescue','shake','squeeze']){
+    const g=fresh();const target=g.addFruit(0,70,300);if(power==='gather')g.addFruit(0,110,300);
+    const untouchedA=g.addFruit(1,320,220),untouchedB=g.addFruit(1,375,220);untouchedA.age=untouchedB.age=2;
+    charge(g,power,1);assert.equal(g.usePowerAt(target.x,target.y),true);assert.ok(untouchedA.powerBlocked&&untouchedB.powerBlocked);
+    const result=link(g,untouchedA,untouchedB);link(g,result);advance(g,3.1);
+    assert.equal(g.inventory.length,0);assert.equal(g.rewardProgress,null);
+  }
+});
+
+test('Ripen reaching the final fruit records the same achievement without inventing points',()=>{
+  const g=fresh();const b=g.addFruit(9,220,280);charge(g,'ripen',5);assert.equal(g.usePowerAt(b.x,b.y),true);
+  assert.equal(b.kind,10);assert.equal(g.highest,10);assert.equal(g.watermelons,1);assert.equal(g.score,0);assert.equal(g.merges,0);
+});
+
+test('power-created drops also block indirect reward farming when they hit the existing pile',()=>{
+  for(const type of ['wild','choose','rescue']){
+    const g=fresh();const existing=g.addFruit(2,220,300);
+    if(type==='rescue'){g.rescuedFruit={kind:1};g.releaseRescue();}
+    else{charge(g,type,2);g.activatePower();if(type==='choose')g.chooseFruit(g.choiceOptions[1]);}
+    assert.equal(g.drop(),true);assert.ok(existing.powerBlocked);assert.ok(g.bodies.at(-1).powerBlocked);
   }
 });
