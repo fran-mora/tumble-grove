@@ -249,3 +249,10 @@
   .power-slot strong{font-size:10px}
   .power-target-panel output{font-size:10px}
 }
+
+/* A single visible count links the celebration to the reward it will earn. */
+.round-caption.has-combo{gap:6px}
+.combo-settling{position:relative;display:inline-block;flex:none;overflow:hidden;font-size:10px;line-height:16px;padding:0 5px 2px;border-radius:5px;color:var(--muted-foreground)}
+.combo-settling i{position:absolute;bottom:0;left:0;height:2px;width:calc(var(--settled) * 100%);background:var(--ring)}
+.round-caption.has-combo .merge-points{font-size:11px}
+@media(max-width:360px){.round-caption.has-combo{gap:4px;font-size:11px}.round-caption.has-combo>svg{width:12px}.combo-settling{font-size:9px;padding-left:3px;padding-right:3px}}

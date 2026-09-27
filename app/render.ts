@@ -60,26 +60,48 @@ function traceBody(ctx:CanvasRenderingContext2D,game:MergeGame,body:FruitBody){
   shape.points.forEach((p,i)=>{if(i===0)ctx.moveTo(body.x+p.x,body.y+p.y);else ctx.lineTo(body.x+p.x,body.y+p.y);});
   ctx.closePath();
 }
+function drawGatherConnection(ctx:CanvasRenderingContext2D,game:MergeGame,a:FruitBody,b:FruitBody,reducedMotion:boolean,time=0){
+  const distance=Math.hypot(b.x-a.x,b.y-a.y);if(distance<1)return;
+  const dx=(b.x-a.x)/distance,dy=(b.y-a.y)/distance;
+  const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+  const supportA=Math.max(...game.getBodyShape(a).points.map(p=>p.x*dx+p.y*dy));
+  const supportB=Math.max(...game.getBodyShape(b).points.map(p=>-p.x*dx-p.y*dy));
+  const gap=distance-supportA-supportB-10;if(gap<8)return;
+  const start={x:a.x+dx*(supportA+5),y:a.y+dy*(supportA+5)},end={x:b.x-dx*(supportB+5),y:b.y-dy*(supportB+5)};
+  ctx.save();ctx.lineWidth=1.7*unit;ctx.setLineDash([4*unit,4*unit]);
+  ctx.beginPath();ctx.moveTo(start.x,start.y);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.setLineDash([]);
+  // Two arrows always point towards the pair's midpoint. Only the small dots move.
+  for(const [fraction,sign] of [[.28,1],[.72,-1]]){
+    const x=start.x+dx*gap*fraction,y=start.y+dy*gap*fraction,size=Math.min(5*unit,gap/10);
+    ctx.beginPath();ctx.moveTo(x-dx*size*sign+dy*size,y-dy*size*sign-dx*size);ctx.lineTo(x,y);ctx.lineTo(x-dx*size*sign-dy*size,y-dy*size*sign+dx*size);ctx.stroke();
+  }
+  if(!reducedMotion){
+    const phase=(time*1.5)%1;
+    for(const fraction of [phase*.45,1-phase*.45]){ctx.beginPath();ctx.arc(start.x+dx*gap*fraction,start.y+dy*gap*fraction,2.5*unit,0,Math.PI*2);ctx.fill();}
+  }
+  ctx.restore();
+}
 function drawPowerEffects(ctx:CanvasRenderingContext2D,game:MergeGame,reducedMotion:boolean){
   if(!game.powersEnabled||game.inspecting)return;
-  // Show the area the ability actually reaches, without obscuring a busy cascade.
+  const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+  // Keep recent power feedback visible without obscuring a busy cascade.
   for(const effect of game.powerEffects.slice(-3)){
     const progress=clamp01((game.time-effect.time)/effect.duration);
     if(progress>=1)continue;
     const {x,y,radius,power}=effect;
     ctx.save();ctx.strokeStyle=POWER_DETAILS[power].color;ctx.fillStyle=POWER_DETAILS[power].color;
     ctx.lineWidth=1.8;ctx.globalAlpha=.32*(1-progress);
-    if(reducedMotion){
-      ctx.setLineDash(power==='gather'?[3,6]:power==='shake'?[10,5]:[2,8]);
-      ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();
-    }else if(power==='gather'){
-      ctx.setLineDash([3,7]);ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-      const phase=(progress*1.6)%1,reach=radius*(1-.72*phase);
-      ctx.globalAlpha=.38*(1-progress);ctx.beginPath();ctx.arc(x,y,reach,0,Math.PI*2);ctx.stroke();
-      for(let i=0;i<6;i++){
-        const angle=i*Math.PI/3+effect.id*.37;
-        ctx.beginPath();ctx.arc(x+Math.cos(angle)*reach,y+Math.sin(angle)*reach,2.5,0,Math.PI*2);ctx.fill();
+    if(power==='gather'){
+      const [a,b]=(effect.bodyIds??[]).map(id=>game.bodies.find(body=>body.id===id));
+      if(a&&b){
+        ctx.globalAlpha=.8*Math.min(1,(1-progress)*4);
+        drawGatherConnection(ctx,game,a,b,reducedMotion,game.time-effect.time);
+        ctx.lineWidth=2*unit;
+        for(const body of [a,b]){traceBody(ctx,game,body);ctx.stroke();}
       }
+    }else if(reducedMotion){
+      ctx.setLineDash(power==='shake'?[10,5]:[2,8]);
+      ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.stroke();
     }else if(power==='shake'||power==='rescue'){
       for(let i=0;i<2;i++){
         const phase=(progress*1.5+i*.5)%1;
@@ -237,17 +259,58 @@ function drawPowerTarget(ctx:CanvasRenderingContext2D,game:MergeGame,colours:Boa
   const detail=POWER_DETAILS[charge.type];if(detail.target==='none')return;
   const {x,y}=game.targetPoint,valid=game.isPowerTargetValid(x,y);
   const unit=Math.max(1,(WIDTH+2*VIEW_PADDING)/(ctx.canvas.clientWidth||WIDTH+2*VIEW_PADDING));
+  if(detail.target==='pair'){
+    const source=game.bodies.find(body=>body.id===game.gatherSourceId);
+    const partners=source?game.getGatherPartners(source.id):[];
+    const hovered=game.getPowerTargetBody(x,y),partner=hovered&&partners.some(body=>body.id===hovered.id)?hovered:undefined;
+    ctx.save();ctx.strokeStyle=detail.color;ctx.fillStyle=detail.color;ctx.lineWidth=2*unit;
+    if(source){
+      ctx.globalAlpha=.35;ctx.setLineDash([5*unit,6*unit]);ctx.beginPath();ctx.arc(source.x,source.y,powerStrength(charge.level).gatherReach,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+      for(const body of partners){
+        traceBody(ctx,game,body);ctx.globalAlpha=.12;ctx.fill();ctx.globalAlpha=body===partner?1:.7;ctx.lineWidth=(body===partner?3:2)*unit;ctx.stroke();
+      }
+      traceBody(ctx,game,source);ctx.globalAlpha=.16;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=3*unit;ctx.stroke();
+      if(partner)drawGatherConnection(ctx,game,source,partner,true);
+    }else if(hovered&&valid){
+      traceBody(ctx,game,hovered);ctx.globalAlpha=.15;ctx.fill();ctx.globalAlpha=.95;ctx.stroke();
+    }
+    if(!partner){ctx.globalAlpha=.65;ctx.lineWidth=1.5*unit;ctx.beginPath();ctx.arc(x,y,6*unit,0,Math.PI*2);ctx.stroke();}
+    ctx.restore();
+    const occupied:LabelBox[]=[];
+    if(source)drawBodyName(ctx,game,source.kind,source.x,source.y,source.angle,occupied,colours,'First fruit · select its match',source.scale??1);
+    if(partner)drawBodyName(ctx,game,partner.kind,partner.x,partner.y,partner.angle,occupied,colours,'Matching partner',partner.scale??1);
+    else if(!source&&hovered&&valid)drawBodyName(ctx,game,hovered.kind,hovered.x,hovered.y,hovered.angle,occupied,colours,'Select first fruit',hovered.scale??1);
+    return;
+  }
   ctx.save();ctx.strokeStyle=valid?detail.color:colours.stackText;ctx.fillStyle=detail.color;ctx.lineWidth=2*unit;
   if(detail.target==='area'){
-    ctx.beginPath();ctx.arc(x,y,powerStrength(charge.level).radius,0,Math.PI*2);
+    const strength=powerStrength(charge.level);
+    ctx.beginPath();ctx.arc(x,y,strength.radius,0,Math.PI*2);
     ctx.globalAlpha=valid?.08:.03;ctx.fill();ctx.globalAlpha=valid?.8:.45;
     ctx.setLineDash(valid?[]:[5*unit,5*unit]);ctx.stroke();ctx.setLineDash([]);
+    if(charge.type==='squeeze'){
+      const changed=valid?game.bodies.filter(body=>!body.wild&&Math.hypot(body.x-x,body.y-y)<=strength.radius&&(body.scale??1)>strength.scale+.001):[];
+      for(const body of changed){
+        ctx.strokeStyle=detail.color;ctx.lineWidth=2*unit;ctx.globalAlpha=.9;
+        traceBody(ctx,game,body);ctx.stroke();
+        // Show the actual resulting outline, including fruit already partly squeezed.
+        ctx.setLineDash([3*unit,3*unit]);traceBody(ctx,game,{...body,scale:strength.scale});ctx.stroke();ctx.setLineDash([]);
+        const percent=Math.round((1-strength.scale/(body.scale??1))*100),text=`−${percent}%`;
+        const fontSize=11*unit;ctx.font=`bold ${fontSize}px Trebuchet MS, sans-serif`;
+        const width=ctx.measureText(text).width+8*unit,height=17*unit;
+        const bx=Math.max(-VIEW_PADDING+4*unit,Math.min(WIDTH+VIEW_PADDING-width-4*unit,body.x-width/2));
+        const by=Math.max(-VIEW_PADDING+4*unit,Math.min(game.height+VIEW_PADDING-height-4*unit,body.y-height/2));
+        ctx.globalAlpha=1;ctx.fillStyle=colours.label;ctx.beginPath();ctx.roundRect(bx,by,width,height,5*unit);ctx.fill();
+        ctx.fillStyle=colours.labelText;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,bx+width/2,by+height/2);
+      }
+      ctx.fillStyle=detail.color;ctx.strokeStyle=valid?detail.color:colours.stackText;
+    }
   }else{
     const body=valid?game.getPowerTargetBody(x,y):undefined;
     if(body){
       traceBody(ctx,game,body);ctx.globalAlpha=.13;ctx.fill();ctx.globalAlpha=.95;ctx.stroke();
       ctx.restore();
-      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours,`${detail.name} · Level ${charge.level}`,body.scale??1,!!body.wild);
+      drawBodyName(ctx,game,body.kind,body.x,body.y,body.angle,[],colours,`${detail.name} · Strength ${charge.level}`,body.scale??1,!!body.wild);
       return;
     }
   }
@@ -294,12 +357,12 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
     else drawFruit(ctx,sprites,game.current,spawn.x,spawn.y,radius,0,game.canDrop?1:.38,game.getFruit(game.current));
   }
   if(!game.inspecting)for(const event of game.events)drawMergeGlow(ctx,game,event,reducedMotion,colours);
-  drawPowerEffects(ctx,game,reducedMotion);
   for(const b of game.bodies){
     // The new silhouette stays full-sized; only its reveal fades, never its collider.
     const opacity=reducedMotion||game.inspecting||!b.birth?1:clamp01((game.time-b.birth.time-.1)/.3);
     drawBody(ctx,game,sprites,b,opacity);
   }
+  drawPowerEffects(ctx,game,reducedMotion);
   if(!reducedMotion&&!game.inspecting)for(const event of game.events){
     drawGatheringFruit(ctx,game,event,sprites);
     drawMergeSparkles(ctx,game,event,colours);
@@ -318,7 +381,7 @@ export function renderGame(ctx:CanvasRenderingContext2D,game:MergeGame,sprites:H
     for(const e of game.events.filter(e=>!e.cleared&&game.time-e.time>=MERGE_GATHER_SECONDS&&game.time-e.time<MERGE_LABEL_SECONDS&&game.bodies.some(b=>b.id===e.bodyId)).slice(-3).reverse()){
       const body=game.bodies.find(b=>b.id===e.bodyId),age=game.time-e.time;
       ctx.save();ctx.globalAlpha=reducedMotion?1:Math.min(1,(MERGE_LABEL_SECONDS-age)/.4);
-      const achievement=`+${e.points}${e.chain>1?` · ${e.chain}-step cascade`:''}`;
+      const achievement=`+${e.points}${e.assisted?' · Power-assisted':e.chain>1?` · ${e.chain}-step cascade`:''}`;
       drawBodyName(ctx,game,e.kind,body?.x??e.x,body?.y??e.y,body?.angle??0,occupied,colours,achievement,body?.scale??1,!!body?.wild);
       ctx.restore();
     }

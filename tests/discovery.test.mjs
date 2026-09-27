@@ -74,7 +74,8 @@ test('merge labels retain the new body and actual round variety, then expire',()
 
 // Record actual renderer output without requiring a browser or loading artwork.
 function canvasRecorder(clientWidth,height){
-  const text=[],boxes=[],arcs=[],images=[];
+  const text=[],boxes=[],arcs=[],images=[],strokes=[];
+  let path=[];
   const ctx=new Proxy({
     canvas:{width:504,height:height+64,clientWidth},
     createRadialGradient(){return {addColorStop(){}};},
@@ -83,8 +84,12 @@ function canvasRecorder(clientWidth,height){
     roundRect(x,y,width,height){boxes.push({x,y,width,height});},
     arc(x,y,radius){arcs.push({x,y,radius});},
     drawImage(...args){images.push(args);},
+    beginPath(){path=[];},
+    moveTo(x,y){path.push({x,y});},
+    lineTo(x,y){path.push({x,y});},
+    stroke(){strokes.push({points:[...path],color:this.strokeStyle});},
   },{get:(target,key)=>key in target?target[key]:()=>{}});
-  return {ctx,text,boxes,arcs,images};
+  return {ctx,text,boxes,arcs,images,strokes};
 }
 
 test('Inspect renders every fruit name within a small phone canvas in both appearances, including rotated edge fruit',()=>{
@@ -138,7 +143,7 @@ test('ordinary fruit labels stay within a narrow canvas and do not claim an intr
 
 test('power effects are limited to three, stay still with reduced motion, and disappear when disabled',()=>{
   const game=new MergeGame(()=>0);game.powersEnabled=true;
-  game.powerEffects=['gather','gather','shake','juice'].map((power,id)=>({id,power,level:1,kind:1,x:200,y:300,time:0,duration:3,radius:90+id}));
+  game.powerEffects=['juice','ripen','shake','juice'].map((power,id)=>({id,power,level:1,kind:1,x:200,y:300,time:0,duration:3,radius:90+id}));
   for(const time of [.2,1.6]){
     game.time=time;
     const {ctx,arcs}=canvasRecorder(374,game.height);renderGame(ctx,game,[],true);
@@ -158,12 +163,12 @@ test('merge labels celebrate the cascade rather than promising an automatic powe
   assert.ok(text.includes('+55 · 8-step cascade'));
 });
 
-test('all eight collectible powers render with and without reduced motion',()=>{
+test('all collectible powers render with and without reduced motion',()=>{
   for(const power of Object.keys(POWER_DETAILS))for(const reducedMotion of [false,true]){
     const game=new MergeGame(()=>0);game.powersEnabled=true;game.time=.5;
     game.powerEffects=[{id:1,power,level:3,kind:1,x:200,y:300,time:0,duration:3,radius:149}];
     const {ctx,arcs}=canvasRecorder(374,game.height);assert.doesNotThrow(()=>renderGame(ctx,game,[],reducedMotion));
-    if(reducedMotion)assert.deepEqual(arcs,[{x:200,y:300,radius:149}]);
+    if(reducedMotion)assert.deepEqual(arcs,power==='gather'?[]:[{x:200,y:300,radius:149}]);
   }
 });
 
@@ -192,13 +197,73 @@ test('Wild seed has a distinct preview, inspection name and geometry at narrow e
 });
 
 test('armed area and fruit powers preview the actual range and eligible fruit without a drop label',()=>{
-  for(const type of ['gather','ripen']){
+  for(const type of ['squeeze','ripen']){
     const game=new MergeGame(()=>0);game.powersEnabled=true;game.current=5;
     const body=game.addFruit(1,220,300);game.addFruit(1,270,300);
     game.inventory=[{id:1,type,level:3}];assert.equal(game.armPower(1),true);game.setPowerTarget(body.x,body.y);
     const {ctx,arcs,text}=canvasRecorder(180,game.height);renderGame(ctx,game,[],true);
-    if(type==='gather')assert.ok(arcs.some(arc=>arc.radius===powerStrength(3).radius));
-    else {assert.ok(text.includes(game.getFruit(body.kind).name));assert.ok(text.includes('Ripen · Level 3'));}
+    if(type==='squeeze')assert.ok(arcs.some(arc=>arc.radius===powerStrength(3).radius));
+    else {assert.ok(text.includes(game.getFruit(body.kind).name));assert.ok(text.includes('Ripen · Strength 3'));}
     assert.ok(!text.includes(game.getFruit(game.current).name),'targeting should not show a ready-to-drop label');
   }
+});
+
+test('Gather selection shows the first fruit, reachable matching partner, and actual reach at every fruit size',()=>{
+  for(const kind of [0,5,10])for(const darkMode of [false,true]){
+    const game=new MergeGame(()=>0);game.powersEnabled=true;
+    const distance=Math.min(powerStrength(5).gatherReach*.7,260);
+    const source=game.addFruit(kind,220-distance/2,300),partner=game.addFruit(kind,220+distance/2,300);
+    game.inventory=[{id:1,type:'gather',level:5}];game.armPower(1);game.setPowerTarget(source.x,source.y);
+    const initial=canvasRecorder(180,game.height);renderGame(initial.ctx,game,[],true,darkMode);
+    assert.ok(initial.text.includes(game.getFruit(kind).name));assert.ok(initial.text.includes('Select first fruit'));
+    assert.equal(game.usePowerAt(source.x,source.y),true);assert.equal(game.gatherSourceId,source.id);game.setPowerTarget(partner.x,partner.y);
+    const selected=canvasRecorder(180,game.height);renderGame(selected.ctx,game,[],true,darkMode);
+    assert.ok(selected.arcs.some(arc=>arc.x===source.x&&arc.y===source.y&&arc.radius===powerStrength(5).gatherReach));
+    assert.ok(selected.text.includes('First fruit · select its match'));assert.ok(selected.text.includes('Matching partner'));
+    assert.equal(selected.text.filter(value=>value===game.getFruit(kind).name).length,2);
+    for(const box of selected.boxes){assert.ok(box.x>=-VIEW_PADDING&&box.x+box.width<=440+VIEW_PADDING);assert.ok(box.y>=-VIEW_PADDING&&box.y+box.height<=game.height+VIEW_PADDING);}
+  }
+});
+
+test('active Gather follows the chosen moving pair and reduced motion does not add a generic area pulse',()=>{
+  const game=new MergeGame(()=>0);game.powersEnabled=true;game.time=.5;
+  const source=game.addFruit(0,100,300),partner=game.addFruit(0,340,300);
+  game.powerEffects=[{id:1,power:'gather',level:3,kind:0,x:220,y:300,time:0,duration:3,radius:149,bodyIds:[source.id,partner.id]}];
+  const first=canvasRecorder(374,game.height);renderGame(first.ctx,game,[],true);
+  assert.equal(first.arcs.length,0);
+  const connection=record=>record.strokes.find(stroke=>stroke.color===POWER_DETAILS.gather.color&&stroke.points.length===2);
+  assert.ok(connection(first));
+  source.x=140;partner.x=280;
+  const moved=canvasRecorder(374,game.height);renderGame(moved.ctx,game,[],true);
+  assert.ok(connection(moved));assert.notDeepEqual(connection(first).points,connection(moved).points);
+  game.bodies=[];
+  const cleared=canvasRecorder(374,game.height);renderGame(cleared.ctx,game,[],true);
+  assert.ok(!connection(cleared));
+});
+
+test('Squeeze previews every changed fruit size with an accurate reduction and excludes unchanged fruit',()=>{
+  const game=new MergeGame(()=>0);game.powersEnabled=true;
+  const small=game.addFruit(0,200,300),large=game.addFruit(10,250,300),partial=game.addFruit(9,200,340);partial.scale=.8;
+  const unchanged=game.addFruit(8,200,320);unchanged.scale=.65;
+  const wild=game.addFruit(0,200,310);wild.wild={level:1,maxKind:2};
+  game.addFruit(10,20,100);
+  game.inventory=[{id:1,type:'squeeze',level:1}];game.armPower(1);game.setPowerTarget(220,300);
+  const {ctx,text,strokes}=canvasRecorder(374,game.height);renderGame(ctx,game,[],true);
+  assert.equal(text.filter(value=>value==='−25%').length,2);
+  assert.equal(text.filter(value=>value==='−6%').length,1);
+  const previews=strokes.filter(stroke=>stroke.color===POWER_DETAILS.squeeze.color&&stroke.points.length>10);
+  assert.equal(previews.length,6,'exactly the old and new outlines of all three changing fruit');
+  for(const body of [small,large,partial]){
+    for(const scale of [body.scale??1,powerStrength(1).scale]){
+      const shape=game.getBodyShape({...body,scale}),first={x:body.x+shape.points[0].x,y:body.y+shape.points[0].y};
+      assert.ok(previews.some(stroke=>Math.abs(stroke.points[0].x-first.x)<1e-8&&Math.abs(stroke.points[0].y-first.y)<1e-8));
+    }
+  }
+});
+
+test('assisted merge labels identify help without claiming a reward cascade',()=>{
+  const game=new MergeGame(()=>0);game.powersEnabled=true;const body=game.addFruit(6,220,350);
+  game.events=[{id:1,chain:8,sources:[],x:220,y:350,kind:6,points:55,time:0,cleared:false,bodyId:body.id,assisted:true}];game.time=.6;
+  const {ctx,text}=canvasRecorder(180,game.height);renderGame(ctx,game,[],true);
+  assert.ok(text.includes('+55 · Power-assisted'));assert.ok(!text.includes('+55 · 8-step cascade'));
 });

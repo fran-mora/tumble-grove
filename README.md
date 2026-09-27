@@ -98,7 +98,7 @@ Each round favours a spread of colours measured from the actual artwork. This is
 
 The consumed pair gathers for about a quarter of a second, then the full-size result reveals with a warm glow, an expanding ring and a small burst of sparkles. Its fruit name and actual earned points remain readable for three seconds. Reduced motion replaces gathering, animated rings and particles with a steady outline and the same paced result and labels.
 
-A newly grown fruit remains solid and moves normally, but cannot merge again for 1.05 seconds. Consecutive cascade steps add 0.1 seconds to that interval, capped at 1.35 seconds. Normal drop cooldown and the world physics speed are unchanged. A cascade follows a result merging again within three seconds; unrelated simultaneous matches each start at step one. The cascade count celebrates successive merges and does not multiply the score. The round caption briefly shows the celebration without adding height on mobile.
+A newly grown fruit remains solid and moves normally, but cannot merge again for 1.05 seconds. Consecutive cascade steps add 0.1 seconds to that interval, capped at 1.35 seconds. Normal drop cooldown and the world physics speed are unchanged. In ordinary mode, a visual cascade follows a result merging again within three seconds; unrelated simultaneous matches each start at step one. With Fruit powers enabled, every merge in the active basket-wide combo shares the celebration count described below. The cascade count celebrates successive merges and does not multiply the score. The round caption briefly shows the celebration without adding height on mobile.
 
 Optional two/three-note chimes accompany the reveal and rise with cascade depth. A final-fruit dialog waits until current celebrations finish. Pausing or inspecting freezes animation time along with physics. Resetting clears all birth/celebration state. Tests cover protected results still colliding, causal counting, independent matches, expiry, final pair clearing, four-step cascades in both arenas and narrow-screen label bounds.
 
@@ -113,45 +113,61 @@ spills still end a round. Regression tests cover every merging alternative at
 floor corners and rotated bowl walls, fast motion, dense stacks, normal spills,
 and paced cascades. Four of these regression tests fail against the previous code.
 
-## Optional cascade powers
+## Optional combo powers
 
 Turn on **Fruit powers** beside Gravity mode to earn and save abilities. It is
 off by default and remembered locally. Changing it asks before starting a new
 round. Classic and gravity keep separate best scores with powers on and off.
 
-A single merge gives points only. Its resulting fruit must merge again to start
-earning a power: 2 connected merges earn level 1, 3 earn level 2, up to level 5
-for 6 or more. When the chain settles (three seconds without another linked
-merge), it gives one random power at its highest tier. A fresh drop starts a new
-chain; unrelated simultaneous matches do not add together. Power selection
-favours types absent from your inventory and avoids the most recent reward.
+Every pair that merges anywhere in the basket counts toward one shared combo,
+including accidental matches. More drops join the active reaction. The combo
+closes after about one second of meaningful calm: pending reveals, falling fruit
+and meaningful movement keep it open, while small resting physics jitter does
+not. This replaces the old descendant-only reward counter and three-second
+expiry. With powers on, celebration counts and reward counts use the same combo.
+Ordinary mode keeps its original visual cascade pacing.
 
-Save up to three powers. Tap one to pause the basket and target a fruit or area;
-Cancel is free. Wild seed requires an explicit action before use.
-A full inventory offers Swap or Skip without stopping play. If another reward
-arrives before that offer is resolved, the higher-tier offer is kept. Rewards,
-active effects and rescued fruit last only for this round.
+One merge earns points only. Two merges earn a strength-1 power, three earn
+strength 2, up to strength 5 for six or more. There is one reward per combo. At
+six merges the maximum reward arrives immediately; the combo stays marked paid
+until it settles, so a continuing reaction cannot award duplicates. Otherwise
+the reward is banked when the combo settles, when a physical power is used, or
+when the round ends. Power type selection favours variety.
+
+Save up to three powers. Tap one to pause the basket and target a fruit, pair or
+area. Cancel is free. Wild seed needs an explicit action to prepare it. When the
+tray is full, Swap or Skip remains optional and play continues. If another offer
+arrives first, the higher-strength offer is kept. Spending a power automatically
+fills its free slot from a waiting offer. Powers and saved fruit last this round.
 
 | Power | Action |
 | --- | --- |
-| Gather | Draw nearby matching pairs together with bounded attraction. |
-| Ripen | Grow one eligible fruit by one level, without merge points. |
+| Gather | Select a fruit, then a highlighted matching partner in reach. Pull that pair together with bounded attraction. Any normal fruit size is supported. |
+| Ripen | Grow one eligible fruit by one size level, without merge points. |
 | Juice | Remove one eligible fruit with a splash. |
 | Wild seed | Prepare a seed that merges with the first eligible fruit it touches. |
 | Rescue | Save one eligible fruit outside the basket; prepare it for a later drop. |
 | Shake | Give fruit in an area a gentle sideways wobble. |
-| Squeeze | Shrink fruit in an area until their next merge; artwork and collision hull shrink together. |
+| Squeeze | Shrink every normal fruit whose centre is inside the preview circle until its next merge. Artwork and collision hull shrink together; the preview shows the percentage. |
 
-Higher power levels expand the eligible growth levels, area or duration.
-Power-caused merges still earn ordinary points but cannot generate more powers;
-this restriction follows affected fruit and their descendants, even after a
-visual effect ends. A later natural drop can begin a fresh eligible chain.
-There are no automatic abilities assigned to fruit identities.
+Gather and Squeeze have no fruit-size restriction. Stronger Gather charges have
+more reach/pull; stronger Squeeze charges have a wider area and greater shrink.
+Already smaller fruit are not enlarged or repeatedly compressed beyond the
+charge's specified size. Ripen, Juice, Wild and Rescue still explain their
+eligible growth sizes; these differ from a power's strength.
 
-Both arenas retain their solid-wall containment and open exits. Pausing,
-inspection and targeting freeze the simulation and reward timers. Reduced motion
-uses static effect outlines. Touch, mouse and keyboard are supported; while
-targeting, arrows move the target, Enter activates, and Escape cancels.
+Using a physical power banks the natural combo and starts a visible
+**Power-assisted · score only** reaction until the basket settles. Those merges
+still earn ordinary points but cannot generate more powers. Normal play can
+start another earning combo after that assisted reaction settles. Preparing a
+Wild seed alone does not trigger a reaction; its drop and eventual wild merge
+are power-assisted. There are no abilities attached to fruit identities.
+
+Both arenas retain solid-wall containment and open exits. Pause, inspection and
+targeting freeze physics and combo timers. Reduced motion uses static effect
+outlines. Touch, mouse and keyboard work: while targeting, arrows move the
+cursor, Enter selects/uses, and Escape cancels. Gather also offers Back to change
+the first fruit without spending the power.
 
 The current App Store build 2 predates these web features. A future native release
 must rebuild, retest, increment its build number and update its store metadata.
