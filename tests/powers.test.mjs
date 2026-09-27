@@ -31,8 +31,8 @@ function contained(g,b){
   }
 }
 
-test('all eight collectible abilities have targets and bounded five-tier strength',()=>{
-  assert.deepEqual(POWER_TYPES,['gather','ripen','juice','wild','rescue','shake','squeeze','choose']);
+test('all seven collectible abilities have targets and bounded five-tier strength',()=>{
+  assert.deepEqual(POWER_TYPES,['gather','ripen','juice','wild','rescue','shake','squeeze']);
   for(const type of POWER_TYPES){assert.ok(POWER_DETAILS[type].name);assert.ok(['area','fruit','none'].includes(POWER_DETAILS[type].target));}
   for(let level=1;level<=5;level++){
     const s=powerStrength(level);assert.ok(s.maxKind>=2&&s.maxKind<=9);assert.ok(s.scale>=.75&&s.scale<=.9);
@@ -174,18 +174,10 @@ test('Squeeze shrinks both artwork geometry and collision hull until the next me
   const result=link(g,a,b);assert.equal(result.scale??1,1);assert.equal(g.events.at(-1).sources[0].scale,.75);assert.equal(result.powerBlocked,true);
 });
 
-test('Choose keeps charge until a different fruit is selected, preserves next, and marks the changed drop as powered',()=>{
-  const g=fresh();g.current=2;g.next=4;const c=charge(g,'choose',5);assert.equal(g.activatePower(),true);
-  assert.equal(g.choiceOptions.length,4);assert.equal(g.inventory[0].id,c.id);const snapshot=JSON.stringify(g.snapshot());advance(g,5);assert.equal(JSON.stringify(g.snapshot()),snapshot);
-  assert.equal(g.chooseFruit(10),false);assert.equal(g.inventory.length,1);assert.equal(g.chooseFruit(g.current),true);assert.equal(g.inventory.length,1);assert.equal(g.targeting,false);
-  assert.equal(g.armPower(c.id),true);assert.equal(g.activatePower(),true);const selected=g.choiceOptions[1];assert.equal(g.chooseFruit(selected),true);
-  assert.equal(g.current,selected);assert.equal(g.next,4);assert.equal(g.inventory.length,0);assert.equal(g.drops,0);assert.equal(g.score,0);assert.equal(g.drop(),true);assert.ok(g.bodies.at(-1).powerBlocked);
-});
-
 test('pause and inspection freeze reward/effect timers; reset and mode switches clear inventory and transient state',()=>{
   const g=fresh();cascade(g,2);charge(g,'shake',2);g.usePowerAt(220,300);g.paused=true;const before=JSON.stringify(g.snapshot());advance(g,10);assert.equal(JSON.stringify(g.snapshot()),before);
   g.paused=false;g.setInspecting(true);const inspected=JSON.stringify(g.snapshot());advance(g,10);assert.equal(JSON.stringify(g.snapshot()),inspected);g.setInspecting(false);
-  g.wildReady={level:1,maxKind:2};g.rescuedFruit={kind:1};g.pendingReward={id:999,type:'choose',level:4};g.reset();
+  g.wildReady={level:1,maxKind:2};g.rescuedFruit={kind:1};g.pendingReward={id:999,type:'shake',level:4};g.reset();
   assert.equal(g.powersEnabled,true);assert.deepEqual(g.inventory,[]);assert.equal(g.wildReady,null);assert.equal(g.rescuedFruit,null);assert.equal(g.pendingReward,null);assert.equal(g.rewardProgress,null);assert.deepEqual(g.powerEffects,[]);
   charge(g,'juice');g.setMode('gravity');assert.deepEqual(g.inventory,[]);assert.equal(g.targeting,false);g.setPowers(false);assert.equal(g.powersEnabled,false);
 });
@@ -202,14 +194,8 @@ test('Ripen, Squeeze, and growing powered bodies respect solid walls for every e
   }
 });
 
-test('Choose cancellation cannot reroll the saved power or reveal extra alternatives',()=>{
-  const g=fresh();let sample=0;g.random=()=>((sample++%5)+.2)/5;const c=charge(g,'choose',1);g.activatePower();const options=[...g.choiceOptions],history=JSON.stringify(g.getFruitHistory());
-  for(let n=0;n<6;n++){g.cancelPower();g.armPower(c.id);g.activatePower();assert.deepEqual(g.choiceOptions,options);assert.equal(JSON.stringify(g.getFruitHistory()),history);}
-  assert.equal(g.inventory.length,1);
-});
-
 test('spending a saved power fills the newly free slot with the waiting offer exactly once',()=>{
-  const g=fresh();g.inventory=[{id:901,type:'wild',level:1},{id:902,type:'ripen',level:2},{id:903,type:'juice',level:1}];g.pendingReward={id:904,type:'choose',level:4};
+  const g=fresh();g.inventory=[{id:901,type:'wild',level:1},{id:902,type:'ripen',level:2},{id:903,type:'juice',level:1}];g.pendingReward={id:904,type:'shake',level:4};
   assert.equal(g.armPower(901),true);assert.equal(g.activatePower(),true);
   assert.deepEqual(g.inventory.map(c=>c.id),[902,903,904]);assert.equal(g.pendingReward,null);assert.equal(g.acceptReward(901),false);
 });
@@ -230,10 +216,10 @@ test('Ripen reaching the final fruit records the same achievement without invent
 });
 
 test('power-created drops also block indirect reward farming when they hit the existing pile',()=>{
-  for(const type of ['wild','choose','rescue']){
+  for(const type of ['wild','rescue']){
     const g=fresh();const existing=g.addFruit(2,220,300);
     if(type==='rescue'){g.rescuedFruit={kind:1};g.releaseRescue();}
-    else{charge(g,type,2);g.activatePower();if(type==='choose')g.chooseFruit(g.choiceOptions[1]);}
+    else{charge(g,type,2);g.activatePower();}
     assert.equal(g.drop(),true);assert.ok(existing.powerBlocked);assert.ok(g.bodies.at(-1).powerBlocked);
   }
 });

@@ -1,6 +1,6 @@
-export type FruitPower = 'gather' | 'ripen' | 'juice' | 'wild' | 'rescue' | 'shake' | 'squeeze' | 'choose';
+export type FruitPower = 'gather' | 'ripen' | 'juice' | 'wild' | 'rescue' | 'shake' | 'squeeze';
 export type PowerCharge = {id:number;type:FruitPower;level:number};
-export const POWER_TYPES: FruitPower[] = ['gather','ripen','juice','wild','rescue','shake','squeeze','choose'];
+export const POWER_TYPES: FruitPower[] = ['gather','ripen','juice','wild','rescue','shake','squeeze'];
 export const POWER_DETAILS: Record<FruitPower, {name:string;description:string;color:string;target:'area'|'fruit'|'none'}> = {
   gather: {name:'Gather',description:'Gently draws matching pairs together in an area.',color:'#bd83df',target:'area'},
   ripen: {name:'Ripen',description:'Grow one eligible fruit by one level.',color:'#eab64c',target:'fruit'},
@@ -9,7 +9,6 @@ export const POWER_DETAILS: Record<FruitPower, {name:string;description:string;c
   rescue: {name:'Rescue',description:'Save one eligible fruit to drop again later.',color:'#61bfba',target:'fruit'},
   shake: {name:'Shake',description:'Give nearby fruit a gentle sideways wobble.',color:'#edaa6a',target:'area'},
   squeeze: {name:'Squeeze',description:'Shrink nearby fruit until they next merge.',color:'#b7c969',target:'area'},
-  choose: {name:'Choose',description:'Choose a replacement for your next drop.',color:'#50bcab',target:'none'},
 };
 export function powerStrength(chargeLevel:number) {
   const level=Math.max(1,Math.min(5,Number.isFinite(chargeLevel)?Math.floor(chargeLevel):1));
@@ -19,7 +18,5 @@ export function powerStrength(chargeLevel:number) {
     acceleration:65+level*14,
     maxKind:[2,4,6,8,9][level-1],
     scale:[.9,.86,.82,.78,.75][level-1],
-    choices:level<=2?2:level<=4?3:4,
-    maxDropKind:level===5?5:4,
   };
 }

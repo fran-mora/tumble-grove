@@ -56,7 +56,6 @@ export class MergeGame {
   paused = false;
   powersEnabled = false;
   powerEffects: PowerEffect[] = [];
-  choiceOptions: number[] = [];
   inventory:PowerCharge[] = [];
   pendingReward:PowerCharge|null = null;
   rewardNotice:{id:number;text:string}|null = null;
@@ -65,7 +64,6 @@ export class MergeGame {
   wildReady:{level:number;maxKind:number}|null = null;
   rescuedFruit:{kind:number}|null = null;
   private nextDropPowered = false;
-  private choiceOrder = new Map<number,number[]>();
   private rewardChains = new Map<number,RewardChain>();
   private powerSerial = 0;
   private rewardSerial = 0;
@@ -103,9 +101,9 @@ export class MergeGame {
     return chain?{chain:chain.count,level:Math.min(5,Math.max(0,chain.count-1))}:null;
   }
   private clearPowers(){
-    this.powerEffects=[];this.choiceOptions=[];this.inventory=[];this.pendingReward=null;this.rewardNotice=null;
+    this.powerEffects=[];this.inventory=[];this.pendingReward=null;this.rewardNotice=null;
     this.armedPowerId=null;this.targetPoint=null;this.wildReady=null;this.rescuedFruit=null;
-    this.nextDropPowered=false;this.choiceOrder.clear();this.rewardChains.clear();this.powerSerial=0;this.rewardSerial=0;this.noticeSerial=0;this.lastReward=null;
+    this.nextDropPowered=false;this.rewardChains.clear();this.powerSerial=0;this.rewardSerial=0;this.noticeSerial=0;this.lastReward=null;
   }
   setPowers(enabled:boolean){if(this.powersEnabled===enabled)return;this.powersEnabled=enabled;this.reset();}
   private powerAvailable(){return this.powersEnabled&&!this.paused&&!this.inspecting&&!this.over;}
@@ -116,10 +114,10 @@ export class MergeGame {
     if(!this.powerAvailable()||!this.inventory.some(charge=>charge.id===id))return false;
     this.cancelPower();this.armedPowerId=id;this.targetPoint={x:WIDTH/2,y:this.height*.62};return true;
   }
-  cancelPower(){this.armedPowerId=null;this.targetPoint=null;this.choiceOptions=[];}
+  cancelPower(){this.armedPowerId=null;this.targetPoint=null;}
   setPowerTarget(x:number,y:number){if(this.targeting&&Number.isFinite(x)&&Number.isFinite(y))this.targetPoint={x,y};}
   private spend(charge:PowerCharge){
-    this.inventory=this.inventory.filter(item=>item.id!==charge.id);this.choiceOrder.delete(charge.id);this.cancelPower();
+    this.inventory=this.inventory.filter(item=>item.id!==charge.id);this.cancelPower();
     if(this.pendingReward&&this.inventory.length<3){
       const reward=this.pendingReward;this.pendingReward=null;this.inventory.push(reward);this.notice(`${POWER_DETAILS[reward.type].name} level ${reward.level} added to the free slot.`);
     }
@@ -205,27 +203,11 @@ export class MergeGame {
       if(this.wildReady)return false;
       const {maxKind}=powerStrength(charge.level);this.wildReady={level:charge.level,maxKind};this.spend(charge);this.setAim(this.aim);return true;
     }
-    if(charge.type!=='choose'||this.wildReady)return false;
-    if(this.choiceOptions.length)return true;
-    const {choices,maxDropKind}=powerStrength(charge.level);
-    let order=this.choiceOrder.get(charge.id);
-    if(!order){
-      const candidates=Array.from({length:maxDropKind+1},(_,kind)=>kind);order=[];
-      while(candidates.length)order.push(candidates.splice(Math.floor(this.fraction()*candidates.length),1)[0]);
-      this.choiceOrder.set(charge.id,order);
-    }
-    const options=[this.current,...order.filter(kind=>kind!==this.current).slice(0,choices-1)];
-    this.choiceOptions=options;for(const kind of options)this.rememberFruit(kind);return true;
-  }
-  chooseFruit(kind:number):boolean {
-    const charge=this.armedCharge();
-    if(!this.powerAvailable()||charge?.type!=='choose'||!this.choiceOptions.includes(kind))return false;
-    if(kind===this.current){this.cancelPower();return true;}
-    this.current=kind;this.nextDropPowered=true;this.rememberFruit(kind);this.effect(charge,this.getSpawn().x,this.getSpawn().y,kind);this.spend(charge);this.setAim(this.aim);return true;
+    return false;
   }
   acceptReward(replaceId:number):boolean {
     if(!this.powerAvailable()||!this.pendingReward||!this.inventory.some(charge=>charge.id===replaceId))return false;
-    const reward=this.pendingReward;this.inventory=this.inventory.map(charge=>charge.id===replaceId?reward:charge);this.choiceOrder.delete(replaceId);this.pendingReward=null;
+    const reward=this.pendingReward;this.inventory=this.inventory.map(charge=>charge.id===replaceId?reward:charge);this.pendingReward=null;
     if(this.armedPowerId===replaceId)this.cancelPower();this.notice(`${POWER_DETAILS[reward.type].name} level ${reward.level} added.`);return true;
   }
   skipReward(){if(!this.pendingReward)return;this.pendingReward=null;this.notice('Power offer skipped.');}
@@ -271,7 +253,7 @@ export class MergeGame {
     const travel=Math.max(0,circleTravel(base,shape,{x:-d.x,y:-d.y},CIRCLE,CIRCLE.radius)-18);
     return {x:base.x-d.x*travel,y:base.y-d.y*travel};
   }
-  get canDrop() { return !this.over && !this.paused && !this.inspecting && !this.targeting && !this.choiceOptions.length && this.cooldown <= 0; }
+  get canDrop() { return !this.over && !this.paused && !this.inspecting && !this.targeting && this.cooldown <= 0; }
   setInspecting(enabled: boolean) {
     if (enabled && (this.over || !this.bodies.length)) return false;
     this.inspecting = enabled;
@@ -337,7 +319,7 @@ export class MergeGame {
       lineup:this.lineup.map(id=>({id,name:FRUIT_COLLECTION[id].name,level:FRUIT_COLLECTION[id].level})),
       powersEnabled:this.powersEnabled,inventory:this.inventory.map(c=>({...c})),pendingReward:this.pendingReward?{...this.pendingReward}:null,
       rewardProgress:this.rewardProgress,rewardNotice:this.rewardNotice,armedPowerId:this.armedPowerId,targetPoint:this.targetPoint,targeting:this.targeting,
-      wildReady:this.wildReady,rescuedFruit:this.rescuedFruit,choiceOptions:[...this.choiceOptions],powerEffects:this.powerEffects.map(e=>({...e})),
+      wildReady:this.wildReady,rescuedFruit:this.rescuedFruit,powerEffects:this.powerEffects.map(e=>({...e})),
       mode:this.mode,height:this.height,gravity:this.gravity,direction:this.down,spawn:this.getSpawn(),score:this.score,drops:this.drops,merges:this.merges,highest:this.highest,
       current:this.current,next:this.next,canDrop:this.canDrop,paused:this.paused,inspecting:this.inspecting,inspectedId:this.inspectedId,over:this.over,danger:this.danger,watermelons:this.watermelons,
       celebrations:this.events.map(e=>({id:e.id,chain:e.chain,kind:e.kind,name:this.getFruit(e.kind).name,age:Math.round((this.time-e.time)*100)/100,cleared:e.cleared,bodyId:e.bodyId})),
@@ -419,7 +401,7 @@ export class MergeGame {
     return body.age>.08 && (!body.birth || this.time-body.birth.time>=mergeHoldSeconds(body.birth.chain));
   }
   step(dt = STEP) {
-    if (this.paused || this.inspecting || this.over || this.targeting || this.choiceOptions.length || dt <= 0 || !Number.isFinite(dt)) return;
+    if (this.paused || this.inspecting || this.over || this.targeting || dt <= 0 || !Number.isFinite(dt)) return;
     dt = Math.min(dt, 1 / 60);
     this.time += dt;
     this.cooldown = Math.max(0, this.cooldown - dt);

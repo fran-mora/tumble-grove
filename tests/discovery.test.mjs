@@ -138,7 +138,7 @@ test('ordinary fruit labels stay within a narrow canvas and do not claim an intr
 
 test('power effects are limited to three, stay still with reduced motion, and disappear when disabled',()=>{
   const game=new MergeGame(()=>0);game.powersEnabled=true;
-  game.powerEffects=['gather','gather','shake','choose'].map((power,id)=>({id,power,level:1,kind:1,x:200,y:300,time:0,duration:3,radius:90+id}));
+  game.powerEffects=['gather','gather','shake','juice'].map((power,id)=>({id,power,level:1,kind:1,x:200,y:300,time:0,duration:3,radius:90+id}));
   for(const time of [.2,1.6]){
     game.time=time;
     const {ctx,arcs}=canvasRecorder(374,game.height);renderGame(ctx,game,[],true);

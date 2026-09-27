@@ -127,7 +127,7 @@ chain; unrelated simultaneous matches do not add together. Power selection
 favours types absent from your inventory and avoids the most recent reward.
 
 Save up to three powers. Tap one to pause the basket and target a fruit or area;
-Cancel is free. Wild seed and Choose require an explicit action before use.
+Cancel is free. Wild seed requires an explicit action before use.
 A full inventory offers Swap or Skip without stopping play. If another reward
 arrives before that offer is resolved, the higher-tier offer is kept. Rewards,
 active effects and rescued fruit last only for this round.
@@ -141,9 +141,8 @@ active effects and rescued fruit last only for this round.
 | Rescue | Save one eligible fruit outside the basket; prepare it for a later drop. |
 | Shake | Give fruit in an area a gentle sideways wobble. |
 | Squeeze | Shrink fruit in an area until their next merge; artwork and collision hull shrink together. |
-| Choose | Replace the fruit ready to drop; keeping the current one is free. |
 
-Higher power levels expand the eligible growth levels, area, duration or choices.
+Higher power levels expand the eligible growth levels, area or duration.
 Power-caused merges still earn ordinary points but cannot generate more powers;
 this restriction follows affected fruit and their descendants, even after a
 visual effect ends. A later natural drop can begin a fresh eligible chain.
