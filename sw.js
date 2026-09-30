@@ -1,4 +1,4 @@
-const CACHE = 'tumble-grove-8b8528c0e35a8717';
+const CACHE = 'tumble-grove-94bb6f6c88162024';
 const FILES = ["artwork-prompt.txt","assets/index-BIyzYZxX.js","assets/index-CUBnicIz.css","credits.html","favicon.svg","fruit-collection-a-prompt.txt","fruit-collection-a.png","fruit-collection-b-prompt.txt","fruit-collection-b.png","fruit-sizes.csv","fruit-sizes.html","fruits.png","index.html","ios-app-icon-prompt.txt","ios-app-icon.png","legal/bundled-dependencies.json","legal/dependency-inventory.json","legal/project-license.txt","legal/third-party-notices.txt","manifest.webmanifest","privacy.html","support.html"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 self.addEventListener('install', event => event.waitUntil((async () => {
