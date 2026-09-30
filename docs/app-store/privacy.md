@@ -2,7 +2,7 @@ Publication source: [public/privacy.html](../../public/privacy.html). The suppor
 
 # Privacy in Tumble Grove
 
-Last updated: 25 September 2026
+Last updated: 30 September 2026
 
 A fruit puzzle you can play without an account, advertising or third-party analytics.
 
@@ -10,7 +10,7 @@ Tumble Grove is published by **Francesco Moramarco**. This policy covers the iOS
 
 ## Information kept on your device
 
-The game stores personal best scores for each mode, your light/dark appearance preference, and fruit-selection and discovery history in local storage. This remembers your preferences and helps vary future fruit lineups. These records are not linked to an account or uploaded by the game.
+The game stores personal best scores for each mode, your light/dark appearance preference, your Fruit powers on/off preference, and fruit-selection and discovery history in local storage. This remembers your preferences and helps vary future fruit lineups. These records are not linked to an account or uploaded by the game.
 
 The current round is held in memory. Returning to an app that is still running preserves the round; reloading the page or restarting the app process starts a new one.
 
