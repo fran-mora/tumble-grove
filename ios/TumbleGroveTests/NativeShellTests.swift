@@ -1,9 +1,82 @@
 import CoreMotion
 import UIKit
+import WebKit
 import XCTest
 @testable import TumbleGrove
 
 final class NativeShellTests: XCTestCase {
+    @MainActor
+    func testRetryIgnoresSupersededCallbacksAndAcceptsLatestReadyResult() throws {
+        let view = NavigationTestWebView()
+        let controller = GameController(makeWebView: { _ in view })
+        controller.load()
+        let previous = try XCTUnwrap(view.navigations.last)
+        controller.load()
+        let current = try XCTUnwrap(view.navigations.last)
+        XCTAssertFalse(previous === current)
+
+        // Retry replaces a slow provisional navigation, whose WebKit 102
+        // cancellation can arrive after the new attempt has already started.
+        controller.webView(view, didFailProvisionalNavigation: previous,
+                           withError: NSError(domain: "WebKitErrorDomain", code: 102))
+        controller.webView(view, didFail: previous,
+                           withError: URLError(.fileDoesNotExist))
+        controller.webView(view, didFinish: previous)
+        XCTAssertNil(controller.failure)
+        XCTAssertTrue(controller.isLoading)
+        XCTAssertTrue(view.readyChecks.isEmpty, "A stale finish must not probe the new document")
+
+        controller.webView(view, didFinish: current)
+        XCTAssertEqual(view.readyChecks.count, 1)
+        view.readyChecks[0](true, nil)
+        XCTAssertNil(controller.failure)
+        XCTAssertFalse(controller.isLoading)
+    }
+
+    @MainActor
+    func testReadinessCompletionFromBeforeRetryCannotCompleteNewLoad() throws {
+        let view = NavigationTestWebView()
+        let controller = GameController(makeWebView: { _ in view })
+        controller.load()
+        let previous = try XCTUnwrap(view.navigations.last)
+        controller.webView(view, didFinish: previous)
+        XCTAssertEqual(view.readyChecks.count, 1)
+        controller.load()
+        let current = try XCTUnwrap(view.navigations.last)
+        view.readyChecks[0](true, nil)
+        XCTAssertTrue(controller.isLoading)
+        XCTAssertNil(controller.failure)
+
+        controller.webView(view, didFinish: current)
+        XCTAssertEqual(view.readyChecks.count, 2)
+        view.readyChecks[1](true, nil)
+        XCTAssertFalse(controller.isLoading)
+        XCTAssertNil(controller.failure)
+    }
+
+    @MainActor
+    func testOnlyCurrentNonCancelledNavigationFailureShowsRecovery() throws {
+        let view = NavigationTestWebView()
+        let controller = GameController(makeWebView: { _ in view })
+        controller.load()
+        let current = try XCTUnwrap(view.navigations.last)
+        controller.webView(view, didFailProvisionalNavigation: nil,
+                           withError: URLError(.fileDoesNotExist))
+        controller.webView(NavigationTestWebView(), didFail: current,
+                           withError: URLError(.fileDoesNotExist))
+        controller.webView(view, didFailProvisionalNavigation: current,
+                           withError: URLError(.cancelled))
+        XCTAssertNil(controller.failure)
+        XCTAssertTrue(controller.isLoading)
+
+        // A current policy failure is real; only superseded policy failures
+        // should be discarded by navigation identity.
+        controller.webView(view, didFailProvisionalNavigation: current,
+                           withError: NSError(domain: "WebKitErrorDomain", code: 102))
+        XCTAssertNotNil(controller.failure)
+        XCTAssertFalse(controller.isLoading)
+    }
+
     func testGravityPointsDownWhenHeldUprightInEveryInterfaceOrientation() {
         let cases: [(UIInterfaceOrientation, CMAcceleration)] = [
             (.portrait, CMAcceleration(x: 0, y: -1, z: 0)),
@@ -78,6 +151,26 @@ final class NativeShellTests: XCTestCase {
         XCTAssertTrue(BundledResources.isExternalLink(try XCTUnwrap(URL(string: "https://example.com/help"))))
         for value in ["javascript:alert(1)", "file:///etc/passwd", "tel:123", "itms-services://host", "tumblegrove://game/credits.html"] {
             XCTAssertFalse(BundledResources.isExternalLink(try XCTUnwrap(URL(string: value))))
+        }
+    }
+}
+
+@MainActor
+private final class NavigationTestWebView: WKWebView {
+    var readyChecks: [@MainActor (Any?, Error?) -> Void] = []
+    var navigations: [WKNavigation] = []
+
+    override func load(_ request: URLRequest) -> WKNavigation? {
+        let navigation = WKNavigation()
+        navigations.append(navigation)
+        return navigation
+    }
+
+    override func evaluateJavaScript(_ javaScriptString: String, completionHandler: (@MainActor (Any?, Error?) -> Void)? = nil) {
+        if javaScriptString == "Boolean(document.querySelector('#root canvas'))", let completionHandler {
+            readyChecks.append(completionHandler)
+        } else {
+            completionHandler?(nil, nil)
         }
     }
 }

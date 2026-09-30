@@ -34,7 +34,7 @@ IPAs and personal Xcode state are ignored by Git.
 
 `project.yml` is the source of truth for XcodeGen. The app target is
 `TumbleGrove`, deployment target iOS 17, bundle ID `com.franmora.tumblegrove`,
-version 1.0 / build 2. Signing uses automatic provisioning for team 8XX87M89M2.
+version 1.0 / build 4. Signing uses automatic provisioning for team 8XX87M89M2.
 The signing identity and App Store app record must match before distribution.
 Increase `CURRENT_PROJECT_VERSION` before uploading another build after Apple
 has accepted a previous build with the same version and build number.
@@ -74,8 +74,10 @@ xcodebuild \
   CODE_SIGNING_ALLOWED=NO test
 ```
 
-The six tests cover gravity transforms, flat-device readings, safe bundle paths,
-ordinary web-link routing, and symlink rejection. Test on a physical device for
+The nine tests cover gravity transforms, flat-device readings, safe bundle paths,
+ordinary web-link routing, symlink rejection and Retry navigation races. A replaced
+load's cancellation, finish and readiness callback cannot fail or complete its
+replacement. Test on a physical device for
 motion permission and all tilt directions; Simulator has no motion sensor.
 Also check offline first launch, background/foreground without losing a round,
 portrait/landscape layouts, Help sheets, dark mode and sustained play.

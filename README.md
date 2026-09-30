@@ -3,8 +3,10 @@
 A complete fruit dropping and merging web game, built as a separate project alongside Little Orchard.
 
 The [native iPhone/iPad project](ios/README.md) bundles the same game for iOS,
-with native tilt controls and offline resources. See the [App Store release
-status](docs/app-store/release-status.md) for validation and submission progress.
+with native tilt controls and offline resources. Version 1.0 build 4 was uploaded
+and selected in App Store Connect on 30 September 2026; it is still in Prepare
+for Submission, not published. See the [App Store release
+status](docs/app-store/release-status.md) for validation and remaining work.
 
 ## Licensing and credits
 
@@ -169,5 +171,6 @@ outlines. Touch, mouse and keyboard work: while targeting, arrows move the
 cursor, Enter selects/uses, and Escape cancels. Gather also offers Back to change
 the first fruit without spending the power.
 
-The current App Store build 2 predates these web features. A future native release
-must rebuild, retest, increment its build number and update its store metadata.
+These powers and combo features are included in native build 4, uploaded and
+selected in App Store Connect on 30 September 2026. That version has not yet
+been submitted for review or published; see the [release status](docs/app-store/release-status.md).

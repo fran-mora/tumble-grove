@@ -25,10 +25,17 @@ final class GameController: NSObject, ObservableObject, WKNavigationDelegate, WK
     private var sceneActive = false
     private var sheetPresented = false
     private var loadID = UUID()
+    private var activeNavigation: WKNavigation?
     private var ready = false
     private var hasStarted = false
     private var samplePending = false
+    private let makeWebView: (WKWebViewConfiguration) -> WKWebView
     private var effectiveActive: Bool { sceneActive && !sheetPresented && ready && failure == nil }
+
+    init(makeWebView: @escaping (WKWebViewConfiguration) -> WKWebView = { WKWebView(frame: .zero, configuration: $0) }) {
+        self.makeWebView = makeWebView
+        super.init()
+    }
 
     lazy var webView: WKWebView = {
         let configuration = WKWebViewConfiguration()
@@ -39,7 +46,7 @@ final class GameController: NSObject, ObservableObject, WKNavigationDelegate, WK
         let handler = WeakMessageHandler()
         handler.owner = self
         configuration.userContentController.add(handler, name: "tumbleGrove")
-        let view = WKWebView(frame: .zero, configuration: configuration)
+        let view = makeWebView(configuration)
         view.navigationDelegate = self
         view.uiDelegate = self
         view.isOpaque = false
@@ -67,8 +74,17 @@ final class GameController: NSObject, ObservableObject, WKNavigationDelegate, WK
         failure = nil
         loadID = UUID()
         let id = loadID
-        webView.load(URLRequest(url: BundledResources.home))
-        DispatchQueue.main.asyncAfter(deadline: .now() + 15) { [weak self] in
+        // Replacing a slow load can deliver cancellation callbacks after the
+        // next load has started. Only that next navigation may change its state.
+        activeNavigation = nil
+        activeNavigation = webView.load(URLRequest(url: BundledResources.home))
+        guard activeNavigation != nil else {
+            fail("The game could not begin opening. Please try again.")
+            return
+        }
+        // Cold WebKit helper processes may take longer on a busy device. Keep
+        // recovery bounded without declaring a healthy startup failed at 15s.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
             guard let self, self.loadID == id, !self.ready, self.failure == nil else { return }
             self.fail("The game could not finish opening. Please try again.")
         }
@@ -157,6 +173,7 @@ final class GameController: NSObject, ObservableObject, WKNavigationDelegate, WK
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard acceptsNavigation(navigation, from: webView) else { return }
         checkGameReady(load: loadID, attempts: 40)
     }
 
@@ -176,11 +193,24 @@ final class GameController: NSObject, ObservableObject, WKNavigationDelegate, WK
         }
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { handleNavigationError(error) }
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { handleNavigationError(error) }
+    private func acceptsNavigation(_ navigation: WKNavigation?, from view: WKWebView) -> Bool {
+        guard view === webView, let navigation, let activeNavigation else { return false }
+        return navigation === activeNavigation
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        guard acceptsNavigation(navigation, from: webView) else { return }
+        handleNavigationError(error)
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        guard acceptsNavigation(navigation, from: webView) else { return }
+        handleNavigationError(error)
+    }
 
     private func handleNavigationError(_ error: Error) {
-        guard (error as NSError).code != NSURLErrorCancelled else { return }
+        let error = error as NSError
+        guard !(error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled) else { return }
         fail("The game could not open. All its resources are included in this app, so no internet connection is needed. Please try again.")
     }
 

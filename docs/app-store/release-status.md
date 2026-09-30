@@ -1,168 +1,141 @@
 # iOS release status
 
-Status recorded 25 September 2026. **Version 1.0, build 2 uploaded successfully
-and is selected and saved on the App Store version. The app remains in Prepare
-for Submission; it has not been submitted for review, approved, or published on
-the App Store.**
+Status recorded 30 September 2026. The owner resumed App Store release work.
+**Version 1.0 build 4 uploaded successfully at 14:44:44 Europe/London, finished
+Apple processing, and was selected and saved in App Store Connect at about
+14:51. The version remains Prepare for Submission. It has not been submitted
+for review or published. Do not submit build 3.**
 
-## Later web update
+## Account and submission
 
-The GitHub Pages game now has an optional combo-earned Fruit powers mode
-(Gather, Ripen, Juice, Wild seed, Rescue, Shake and Squeeze), a three-slot
-inventory, a saved on/off preference and separate best scores. Web combos count
-matches across the basket, including overlapping drops; Gather targets an
-explicit matching pair and Squeeze includes every fruit size in its circle. **Uploaded native
-build 2 predates this feature** and its bundled pages remain the version audited
-below. App Store submission work is paused at the owner's request while they are
-on their phone. Before resuming, decide whether to ship that existing build or
-include powers in a new numbered build; update and verify screenshots, metadata
-and tests against whichever binary is submitted. The four approval requests
-below remain pending. The web deployment does not submit or modify the binary.
+App Store Connect app **6816024635**, bundle ID `com.franmora.tumblegrove`,
+signing team `8XX87M89M2`. The authenticated App Store Connect session confirmed
+**Prepare for Submission** on 30 September, with build 4 selected and saved.
+No review submission, approval or public release is confirmed.
 
-## Current build and validation
+The Chrome session initially required sign-in; authenticated access was restored
+on 30 September. Updated promotional text, description and review notes from
+[the listing](listing.en-GB.json) have been saved to App Store Connect. No
+passwords, verification codes or private review contacts belong in this
+repository.
 
-- The SwiftUI/WKWebView app bundles the complete game, artwork, fruit research,
-  credits, licences, privacy policy and support page. Help links to both new
-  information pages. Native motion and lifecycle events implement the web
-  bridge; bundled reference pages use a separate sheet, and ordinary external
-  web links open in the system browser.
-- Build 2 includes the symlink-containment fix and native safe-area CSS
-  correction. All **19 bundled-resource hashes** match in its exported IPA, and
-  strict code-signature verification passed. The package contains no service
-  worker or web manifest; its runtime assets are bundled. The privacy manifest
-  and non-exempt-encryption declaration are present.
-- `npm run build:ios`, `npm run build:pages`, `npm run ios:project` and the offline
-  check passed for this update. TypeScript and static policy-page link checks
-  passed during the integration.
-- Earlier automated evidence remains **78 JavaScript tests passed** and **six
-  native tests passed**. These counts are prior test results, not a claim that
-  those full suites were rerun for build 2. Native report:
-  `ios/build/NativeTests-fixed.xcresult`; it covers gravity projection, safe paths,
-  symlink rejection, ordinary-file controls and external URL restrictions.
-- Actual iPhone simulator gameplay, drops and a merge were manually verified.
-  iPad simulator portrait and landscape play were checked, including two drops
-  merging for score 1. Opening the bundled fruit-size page from Help and closing
-  its native sheet with Done preserved the game. Gravity mode immediately
-  reported missing simulator motion sensors, verifying the native bridge.
-- The first iPad launch timed out during concurrent simulator boot and test-build
-  work; Retry loaded promptly. Physical-device tilt, permission denial,
-  interruptions, cold-launch performance and prolonged play remain unverified.
-  Simulator results are not evidence of physical-iPhone motion behaviour.
-- The build 2 upload succeeded at **14:49:53 Europe/London on 25 September 2026**.
-  Local log: `/private/tmp/tumble-ios-upload2.log`. Apple's Add Build dialog then
-  offered build 2, which was selected and saved on the version. This is not a
-  review submission or approval.
-- Historical build 1 uploaded at 11:09:28 Europe/London on the same day. TestFlight
-  later showed upload Complete and Ready to Submit with a 90-day expiry. Its
-  upload and processing evidence is superseded by build 2 for the current release.
+## Current native build 4
 
-Signing uses automatic provisioning for team `8XX87M89M2`, bundle ID
-`com.franmora.tumblegrove`, version 1.0, build 2. Private signing keys and account
-credentials are not part of the repository.
+Build 4 includes the current Fruit powers toggle, whole-basket combos,
+accidental and overlapping-drop merge credit, explicit Gather pair selection,
+all-size Squeeze, and the latest web game improvements. All game resources are
+bundled for offline use; the native build contains no service worker or web
+manifest and does not download game code from GitHub Pages.
 
-The current local exported IPA is **10,033,977 bytes**. SHA-256:
-`027753c8e2c19d19697cb215a2eb95f4c74c41e43dd49682d93f7425f20130de`.
-This identifies the local export; Xcode uploads from the archive through its
-separate upload-packaging step. Any further native or bundled-web change needs
-a higher build number, another archive/export/upload, and an updated fingerprint.
+It also fixes the startup-recovery race found while testing build 3. Navigation
+callbacks must match the current `WKNavigation`, so an old navigation's failure
+or finish cannot change the state of a newer Retry. Existing load-generation
+checks protect delayed readiness callbacks and timers. Cold startup has a
+bounded 30-second watchdog. Genuine errors for the current navigation still
+show the recovery screen.
 
-Local artifacts are ignored by Git:
+Completed checks:
+
+- 121 JavaScript tests and TypeScript passed for the bundled game source.
+- Nine native tests passed: `ios/build/NativeTests-build4.xcresult`. Three new
+  regressions cover stale navigation callbacks, old readiness completions after
+  Retry, and current-navigation cancellation/failure handling.
+- Simulator build, signed archive and local App Store export succeeded.
+- All 19 bundled-resource hashes match in the archive and exported IPA.
+- Strict code signature passed; Cloud Managed Apple Distribution, correct team,
+  release entitlement `get-task-allow=false`, privacy manifest and
+  non-exempt-encryption declaration present.
+- iPad simulator: successful cold launch, classic dropping and merge for score 1,
+  powers/new-round switch, and landscape layout and dropping were observed.
+- iPhone simulator: successful cold launch, retained dark-mode and powers
+  preferences, merging, current combo UI, switching to light mode and Inspect
+  naming a Greengage were observed.
+- No physical iPhone was connected. Physical tilt, permission denial, prolonged
+  physical-device play and physical-device cold launch remain unverified.
+
+## Local build 4 artifacts
 
 | Artifact | Location |
 | --- | --- |
-| Current Xcode archive | `ios/build/TumbleGrove-build2.xcarchive` |
-| Current exported IPA | `ios/build/AppStore-build2/Tumble Grove.ipa` |
-| Current export audit | `ios/build/AppStore-build2/DistributionSummary.plist` and `Packaging.log` |
-| Passing native-test report | `ios/build/NativeTests-fixed.xcresult` |
+| Signed archive | `ios/build/TumbleGrove-build4.xcarchive` |
+| Exported IPA | `ios/build/AppStore-build4/Tumble Grove.ipa` |
+| Export verification | `ios/build/AppStore-build4/verification.json` |
+| Packaging evidence | `ios/build/AppStore-build4/DistributionSummary.plist`, `Packaging.log` |
+| Native tests | `ios/build/NativeTests-build4.xcresult` |
+| Successful upload log | `/private/tmp/tumble-ios-upload4.log` |
 
-## Public information and screenshots
+Exported IPA: **10,046,468 bytes**. SHA-256:
+`0cd26ad5faae033745cdbf8ba91451b92004de76c101818b9de906fae4263051`.
+Xcode uploads from the archive through a separate packaging step; this hash
+identifies the local export.
 
-- [Privacy](https://fran-mora.github.io/tumble-grove/privacy.html) and
-  [support](https://fran-mora.github.io/tumble-grove/support.html) are live on
-  GitHub Pages from `gh-pages` commit `486446d`. Both returned HTTP 200 and their
-  downloaded contents matched the build. Build 2 includes the same pages for
-  offline reading.
-- Final browser verification of the live GitHub Pages game showed both Privacy
-  Policy and Support links in Help. The support page was visually checked as
-  readable and contained no email address. The new pages' presence in native
-  build 2 is verified by packaging; a native UI check of these two pages is not
-  claimed here.
-- The owner chose public GitHub Issues as the support route. The pages explain
-  that posting needs a GitHub account, posts and attachments are public, and
-  personal or sensitive information must not be submitted. The dedicated-mailbox
-  plan was cancelled: **no mailbox was created and no personal contact address
-  was published**. The shipped pages contain no contact placeholders.
-- An old browser service worker initially displayed the game when the support
-  URL was first opened. Refreshing once loaded the correct new support page.
-  Fresh HTTP checks matched the deployed content.
-- Three authentic native screenshots have been captured and visually checked:
-  two 6.9-inch iPhone images (classic cascade and dark-mode Mangosteen inspection)
-  and one 13-inch iPad landscape image (classic gameplay, score 12). PNG originals,
-  opaque JPEG upload copies and capture provenance are in
-  [screenshots](screenshots/README.md). **None has been uploaded to App Store
-  Connect.**
-- The browser file-upload attempt failed with “Not allowed” because the extension
-  lacked AllowFileURLs. User permission to enable the file-URL extension setting
-  is pending. A generic native Chrome upload fallback was rejected by automatic
-  approval review because of the risk of interacting with an unrelated private
-  browser window. No upload through that fallback occurred.
+## Listing, screenshots and privacy
 
-## Saved App Store information
+The listing saved in App Store Connect describes all seven optional powers,
+shared combos and the updated targeting accurately. Three new build-4 captures
+are ready: iPhone powers, iPhone dark-mode Inspect with a Greengage, and iPad
+landscape powers. All JPEGs were visually checked and have no alpha channel.
+No screenshot upload has yet been confirmed in App Store Connect. A supported
+6.9-inch file-chooser attempt timed out. After the automation runtime was reset,
+Chrome reconnected, but two attempts to attach to the media-manager tab failed
+with “Debugger unattached”. The current blocker is an unavailable browser
+automation connection. The saved metadata and build-4 selection were completed
+before this failure and remain valid. Capture provenance is in
+[screenshots](screenshots/README.md). The old build-1 captures remain historical
+evidence and should not be used for this release.
 
-- App record **6816024635** exists for `com.franmora.tumblegrove`. The main version
-  form has saved promotional text, description, keywords, marketing URL,
-  copyright, sign-in-not-required, Support URL and updated App Review Notes.
-- The owner authorized use of existing Apple account contact details strictly
-  for private App Review. Name, email and phone were entered into Apple only,
-  saved, and verified in a screenshot after reload with Save disabled. No private
-  contact values are in this repository. Accessibility/DOM snapshots and element
-  `.value` readings misleadingly omitted telephone/email values despite the
-  screenshot showing them filled; verify the rendered screenshot before treating
-  those fields as missing.
-- App Information saved the subtitle “A colourful fruit puzzle” and categories
-  Games / Puzzle / Casual. The age questionnaire used all listed content absent
-  or No, calculated **4+**, and selected Not Applicable rather than Made for Kids.
-  Content rights was set to Yes for licensed third-party content. The parent
-  form's Saved indicator confirmed these choices persisted.
-- The existing per-app Non-Trader status was visible; no new trader declaration
-  was made. The availability wizard selected **173 of 175 regions**, excluding
-  mainland China and Vietnam, but **this selection has not been saved**. The
-  attempt to disable automatic availability in future markets and click Next
-  was rejected by automatic approval review because the earlier worldwide-if-
-  possible request did not explicitly approve that narrower scope. The future-
-  markets option is **not confirmed off**. Explicit approval for the 173 regions
-  and future markets off is now pending. Apple's
-  [App Information reference](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information),
-  verified 25 September 2026, requires a game approval number for mainland China
-  and a game-release licence for Vietnam; no such permits are recorded here.
-- The privacy-policy URL and No data collected questionnaire are saved. The
-  preview shows **Data Not Collected**. The final Publish confirmation, including
-  the legal accuracy/update attestation, awaits explicit owner approval. **App
-  Privacy has not been published.**
-- With the owner's explicit authorization, developer agreement **XG8DNV4HYY**,
-  issued 18 August 2026, was accepted. After reload, Apple showed **Accepted
-  25 September 2026** and the update banner was gone.
-- The pricing wizard was prepared with UK as the base region, GBP £0.00 and zero
-  prices across all 174 comparison currencies. Final Confirm was rejected by
-  automatic approval review because the earlier publishing authorization did
-  not explicitly specify free pricing. Explicit approval for a free app with
-  no ads or in-app purchases is pending. **Pricing has not been saved.**
+The privacy wording explicitly includes the locally stored Fruit powers on/off
+preference. Source audit found no new off-device data flow from powers. The
+public [privacy page](https://fran-mora.github.io/tumble-grove/privacy.html) and
+service worker were deployed through GitHub Pages commit `1a989e5` and verified
+byte-for-byte on 30 September. The same privacy page is bundled in build 4. The
+game uses public GitHub Issues for support; no personal email address or phone
+number is published by the support page.
+
+The App Privacy publication dialog remains pending. The proposed answer is
+“No, we do not collect data from this app”. Its final accuracy, compliance and
+future-update attestation has not yet been confirmed or published.
 
 ## Remaining actions
 
-1. Obtain the four pending approvals: free pricing, the browser extension's
-   file-URL upload permission, publishing the saved privacy declaration, and
-   availability in the 173 proposed regions with automatic future markets off.
-2. Upload the three existing screenshots through a permitted file-selection
-   path and verify their device-family placement in App Store Connect.
-3. Confirm pricing, finish eligible territories and the release choice, publish
-   the privacy declaration, and verify the complete version form with build 2.
-4. Complete the outstanding physical-device checks. Both task-created test
-   simulators are shut down; no user applications were stopped.
-5. Submit the completed version for review and record Apple's actual outcome.
-   Uploading, selecting a build and publishing privacy details do not constitute
-   review submission or public release.
+1. Restore the Chrome browser automation connection, upload the prepared
+   build-4 iPhone and iPad screenshots, and verify their processed previews.
+2. Resolve three pending owner confirmations: free pricing; availability in 173
+   eligible territories excluding mainland China and Vietnam, with future
+   territories off; and Apple's final App Privacy accuracy, compliance and
+   future-update attestation. No required game permits are recorded for the
+   excluded territories. The earlier developer agreement was accepted on
+   25 September; it is separate from this privacy attestation.
+3. Save the confirmed pricing and availability choices and publish the verified
+   privacy declaration.
+4. Complete outstanding physical-device checks, verify the complete version
+   form and release choice, then submit for review and record Apple's outcome.
 
-The [submission checklist](submission-checklist.md) retains the earlier audit
-and Apple references. This status record supplies newer implementation and test
-evidence; assess remaining items against the actual submitted binary.
+A prior screenshot upload attempt on an earlier date lacked the Chrome
+extension's file-URL permission. That is historical evidence, not the established
+cause of the current “Debugger unattached” failure. Retry the supported
+file-chooser flow when browser attachment works. Do not expand extension access
+or use unrelated private browser windows as an upload workaround.
+
+## Earlier builds
+
+Build 3 uploaded successfully on 30 September at **14:25:12 Europe/London**,
+then simulator QA found the recovery race described above. A cold iPad WebKit
+startup exceeded the old 15-second watchdog. On Retry, an old navigation's
+policy-cancellation error (WebKit error 102) marked the new attempt failed,
+even though the replacement navigation subsequently finished successfully.
+Build 4 supersedes it. Do not submit build 3.
+
+Build 3 passed six native tests and its original resource/signing checks before
+that UI issue was discovered. Its artifacts are preserved at
+`ios/build/TumbleGrove-build3.xcarchive`, `ios/build/AppStore-build3/` and
+`ios/build/NativeTests-build3.xcresult`, with successful upload log
+`/private/tmp/tumble-ios-upload3.log`. Its local IPA is **10,045,179 bytes**,
+SHA-256 `9f968c52a6a8df11f512c78fdd49d8fcd3380e014e014d5944827a1d0f4fbdff`.
+Mac memory pressure and slow simulator startup were observed during that QA;
+these are not evidence of missing bundled resources. A later simulator
+shutdown was requested when Device Hub quit, rather than a game crash.
+
+Earlier saved account fields, build 2 evidence and historical approval details
+are retained in [the previous release record](release-status-build2.md). They
+are dated evidence, not a fresh verification of Apple's current account state.
