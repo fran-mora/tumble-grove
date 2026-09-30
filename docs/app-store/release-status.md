@@ -75,12 +75,15 @@ The listing saved in App Store Connect describes all seven optional powers,
 shared combos and the updated targeting accurately. Three new build-4 captures
 are ready: iPhone powers, iPhone dark-mode Inspect with a Greengage, and iPad
 landscape powers. All JPEGs were visually checked and have no alpha channel.
-No screenshot upload has yet been confirmed in App Store Connect. A supported
-6.9-inch file-chooser attempt timed out. After the automation runtime was reset,
-Chrome reconnected, but two attempts to attach to the media-manager tab failed
-with “Debugger unattached”. The current blocker is an unavailable browser
-automation connection. The saved metadata and build-4 selection were completed
-before this failure and remain valid. Capture provenance is in
+No screenshot upload has yet been confirmed in App Store Connect. Browser
+access was restored after the owner confirmed sign-in. The visible Choose File
+control now opens its supported file chooser, but attaching the prepared files
+fails with “Not allowed”. The current blocker is the Chrome ChatGPT extension's
+file-URL access. Owner permission has been requested to temporarily enable
+“Allow access to file URLs” for this upload and turn it off afterwards; that
+permission is still pending. Earlier chooser timeouts and “Debugger unattached”
+errors are historical, not the current blocker. The saved metadata and build-4
+selection remain valid. Capture provenance is in
 [screenshots](screenshots/README.md). The old build-1 captures remain historical
 evidence and should not be used for this release.
 
@@ -96,10 +99,25 @@ The App Privacy publication dialog remains pending. The proposed answer is
 “No, we do not collect data from this app”. Its final accuracy, compliance and
 future-update attestation has not yet been confirmed or published.
 
+## Submission preflight
+
+Apple's Add for Review preflight was checked after browser access was restored.
+It reported “Unable to Add for Review” and listed only the missing 13-inch iPad
+screenshots, 6.5-inch iPhone screenshots, App Privacy information and price tier.
+The selected build 4 and saved version/contact information were accepted by this
+preflight. Private contact values are not recorded here. This validation attempt
+did not submit the app for review.
+
+The media manager explicitly states that its 6.9-inch screenshot group covers
+6.5-inch, 6.7-inch and 6.9-inch iPhones. The prepared 1320 × 2868 images therefore
+belong in that group even though the preflight describes the missing images as
+6.5-inch screenshots. Their upload and processing still need verification.
+
 ## Remaining actions
 
-1. Restore the Chrome browser automation connection, upload the prepared
-   build-4 iPhone and iPad screenshots, and verify their processed previews.
+1. Obtain the pending temporary file-URL-access permission, enable it for the
+   screenshot upload, upload the prepared build-4 iPhone and iPad images, verify
+   their processed previews and disable the permission afterwards.
 2. Resolve three pending owner confirmations: free pricing; availability in 173
    eligible territories excluding mainland China and Vietnam, with future
    territories off; and Apple's final App Privacy accuracy, compliance and
@@ -111,11 +129,10 @@ future-update attestation has not yet been confirmed or published.
 4. Complete outstanding physical-device checks, verify the complete version
    form and release choice, then submit for review and record Apple's outcome.
 
-A prior screenshot upload attempt on an earlier date lacked the Chrome
-extension's file-URL permission. That is historical evidence, not the established
-cause of the current “Debugger unattached” failure. Retry the supported
-file-chooser flow when browser attachment works. Do not expand extension access
-or use unrelated private browser windows as an upload workaround.
+The three pricing, territory and privacy confirmations above remain unanswered,
+separately from the new temporary file-access permission request. Use the
+supported screenshot file chooser once authorised. Do not use unrelated private
+browser windows as an upload workaround.
 
 ## Earlier builds
 

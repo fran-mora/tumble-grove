@@ -26,18 +26,25 @@ with macOS `sips` at quality 95; both are 1320 × 2868 with no alpha channel.
 Both final JPEGs were visually checked: the controls are visible, and dark-mode
 Inspect identifies the Greengage. No overlay or compositing was used.
 
-No build-4 screenshot upload has yet been confirmed in App Store Connect. The
-supported file-chooser attempt for the 6.9-inch group timed out. After resetting
-the automation runtime and reconnecting Chrome, two attempts to attach to the
-media-manager tab failed with “Debugger unattached”. The current blocker is the
-browser automation connection; a past file-URL permission issue is not confirmed
-to be the cause of this failure.
+No build-4 screenshot upload has yet been confirmed in App Store Connect.
+Browser access is restored and the visible Choose File control opens its
+supported chooser, but attaching files fails with “Not allowed”. Permission is
+pending to temporarily enable the Chrome ChatGPT extension's “Allow access to
+file URLs”, upload the images and then turn that setting off. The earlier
+file-chooser timeout and “Debugger unattached” failures are historical; they are
+not the current blocker.
 
-Once the connection is restored, upload the two iPhone JPEGs to the 6.9-inch
-iPhone group and the iPad JPEG to the 13-inch iPad group, then verify the
-processed previews. A local capture is not proof that Apple received or accepted
-the image. The listing metadata and build-4 selection were saved successfully
-before the connection failure.
+Upload the two iPhone JPEGs to the 6.9-inch iPhone group and the iPad JPEG to the
+13-inch iPad group, then verify the processed previews. The media manager
+explicitly says the 6.9-inch group covers 6.5-inch, 6.7-inch and 6.9-inch iPhones,
+so the prepared 1320 × 2868 images use that group even though Apple's submission
+preflight labels the missing iPhone screenshots as 6.5-inch. The preflight also
+lists missing 13-inch iPad screenshots; neither requirement is satisfied until
+upload and processing are confirmed.
+
+A local capture is not proof that Apple received or accepted the image. Listing
+metadata and the build-4 selection remain saved. The Add for Review preflight
+reported missing items and did not submit the app for review.
 
 ## Historical build 1 captures
 
